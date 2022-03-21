@@ -1,0 +1,34 @@
+User
+    * Attributes:
+        - username: string
+        - email: string
+        - password: string
+        - id: int
+        - full name: string
+        - created_date: datetime
+        - updated_date: datetime
+        - isSuperuser: bool
+
+    * Relations:
+        - Favorites Movies
+        - Search History
+        - Favorites Words
+
+Word
+    * Attributes
+        - Title
+        - Meaning
+        - Sentence
+        - id 
+        - onDuration
+    
+    * Relations:
+        - Movie
+
+Search KeyWord
+    * Attributes
+        - Title
+        - id
+        - rate
+
+    
