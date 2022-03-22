@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"interface_project/api"
 	"interface_project/database"
 	"log"
 	"os"
@@ -37,4 +38,5 @@ func main() {
 	if err := client.Schema.Create(context.Background()); err != nil {
 		log.Fatalf("failed creating schema changes: %+v", err)
 	}
+	api.RunAPI(&ctx, client)
 }
