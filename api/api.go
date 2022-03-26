@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"interface_project/api/routers"
 	"interface_project/database/crud"
 	"interface_project/ent"
 
@@ -11,21 +10,21 @@ import (
 
 type API struct {
 	Crud   *crud.Crud
-	Router *routers.Router
+	Engine *gin.Engine
+}
+
+func (api *API) groups() {
+	api.userGroup("/users")
 }
 
 func RunAPI(ctx *context.Context, client *ent.Client) {
-	interfaceAPI := API{
+	interfaceAPI := &API{
+		Engine: gin.Default(),
 		Crud: &crud.Crud{
 			Ctx:    ctx,
 			Client: client,
 		},
-		Router: &routers.Router{
-			Engine:    gin.Default(),
-			UserPath:  "/users",
-			MoviePath: "/movie",
-		},
 	}
-	interfaceAPI.Router.UsersRouter()
-	interfaceAPI.Router.Engine.Run("localhost:8080")
+	interfaceAPI.groups()
+	interfaceAPI.Engine.Run(":8080")
 }

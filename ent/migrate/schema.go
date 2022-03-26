@@ -11,6 +11,15 @@ var (
 	// MoviesColumns holds the columns for the "movies" table.
 	MoviesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "title", Type: field.TypeString},
+		{Name: "year", Type: field.TypeString},
+		{Name: "image_url", Type: field.TypeString},
+		{Name: "runtime_str", Type: field.TypeString},
+		{Name: "genres", Type: field.TypeString},
+		{Name: "im_db_rating", Type: field.TypeString},
+		{Name: "plot", Type: field.TypeString},
+		{Name: "stars", Type: field.TypeString},
+		{Name: "metacritic_rating", Type: field.TypeString},
 	}
 	// MoviesTable holds the schema information for the "movies" table.
 	MoviesTable = &schema.Table{

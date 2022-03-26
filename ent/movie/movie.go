@@ -7,6 +7,24 @@ const (
 	Label = "movie"
 	// FieldID holds the string denoting the id field in the database.
 	FieldID = "id"
+	// FieldTitle holds the string denoting the title field in the database.
+	FieldTitle = "title"
+	// FieldYear holds the string denoting the year field in the database.
+	FieldYear = "year"
+	// FieldImageURL holds the string denoting the image_url field in the database.
+	FieldImageURL = "image_url"
+	// FieldRuntimeStr holds the string denoting the runtimestr field in the database.
+	FieldRuntimeStr = "runtime_str"
+	// FieldGenres holds the string denoting the genres field in the database.
+	FieldGenres = "genres"
+	// FieldImDbRating holds the string denoting the imdbrating field in the database.
+	FieldImDbRating = "im_db_rating"
+	// FieldPlot holds the string denoting the plot field in the database.
+	FieldPlot = "plot"
+	// FieldStars holds the string denoting the stars field in the database.
+	FieldStars = "stars"
+	// FieldMetacriticRating holds the string denoting the metacriticrating field in the database.
+	FieldMetacriticRating = "metacritic_rating"
 	// Table holds the table name of the movie in the database.
 	Table = "movies"
 )
@@ -14,6 +32,15 @@ const (
 // Columns holds all SQL columns for movie fields.
 var Columns = []string{
 	FieldID,
+	FieldTitle,
+	FieldYear,
+	FieldImageURL,
+	FieldRuntimeStr,
+	FieldGenres,
+	FieldImDbRating,
+	FieldPlot,
+	FieldStars,
+	FieldMetacriticRating,
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -25,3 +52,24 @@ func ValidColumn(column string) bool {
 	}
 	return false
 }
+
+var (
+	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	TitleValidator func(string) error
+	// YearValidator is a validator for the "year" field. It is called by the builders before save.
+	YearValidator func(string) error
+	// ImageURLValidator is a validator for the "image_url" field. It is called by the builders before save.
+	ImageURLValidator func(string) error
+	// RuntimeStrValidator is a validator for the "runtimeStr" field. It is called by the builders before save.
+	RuntimeStrValidator func(string) error
+	// GenresValidator is a validator for the "genres" field. It is called by the builders before save.
+	GenresValidator func(string) error
+	// ImDbRatingValidator is a validator for the "imDbRating" field. It is called by the builders before save.
+	ImDbRatingValidator func(string) error
+	// PlotValidator is a validator for the "plot" field. It is called by the builders before save.
+	PlotValidator func(string) error
+	// StarsValidator is a validator for the "stars" field. It is called by the builders before save.
+	StarsValidator func(string) error
+	// MetacriticRatingValidator is a validator for the "metacriticRating" field. It is called by the builders before save.
+	MetacriticRatingValidator func(string) error
+)

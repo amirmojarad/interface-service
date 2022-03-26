@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"interface_project/ent/movie"
 	"interface_project/ent/predicate"
 	"interface_project/ent/searchkeyword"
 	"interface_project/ent/user"
@@ -34,13 +35,22 @@ const (
 // MovieMutation represents an operation that mutates the Movie nodes in the graph.
 type MovieMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*Movie, error)
-	predicates    []predicate.Movie
+	op               Op
+	typ              string
+	id               *int
+	title            *string
+	year             *string
+	image_url        *string
+	runtimeStr       *string
+	genres           *string
+	imDbRating       *string
+	plot             *string
+	stars            *string
+	metacriticRating *string
+	clearedFields    map[string]struct{}
+	done             bool
+	oldValue         func(context.Context) (*Movie, error)
+	predicates       []predicate.Movie
 }
 
 var _ ent.Mutation = (*MovieMutation)(nil)
@@ -141,6 +151,330 @@ func (m *MovieMutation) IDs(ctx context.Context) ([]int, error) {
 	}
 }
 
+// SetTitle sets the "title" field.
+func (m *MovieMutation) SetTitle(s string) {
+	m.title = &s
+}
+
+// Title returns the value of the "title" field in the mutation.
+func (m *MovieMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitle returns the old "title" field's value of the Movie entity.
+// If the Movie object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MovieMutation) OldTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
+}
+
+// ResetTitle resets all changes to the "title" field.
+func (m *MovieMutation) ResetTitle() {
+	m.title = nil
+}
+
+// SetYear sets the "year" field.
+func (m *MovieMutation) SetYear(s string) {
+	m.year = &s
+}
+
+// Year returns the value of the "year" field in the mutation.
+func (m *MovieMutation) Year() (r string, exists bool) {
+	v := m.year
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldYear returns the old "year" field's value of the Movie entity.
+// If the Movie object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MovieMutation) OldYear(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldYear is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldYear requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldYear: %w", err)
+	}
+	return oldValue.Year, nil
+}
+
+// ResetYear resets all changes to the "year" field.
+func (m *MovieMutation) ResetYear() {
+	m.year = nil
+}
+
+// SetImageURL sets the "image_url" field.
+func (m *MovieMutation) SetImageURL(s string) {
+	m.image_url = &s
+}
+
+// ImageURL returns the value of the "image_url" field in the mutation.
+func (m *MovieMutation) ImageURL() (r string, exists bool) {
+	v := m.image_url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImageURL returns the old "image_url" field's value of the Movie entity.
+// If the Movie object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MovieMutation) OldImageURL(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImageURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImageURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImageURL: %w", err)
+	}
+	return oldValue.ImageURL, nil
+}
+
+// ResetImageURL resets all changes to the "image_url" field.
+func (m *MovieMutation) ResetImageURL() {
+	m.image_url = nil
+}
+
+// SetRuntimeStr sets the "runtimeStr" field.
+func (m *MovieMutation) SetRuntimeStr(s string) {
+	m.runtimeStr = &s
+}
+
+// RuntimeStr returns the value of the "runtimeStr" field in the mutation.
+func (m *MovieMutation) RuntimeStr() (r string, exists bool) {
+	v := m.runtimeStr
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldRuntimeStr returns the old "runtimeStr" field's value of the Movie entity.
+// If the Movie object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MovieMutation) OldRuntimeStr(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldRuntimeStr is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldRuntimeStr requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldRuntimeStr: %w", err)
+	}
+	return oldValue.RuntimeStr, nil
+}
+
+// ResetRuntimeStr resets all changes to the "runtimeStr" field.
+func (m *MovieMutation) ResetRuntimeStr() {
+	m.runtimeStr = nil
+}
+
+// SetGenres sets the "genres" field.
+func (m *MovieMutation) SetGenres(s string) {
+	m.genres = &s
+}
+
+// Genres returns the value of the "genres" field in the mutation.
+func (m *MovieMutation) Genres() (r string, exists bool) {
+	v := m.genres
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGenres returns the old "genres" field's value of the Movie entity.
+// If the Movie object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MovieMutation) OldGenres(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldGenres is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldGenres requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGenres: %w", err)
+	}
+	return oldValue.Genres, nil
+}
+
+// ResetGenres resets all changes to the "genres" field.
+func (m *MovieMutation) ResetGenres() {
+	m.genres = nil
+}
+
+// SetImDbRating sets the "imDbRating" field.
+func (m *MovieMutation) SetImDbRating(s string) {
+	m.imDbRating = &s
+}
+
+// ImDbRating returns the value of the "imDbRating" field in the mutation.
+func (m *MovieMutation) ImDbRating() (r string, exists bool) {
+	v := m.imDbRating
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImDbRating returns the old "imDbRating" field's value of the Movie entity.
+// If the Movie object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MovieMutation) OldImDbRating(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImDbRating is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImDbRating requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImDbRating: %w", err)
+	}
+	return oldValue.ImDbRating, nil
+}
+
+// ResetImDbRating resets all changes to the "imDbRating" field.
+func (m *MovieMutation) ResetImDbRating() {
+	m.imDbRating = nil
+}
+
+// SetPlot sets the "plot" field.
+func (m *MovieMutation) SetPlot(s string) {
+	m.plot = &s
+}
+
+// Plot returns the value of the "plot" field in the mutation.
+func (m *MovieMutation) Plot() (r string, exists bool) {
+	v := m.plot
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldPlot returns the old "plot" field's value of the Movie entity.
+// If the Movie object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MovieMutation) OldPlot(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldPlot is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldPlot requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldPlot: %w", err)
+	}
+	return oldValue.Plot, nil
+}
+
+// ResetPlot resets all changes to the "plot" field.
+func (m *MovieMutation) ResetPlot() {
+	m.plot = nil
+}
+
+// SetStars sets the "stars" field.
+func (m *MovieMutation) SetStars(s string) {
+	m.stars = &s
+}
+
+// Stars returns the value of the "stars" field in the mutation.
+func (m *MovieMutation) Stars() (r string, exists bool) {
+	v := m.stars
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStars returns the old "stars" field's value of the Movie entity.
+// If the Movie object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MovieMutation) OldStars(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStars is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStars requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStars: %w", err)
+	}
+	return oldValue.Stars, nil
+}
+
+// ResetStars resets all changes to the "stars" field.
+func (m *MovieMutation) ResetStars() {
+	m.stars = nil
+}
+
+// SetMetacriticRating sets the "metacriticRating" field.
+func (m *MovieMutation) SetMetacriticRating(s string) {
+	m.metacriticRating = &s
+}
+
+// MetacriticRating returns the value of the "metacriticRating" field in the mutation.
+func (m *MovieMutation) MetacriticRating() (r string, exists bool) {
+	v := m.metacriticRating
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldMetacriticRating returns the old "metacriticRating" field's value of the Movie entity.
+// If the Movie object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *MovieMutation) OldMetacriticRating(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldMetacriticRating is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldMetacriticRating requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldMetacriticRating: %w", err)
+	}
+	return oldValue.MetacriticRating, nil
+}
+
+// ResetMetacriticRating resets all changes to the "metacriticRating" field.
+func (m *MovieMutation) ResetMetacriticRating() {
+	m.metacriticRating = nil
+}
+
 // Where appends a list predicates to the MovieMutation builder.
 func (m *MovieMutation) Where(ps ...predicate.Movie) {
 	m.predicates = append(m.predicates, ps...)
@@ -160,7 +494,34 @@ func (m *MovieMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *MovieMutation) Fields() []string {
-	fields := make([]string, 0, 0)
+	fields := make([]string, 0, 9)
+	if m.title != nil {
+		fields = append(fields, movie.FieldTitle)
+	}
+	if m.year != nil {
+		fields = append(fields, movie.FieldYear)
+	}
+	if m.image_url != nil {
+		fields = append(fields, movie.FieldImageURL)
+	}
+	if m.runtimeStr != nil {
+		fields = append(fields, movie.FieldRuntimeStr)
+	}
+	if m.genres != nil {
+		fields = append(fields, movie.FieldGenres)
+	}
+	if m.imDbRating != nil {
+		fields = append(fields, movie.FieldImDbRating)
+	}
+	if m.plot != nil {
+		fields = append(fields, movie.FieldPlot)
+	}
+	if m.stars != nil {
+		fields = append(fields, movie.FieldStars)
+	}
+	if m.metacriticRating != nil {
+		fields = append(fields, movie.FieldMetacriticRating)
+	}
 	return fields
 }
 
@@ -168,6 +529,26 @@ func (m *MovieMutation) Fields() []string {
 // return value indicates that this field was not set, or was not defined in the
 // schema.
 func (m *MovieMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case movie.FieldTitle:
+		return m.Title()
+	case movie.FieldYear:
+		return m.Year()
+	case movie.FieldImageURL:
+		return m.ImageURL()
+	case movie.FieldRuntimeStr:
+		return m.RuntimeStr()
+	case movie.FieldGenres:
+		return m.Genres()
+	case movie.FieldImDbRating:
+		return m.ImDbRating()
+	case movie.FieldPlot:
+		return m.Plot()
+	case movie.FieldStars:
+		return m.Stars()
+	case movie.FieldMetacriticRating:
+		return m.MetacriticRating()
+	}
 	return nil, false
 }
 
@@ -175,6 +556,26 @@ func (m *MovieMutation) Field(name string) (ent.Value, bool) {
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
 func (m *MovieMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case movie.FieldTitle:
+		return m.OldTitle(ctx)
+	case movie.FieldYear:
+		return m.OldYear(ctx)
+	case movie.FieldImageURL:
+		return m.OldImageURL(ctx)
+	case movie.FieldRuntimeStr:
+		return m.OldRuntimeStr(ctx)
+	case movie.FieldGenres:
+		return m.OldGenres(ctx)
+	case movie.FieldImDbRating:
+		return m.OldImDbRating(ctx)
+	case movie.FieldPlot:
+		return m.OldPlot(ctx)
+	case movie.FieldStars:
+		return m.OldStars(ctx)
+	case movie.FieldMetacriticRating:
+		return m.OldMetacriticRating(ctx)
+	}
 	return nil, fmt.Errorf("unknown Movie field %s", name)
 }
 
@@ -183,6 +584,69 @@ func (m *MovieMutation) OldField(ctx context.Context, name string) (ent.Value, e
 // type.
 func (m *MovieMutation) SetField(name string, value ent.Value) error {
 	switch name {
+	case movie.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
+		return nil
+	case movie.FieldYear:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetYear(v)
+		return nil
+	case movie.FieldImageURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImageURL(v)
+		return nil
+	case movie.FieldRuntimeStr:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetRuntimeStr(v)
+		return nil
+	case movie.FieldGenres:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGenres(v)
+		return nil
+	case movie.FieldImDbRating:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImDbRating(v)
+		return nil
+	case movie.FieldPlot:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetPlot(v)
+		return nil
+	case movie.FieldStars:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStars(v)
+		return nil
+	case movie.FieldMetacriticRating:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetMetacriticRating(v)
+		return nil
 	}
 	return fmt.Errorf("unknown Movie field %s", name)
 }
@@ -204,6 +668,8 @@ func (m *MovieMutation) AddedField(name string) (ent.Value, bool) {
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
 func (m *MovieMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown Movie numeric field %s", name)
 }
 
@@ -229,6 +695,35 @@ func (m *MovieMutation) ClearField(name string) error {
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
 func (m *MovieMutation) ResetField(name string) error {
+	switch name {
+	case movie.FieldTitle:
+		m.ResetTitle()
+		return nil
+	case movie.FieldYear:
+		m.ResetYear()
+		return nil
+	case movie.FieldImageURL:
+		m.ResetImageURL()
+		return nil
+	case movie.FieldRuntimeStr:
+		m.ResetRuntimeStr()
+		return nil
+	case movie.FieldGenres:
+		m.ResetGenres()
+		return nil
+	case movie.FieldImDbRating:
+		m.ResetImDbRating()
+		return nil
+	case movie.FieldPlot:
+		m.ResetPlot()
+		return nil
+	case movie.FieldStars:
+		m.ResetStars()
+		return nil
+	case movie.FieldMetacriticRating:
+		m.ResetMetacriticRating()
+		return nil
+	}
 	return fmt.Errorf("unknown Movie field %s", name)
 }
 

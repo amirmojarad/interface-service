@@ -27,6 +27,60 @@ func (mu *MovieUpdate) Where(ps ...predicate.Movie) *MovieUpdate {
 	return mu
 }
 
+// SetTitle sets the "title" field.
+func (mu *MovieUpdate) SetTitle(s string) *MovieUpdate {
+	mu.mutation.SetTitle(s)
+	return mu
+}
+
+// SetYear sets the "year" field.
+func (mu *MovieUpdate) SetYear(s string) *MovieUpdate {
+	mu.mutation.SetYear(s)
+	return mu
+}
+
+// SetImageURL sets the "image_url" field.
+func (mu *MovieUpdate) SetImageURL(s string) *MovieUpdate {
+	mu.mutation.SetImageURL(s)
+	return mu
+}
+
+// SetRuntimeStr sets the "runtimeStr" field.
+func (mu *MovieUpdate) SetRuntimeStr(s string) *MovieUpdate {
+	mu.mutation.SetRuntimeStr(s)
+	return mu
+}
+
+// SetGenres sets the "genres" field.
+func (mu *MovieUpdate) SetGenres(s string) *MovieUpdate {
+	mu.mutation.SetGenres(s)
+	return mu
+}
+
+// SetImDbRating sets the "imDbRating" field.
+func (mu *MovieUpdate) SetImDbRating(s string) *MovieUpdate {
+	mu.mutation.SetImDbRating(s)
+	return mu
+}
+
+// SetPlot sets the "plot" field.
+func (mu *MovieUpdate) SetPlot(s string) *MovieUpdate {
+	mu.mutation.SetPlot(s)
+	return mu
+}
+
+// SetStars sets the "stars" field.
+func (mu *MovieUpdate) SetStars(s string) *MovieUpdate {
+	mu.mutation.SetStars(s)
+	return mu
+}
+
+// SetMetacriticRating sets the "metacriticRating" field.
+func (mu *MovieUpdate) SetMetacriticRating(s string) *MovieUpdate {
+	mu.mutation.SetMetacriticRating(s)
+	return mu
+}
+
 // Mutation returns the MovieMutation object of the builder.
 func (mu *MovieUpdate) Mutation() *MovieMutation {
 	return mu.mutation
@@ -39,12 +93,18 @@ func (mu *MovieUpdate) Save(ctx context.Context) (int, error) {
 		affected int
 	)
 	if len(mu.hooks) == 0 {
+		if err = mu.check(); err != nil {
+			return 0, err
+		}
 		affected, err = mu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*MovieMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = mu.check(); err != nil {
+				return 0, err
 			}
 			mu.mutation = mutation
 			affected, err = mu.sqlSave(ctx)
@@ -86,6 +146,56 @@ func (mu *MovieUpdate) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (mu *MovieUpdate) check() error {
+	if v, ok := mu.mutation.Title(); ok {
+		if err := movie.TitleValidator(v); err != nil {
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Movie.title": %w`, err)}
+		}
+	}
+	if v, ok := mu.mutation.Year(); ok {
+		if err := movie.YearValidator(v); err != nil {
+			return &ValidationError{Name: "year", err: fmt.Errorf(`ent: validator failed for field "Movie.year": %w`, err)}
+		}
+	}
+	if v, ok := mu.mutation.ImageURL(); ok {
+		if err := movie.ImageURLValidator(v); err != nil {
+			return &ValidationError{Name: "image_url", err: fmt.Errorf(`ent: validator failed for field "Movie.image_url": %w`, err)}
+		}
+	}
+	if v, ok := mu.mutation.RuntimeStr(); ok {
+		if err := movie.RuntimeStrValidator(v); err != nil {
+			return &ValidationError{Name: "runtimeStr", err: fmt.Errorf(`ent: validator failed for field "Movie.runtimeStr": %w`, err)}
+		}
+	}
+	if v, ok := mu.mutation.Genres(); ok {
+		if err := movie.GenresValidator(v); err != nil {
+			return &ValidationError{Name: "genres", err: fmt.Errorf(`ent: validator failed for field "Movie.genres": %w`, err)}
+		}
+	}
+	if v, ok := mu.mutation.ImDbRating(); ok {
+		if err := movie.ImDbRatingValidator(v); err != nil {
+			return &ValidationError{Name: "imDbRating", err: fmt.Errorf(`ent: validator failed for field "Movie.imDbRating": %w`, err)}
+		}
+	}
+	if v, ok := mu.mutation.Plot(); ok {
+		if err := movie.PlotValidator(v); err != nil {
+			return &ValidationError{Name: "plot", err: fmt.Errorf(`ent: validator failed for field "Movie.plot": %w`, err)}
+		}
+	}
+	if v, ok := mu.mutation.Stars(); ok {
+		if err := movie.StarsValidator(v); err != nil {
+			return &ValidationError{Name: "stars", err: fmt.Errorf(`ent: validator failed for field "Movie.stars": %w`, err)}
+		}
+	}
+	if v, ok := mu.mutation.MetacriticRating(); ok {
+		if err := movie.MetacriticRatingValidator(v); err != nil {
+			return &ValidationError{Name: "metacriticRating", err: fmt.Errorf(`ent: validator failed for field "Movie.metacriticRating": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (mu *MovieUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -104,6 +214,69 @@ func (mu *MovieUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
+	if value, ok := mu.mutation.Title(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldTitle,
+		})
+	}
+	if value, ok := mu.mutation.Year(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldYear,
+		})
+	}
+	if value, ok := mu.mutation.ImageURL(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldImageURL,
+		})
+	}
+	if value, ok := mu.mutation.RuntimeStr(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldRuntimeStr,
+		})
+	}
+	if value, ok := mu.mutation.Genres(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldGenres,
+		})
+	}
+	if value, ok := mu.mutation.ImDbRating(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldImDbRating,
+		})
+	}
+	if value, ok := mu.mutation.Plot(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldPlot,
+		})
+	}
+	if value, ok := mu.mutation.Stars(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldStars,
+		})
+	}
+	if value, ok := mu.mutation.MetacriticRating(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldMetacriticRating,
+		})
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, mu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{movie.Label}
@@ -121,6 +294,60 @@ type MovieUpdateOne struct {
 	fields   []string
 	hooks    []Hook
 	mutation *MovieMutation
+}
+
+// SetTitle sets the "title" field.
+func (muo *MovieUpdateOne) SetTitle(s string) *MovieUpdateOne {
+	muo.mutation.SetTitle(s)
+	return muo
+}
+
+// SetYear sets the "year" field.
+func (muo *MovieUpdateOne) SetYear(s string) *MovieUpdateOne {
+	muo.mutation.SetYear(s)
+	return muo
+}
+
+// SetImageURL sets the "image_url" field.
+func (muo *MovieUpdateOne) SetImageURL(s string) *MovieUpdateOne {
+	muo.mutation.SetImageURL(s)
+	return muo
+}
+
+// SetRuntimeStr sets the "runtimeStr" field.
+func (muo *MovieUpdateOne) SetRuntimeStr(s string) *MovieUpdateOne {
+	muo.mutation.SetRuntimeStr(s)
+	return muo
+}
+
+// SetGenres sets the "genres" field.
+func (muo *MovieUpdateOne) SetGenres(s string) *MovieUpdateOne {
+	muo.mutation.SetGenres(s)
+	return muo
+}
+
+// SetImDbRating sets the "imDbRating" field.
+func (muo *MovieUpdateOne) SetImDbRating(s string) *MovieUpdateOne {
+	muo.mutation.SetImDbRating(s)
+	return muo
+}
+
+// SetPlot sets the "plot" field.
+func (muo *MovieUpdateOne) SetPlot(s string) *MovieUpdateOne {
+	muo.mutation.SetPlot(s)
+	return muo
+}
+
+// SetStars sets the "stars" field.
+func (muo *MovieUpdateOne) SetStars(s string) *MovieUpdateOne {
+	muo.mutation.SetStars(s)
+	return muo
+}
+
+// SetMetacriticRating sets the "metacriticRating" field.
+func (muo *MovieUpdateOne) SetMetacriticRating(s string) *MovieUpdateOne {
+	muo.mutation.SetMetacriticRating(s)
+	return muo
 }
 
 // Mutation returns the MovieMutation object of the builder.
@@ -142,12 +369,18 @@ func (muo *MovieUpdateOne) Save(ctx context.Context) (*Movie, error) {
 		node *Movie
 	)
 	if len(muo.hooks) == 0 {
+		if err = muo.check(); err != nil {
+			return nil, err
+		}
 		node, err = muo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
 			mutation, ok := m.(*MovieMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
+			}
+			if err = muo.check(); err != nil {
+				return nil, err
 			}
 			muo.mutation = mutation
 			node, err = muo.sqlSave(ctx)
@@ -189,6 +422,56 @@ func (muo *MovieUpdateOne) ExecX(ctx context.Context) {
 	}
 }
 
+// check runs all checks and user-defined validators on the builder.
+func (muo *MovieUpdateOne) check() error {
+	if v, ok := muo.mutation.Title(); ok {
+		if err := movie.TitleValidator(v); err != nil {
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Movie.title": %w`, err)}
+		}
+	}
+	if v, ok := muo.mutation.Year(); ok {
+		if err := movie.YearValidator(v); err != nil {
+			return &ValidationError{Name: "year", err: fmt.Errorf(`ent: validator failed for field "Movie.year": %w`, err)}
+		}
+	}
+	if v, ok := muo.mutation.ImageURL(); ok {
+		if err := movie.ImageURLValidator(v); err != nil {
+			return &ValidationError{Name: "image_url", err: fmt.Errorf(`ent: validator failed for field "Movie.image_url": %w`, err)}
+		}
+	}
+	if v, ok := muo.mutation.RuntimeStr(); ok {
+		if err := movie.RuntimeStrValidator(v); err != nil {
+			return &ValidationError{Name: "runtimeStr", err: fmt.Errorf(`ent: validator failed for field "Movie.runtimeStr": %w`, err)}
+		}
+	}
+	if v, ok := muo.mutation.Genres(); ok {
+		if err := movie.GenresValidator(v); err != nil {
+			return &ValidationError{Name: "genres", err: fmt.Errorf(`ent: validator failed for field "Movie.genres": %w`, err)}
+		}
+	}
+	if v, ok := muo.mutation.ImDbRating(); ok {
+		if err := movie.ImDbRatingValidator(v); err != nil {
+			return &ValidationError{Name: "imDbRating", err: fmt.Errorf(`ent: validator failed for field "Movie.imDbRating": %w`, err)}
+		}
+	}
+	if v, ok := muo.mutation.Plot(); ok {
+		if err := movie.PlotValidator(v); err != nil {
+			return &ValidationError{Name: "plot", err: fmt.Errorf(`ent: validator failed for field "Movie.plot": %w`, err)}
+		}
+	}
+	if v, ok := muo.mutation.Stars(); ok {
+		if err := movie.StarsValidator(v); err != nil {
+			return &ValidationError{Name: "stars", err: fmt.Errorf(`ent: validator failed for field "Movie.stars": %w`, err)}
+		}
+	}
+	if v, ok := muo.mutation.MetacriticRating(); ok {
+		if err := movie.MetacriticRatingValidator(v); err != nil {
+			return &ValidationError{Name: "metacriticRating", err: fmt.Errorf(`ent: validator failed for field "Movie.metacriticRating": %w`, err)}
+		}
+	}
+	return nil
+}
+
 func (muo *MovieUpdateOne) sqlSave(ctx context.Context) (_node *Movie, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
@@ -223,6 +506,69 @@ func (muo *MovieUpdateOne) sqlSave(ctx context.Context) (_node *Movie, err error
 				ps[i](selector)
 			}
 		}
+	}
+	if value, ok := muo.mutation.Title(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldTitle,
+		})
+	}
+	if value, ok := muo.mutation.Year(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldYear,
+		})
+	}
+	if value, ok := muo.mutation.ImageURL(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldImageURL,
+		})
+	}
+	if value, ok := muo.mutation.RuntimeStr(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldRuntimeStr,
+		})
+	}
+	if value, ok := muo.mutation.Genres(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldGenres,
+		})
+	}
+	if value, ok := muo.mutation.ImDbRating(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldImDbRating,
+		})
+	}
+	if value, ok := muo.mutation.Plot(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldPlot,
+		})
+	}
+	if value, ok := muo.mutation.Stars(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldStars,
+		})
+	}
+	if value, ok := muo.mutation.MetacriticRating(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldMetacriticRating,
+		})
 	}
 	_node = &Movie{config: muo.config}
 	_spec.Assign = _node.assignValues

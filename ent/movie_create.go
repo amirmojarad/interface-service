@@ -4,6 +4,7 @@ package ent
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"interface_project/ent/movie"
 
@@ -16,6 +17,60 @@ type MovieCreate struct {
 	config
 	mutation *MovieMutation
 	hooks    []Hook
+}
+
+// SetTitle sets the "title" field.
+func (mc *MovieCreate) SetTitle(s string) *MovieCreate {
+	mc.mutation.SetTitle(s)
+	return mc
+}
+
+// SetYear sets the "year" field.
+func (mc *MovieCreate) SetYear(s string) *MovieCreate {
+	mc.mutation.SetYear(s)
+	return mc
+}
+
+// SetImageURL sets the "image_url" field.
+func (mc *MovieCreate) SetImageURL(s string) *MovieCreate {
+	mc.mutation.SetImageURL(s)
+	return mc
+}
+
+// SetRuntimeStr sets the "runtimeStr" field.
+func (mc *MovieCreate) SetRuntimeStr(s string) *MovieCreate {
+	mc.mutation.SetRuntimeStr(s)
+	return mc
+}
+
+// SetGenres sets the "genres" field.
+func (mc *MovieCreate) SetGenres(s string) *MovieCreate {
+	mc.mutation.SetGenres(s)
+	return mc
+}
+
+// SetImDbRating sets the "imDbRating" field.
+func (mc *MovieCreate) SetImDbRating(s string) *MovieCreate {
+	mc.mutation.SetImDbRating(s)
+	return mc
+}
+
+// SetPlot sets the "plot" field.
+func (mc *MovieCreate) SetPlot(s string) *MovieCreate {
+	mc.mutation.SetPlot(s)
+	return mc
+}
+
+// SetStars sets the "stars" field.
+func (mc *MovieCreate) SetStars(s string) *MovieCreate {
+	mc.mutation.SetStars(s)
+	return mc
+}
+
+// SetMetacriticRating sets the "metacriticRating" field.
+func (mc *MovieCreate) SetMetacriticRating(s string) *MovieCreate {
+	mc.mutation.SetMetacriticRating(s)
+	return mc
 }
 
 // Mutation returns the MovieMutation object of the builder.
@@ -88,6 +143,78 @@ func (mc *MovieCreate) ExecX(ctx context.Context) {
 
 // check runs all checks and user-defined validators on the builder.
 func (mc *MovieCreate) check() error {
+	if _, ok := mc.mutation.Title(); !ok {
+		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "Movie.title"`)}
+	}
+	if v, ok := mc.mutation.Title(); ok {
+		if err := movie.TitleValidator(v); err != nil {
+			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Movie.title": %w`, err)}
+		}
+	}
+	if _, ok := mc.mutation.Year(); !ok {
+		return &ValidationError{Name: "year", err: errors.New(`ent: missing required field "Movie.year"`)}
+	}
+	if v, ok := mc.mutation.Year(); ok {
+		if err := movie.YearValidator(v); err != nil {
+			return &ValidationError{Name: "year", err: fmt.Errorf(`ent: validator failed for field "Movie.year": %w`, err)}
+		}
+	}
+	if _, ok := mc.mutation.ImageURL(); !ok {
+		return &ValidationError{Name: "image_url", err: errors.New(`ent: missing required field "Movie.image_url"`)}
+	}
+	if v, ok := mc.mutation.ImageURL(); ok {
+		if err := movie.ImageURLValidator(v); err != nil {
+			return &ValidationError{Name: "image_url", err: fmt.Errorf(`ent: validator failed for field "Movie.image_url": %w`, err)}
+		}
+	}
+	if _, ok := mc.mutation.RuntimeStr(); !ok {
+		return &ValidationError{Name: "runtimeStr", err: errors.New(`ent: missing required field "Movie.runtimeStr"`)}
+	}
+	if v, ok := mc.mutation.RuntimeStr(); ok {
+		if err := movie.RuntimeStrValidator(v); err != nil {
+			return &ValidationError{Name: "runtimeStr", err: fmt.Errorf(`ent: validator failed for field "Movie.runtimeStr": %w`, err)}
+		}
+	}
+	if _, ok := mc.mutation.Genres(); !ok {
+		return &ValidationError{Name: "genres", err: errors.New(`ent: missing required field "Movie.genres"`)}
+	}
+	if v, ok := mc.mutation.Genres(); ok {
+		if err := movie.GenresValidator(v); err != nil {
+			return &ValidationError{Name: "genres", err: fmt.Errorf(`ent: validator failed for field "Movie.genres": %w`, err)}
+		}
+	}
+	if _, ok := mc.mutation.ImDbRating(); !ok {
+		return &ValidationError{Name: "imDbRating", err: errors.New(`ent: missing required field "Movie.imDbRating"`)}
+	}
+	if v, ok := mc.mutation.ImDbRating(); ok {
+		if err := movie.ImDbRatingValidator(v); err != nil {
+			return &ValidationError{Name: "imDbRating", err: fmt.Errorf(`ent: validator failed for field "Movie.imDbRating": %w`, err)}
+		}
+	}
+	if _, ok := mc.mutation.Plot(); !ok {
+		return &ValidationError{Name: "plot", err: errors.New(`ent: missing required field "Movie.plot"`)}
+	}
+	if v, ok := mc.mutation.Plot(); ok {
+		if err := movie.PlotValidator(v); err != nil {
+			return &ValidationError{Name: "plot", err: fmt.Errorf(`ent: validator failed for field "Movie.plot": %w`, err)}
+		}
+	}
+	if _, ok := mc.mutation.Stars(); !ok {
+		return &ValidationError{Name: "stars", err: errors.New(`ent: missing required field "Movie.stars"`)}
+	}
+	if v, ok := mc.mutation.Stars(); ok {
+		if err := movie.StarsValidator(v); err != nil {
+			return &ValidationError{Name: "stars", err: fmt.Errorf(`ent: validator failed for field "Movie.stars": %w`, err)}
+		}
+	}
+	if _, ok := mc.mutation.MetacriticRating(); !ok {
+		return &ValidationError{Name: "metacriticRating", err: errors.New(`ent: missing required field "Movie.metacriticRating"`)}
+	}
+	if v, ok := mc.mutation.MetacriticRating(); ok {
+		if err := movie.MetacriticRatingValidator(v); err != nil {
+			return &ValidationError{Name: "metacriticRating", err: fmt.Errorf(`ent: validator failed for field "Movie.metacriticRating": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -115,6 +242,78 @@ func (mc *MovieCreate) createSpec() (*Movie, *sqlgraph.CreateSpec) {
 			},
 		}
 	)
+	if value, ok := mc.mutation.Title(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldTitle,
+		})
+		_node.Title = value
+	}
+	if value, ok := mc.mutation.Year(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldYear,
+		})
+		_node.Year = value
+	}
+	if value, ok := mc.mutation.ImageURL(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldImageURL,
+		})
+		_node.ImageURL = value
+	}
+	if value, ok := mc.mutation.RuntimeStr(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldRuntimeStr,
+		})
+		_node.RuntimeStr = value
+	}
+	if value, ok := mc.mutation.Genres(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldGenres,
+		})
+		_node.Genres = value
+	}
+	if value, ok := mc.mutation.ImDbRating(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldImDbRating,
+		})
+		_node.ImDbRating = value
+	}
+	if value, ok := mc.mutation.Plot(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldPlot,
+		})
+		_node.Plot = value
+	}
+	if value, ok := mc.mutation.Stars(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldStars,
+		})
+		_node.Stars = value
+	}
+	if value, ok := mc.mutation.MetacriticRating(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: movie.FieldMetacriticRating,
+		})
+		_node.MetacriticRating = value
+	}
 	return _node, _spec
 }
 

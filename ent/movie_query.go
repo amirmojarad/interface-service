@@ -250,6 +250,19 @@ func (mq *MovieQuery) Clone() *MovieQuery {
 
 // GroupBy is used to group vertices by one or more fields/columns.
 // It is often used with aggregate functions, like: count, max, mean, min, sum.
+//
+// Example:
+//
+//	var v []struct {
+//		Title string `json:"title,omitempty"`
+//		Count int `json:"count,omitempty"`
+//	}
+//
+//	client.Movie.Query().
+//		GroupBy(movie.FieldTitle).
+//		Aggregate(ent.Count()).
+//		Scan(ctx, &v)
+//
 func (mq *MovieQuery) GroupBy(field string, fields ...string) *MovieGroupBy {
 	group := &MovieGroupBy{config: mq.config}
 	group.fields = append([]string{field}, fields...)
@@ -264,6 +277,17 @@ func (mq *MovieQuery) GroupBy(field string, fields ...string) *MovieGroupBy {
 
 // Select allows the selection one or more fields/columns for the given query,
 // instead of selecting all fields in the entity.
+//
+// Example:
+//
+//	var v []struct {
+//		Title string `json:"title,omitempty"`
+//	}
+//
+//	client.Movie.Query().
+//		Select(movie.FieldTitle).
+//		Scan(ctx, &v)
+//
 func (mq *MovieQuery) Select(fields ...string) *MovieSelect {
 	mq.fields = append(mq.fields, fields...)
 	return &MovieSelect{MovieQuery: mq}

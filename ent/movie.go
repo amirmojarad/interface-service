@@ -12,9 +12,27 @@ import (
 
 // Movie is the model entity for the Movie schema.
 type Movie struct {
-	config
+	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
+	// Title holds the value of the "title" field.
+	Title string `json:"title,omitempty"`
+	// Year holds the value of the "year" field.
+	Year string `json:"year,omitempty"`
+	// ImageURL holds the value of the "image_url" field.
+	ImageURL string `json:"image_url,omitempty"`
+	// RuntimeStr holds the value of the "runtimeStr" field.
+	RuntimeStr string `json:"runtimeStr,omitempty"`
+	// Genres holds the value of the "genres" field.
+	Genres string `json:"genres,omitempty"`
+	// ImDbRating holds the value of the "imDbRating" field.
+	ImDbRating string `json:"imDbRating,omitempty"`
+	// Plot holds the value of the "plot" field.
+	Plot string `json:"plot,omitempty"`
+	// Stars holds the value of the "stars" field.
+	Stars string `json:"stars,omitempty"`
+	// MetacriticRating holds the value of the "metacriticRating" field.
+	MetacriticRating string `json:"metacriticRating,omitempty"`
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -24,6 +42,8 @@ func (*Movie) scanValues(columns []string) ([]interface{}, error) {
 		switch columns[i] {
 		case movie.FieldID:
 			values[i] = new(sql.NullInt64)
+		case movie.FieldTitle, movie.FieldYear, movie.FieldImageURL, movie.FieldRuntimeStr, movie.FieldGenres, movie.FieldImDbRating, movie.FieldPlot, movie.FieldStars, movie.FieldMetacriticRating:
+			values[i] = new(sql.NullString)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Movie", columns[i])
 		}
@@ -45,6 +65,60 @@ func (m *Movie) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
 			m.ID = int(value.Int64)
+		case movie.FieldTitle:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field title", values[i])
+			} else if value.Valid {
+				m.Title = value.String
+			}
+		case movie.FieldYear:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field year", values[i])
+			} else if value.Valid {
+				m.Year = value.String
+			}
+		case movie.FieldImageURL:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field image_url", values[i])
+			} else if value.Valid {
+				m.ImageURL = value.String
+			}
+		case movie.FieldRuntimeStr:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field runtimeStr", values[i])
+			} else if value.Valid {
+				m.RuntimeStr = value.String
+			}
+		case movie.FieldGenres:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field genres", values[i])
+			} else if value.Valid {
+				m.Genres = value.String
+			}
+		case movie.FieldImDbRating:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field imDbRating", values[i])
+			} else if value.Valid {
+				m.ImDbRating = value.String
+			}
+		case movie.FieldPlot:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field plot", values[i])
+			} else if value.Valid {
+				m.Plot = value.String
+			}
+		case movie.FieldStars:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field stars", values[i])
+			} else if value.Valid {
+				m.Stars = value.String
+			}
+		case movie.FieldMetacriticRating:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field metacriticRating", values[i])
+			} else if value.Valid {
+				m.MetacriticRating = value.String
+			}
 		}
 	}
 	return nil
@@ -73,6 +147,24 @@ func (m *Movie) String() string {
 	var builder strings.Builder
 	builder.WriteString("Movie(")
 	builder.WriteString(fmt.Sprintf("id=%v", m.ID))
+	builder.WriteString(", title=")
+	builder.WriteString(m.Title)
+	builder.WriteString(", year=")
+	builder.WriteString(m.Year)
+	builder.WriteString(", image_url=")
+	builder.WriteString(m.ImageURL)
+	builder.WriteString(", runtimeStr=")
+	builder.WriteString(m.RuntimeStr)
+	builder.WriteString(", genres=")
+	builder.WriteString(m.Genres)
+	builder.WriteString(", imDbRating=")
+	builder.WriteString(m.ImDbRating)
+	builder.WriteString(", plot=")
+	builder.WriteString(m.Plot)
+	builder.WriteString(", stars=")
+	builder.WriteString(m.Stars)
+	builder.WriteString(", metacriticRating=")
+	builder.WriteString(m.MetacriticRating)
 	builder.WriteByte(')')
 	return builder.String()
 }
