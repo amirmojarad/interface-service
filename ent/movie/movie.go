@@ -67,20 +67,4 @@ func ValidColumn(column string) bool {
 var (
 	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	TitleValidator func(string) error
-	// YearValidator is a validator for the "year" field. It is called by the builders before save.
-	YearValidator func(string) error
-	// ImageURLValidator is a validator for the "image_url" field. It is called by the builders before save.
-	ImageURLValidator func(string) error
-	// RuntimeStrValidator is a validator for the "runtimeStr" field. It is called by the builders before save.
-	RuntimeStrValidator func(string) error
-	// GenresValidator is a validator for the "genres" field. It is called by the builders before save.
-	GenresValidator func(string) error
-	// ImDbRatingValidator is a validator for the "imDbRating" field. It is called by the builders before save.
-	ImDbRatingValidator func(string) error
-	// PlotValidator is a validator for the "plot" field. It is called by the builders before save.
-	PlotValidator func(string) error
-	// StarsValidator is a validator for the "stars" field. It is called by the builders before save.
-	StarsValidator func(string) error
-	// MetacriticRatingValidator is a validator for the "metacriticRating" field. It is called by the builders before save.
-	MetacriticRatingValidator func(string) error
 )

@@ -21,38 +21,6 @@ func init() {
 	movieDescTitle := movieFields[0].Descriptor()
 	// movie.TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	movie.TitleValidator = movieDescTitle.Validators[0].(func(string) error)
-	// movieDescYear is the schema descriptor for year field.
-	movieDescYear := movieFields[1].Descriptor()
-	// movie.YearValidator is a validator for the "year" field. It is called by the builders before save.
-	movie.YearValidator = movieDescYear.Validators[0].(func(string) error)
-	// movieDescImageURL is the schema descriptor for image_url field.
-	movieDescImageURL := movieFields[2].Descriptor()
-	// movie.ImageURLValidator is a validator for the "image_url" field. It is called by the builders before save.
-	movie.ImageURLValidator = movieDescImageURL.Validators[0].(func(string) error)
-	// movieDescRuntimeStr is the schema descriptor for runtimeStr field.
-	movieDescRuntimeStr := movieFields[3].Descriptor()
-	// movie.RuntimeStrValidator is a validator for the "runtimeStr" field. It is called by the builders before save.
-	movie.RuntimeStrValidator = movieDescRuntimeStr.Validators[0].(func(string) error)
-	// movieDescGenres is the schema descriptor for genres field.
-	movieDescGenres := movieFields[4].Descriptor()
-	// movie.GenresValidator is a validator for the "genres" field. It is called by the builders before save.
-	movie.GenresValidator = movieDescGenres.Validators[0].(func(string) error)
-	// movieDescImDbRating is the schema descriptor for imDbRating field.
-	movieDescImDbRating := movieFields[5].Descriptor()
-	// movie.ImDbRatingValidator is a validator for the "imDbRating" field. It is called by the builders before save.
-	movie.ImDbRatingValidator = movieDescImDbRating.Validators[0].(func(string) error)
-	// movieDescPlot is the schema descriptor for plot field.
-	movieDescPlot := movieFields[6].Descriptor()
-	// movie.PlotValidator is a validator for the "plot" field. It is called by the builders before save.
-	movie.PlotValidator = movieDescPlot.Validators[0].(func(string) error)
-	// movieDescStars is the schema descriptor for stars field.
-	movieDescStars := movieFields[7].Descriptor()
-	// movie.StarsValidator is a validator for the "stars" field. It is called by the builders before save.
-	movie.StarsValidator = movieDescStars.Validators[0].(func(string) error)
-	// movieDescMetacriticRating is the schema descriptor for metacriticRating field.
-	movieDescMetacriticRating := movieFields[8].Descriptor()
-	// movie.MetacriticRatingValidator is a validator for the "metacriticRating" field. It is called by the builders before save.
-	movie.MetacriticRatingValidator = movieDescMetacriticRating.Validators[0].(func(string) error)
 	searchkeywordFields := schema.SearchKeyword{}.Fields()
 	_ = searchkeywordFields
 	// searchkeywordDescTitle is the schema descriptor for title field.

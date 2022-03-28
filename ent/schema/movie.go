@@ -14,14 +14,14 @@ type Movie struct {
 func (Movie) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("title").NotEmpty(),
-		field.String("year").NotEmpty(),
-		field.String("image_url").NotEmpty(),
-		field.String("runtimeStr").NotEmpty(),
-		field.String("genres").NotEmpty(),
-		field.String("imDbRating").NotEmpty(),
-		field.String("plot").NotEmpty(),
-		field.String("stars").NotEmpty(),
-		field.String("metacriticRating").NotEmpty(),
+		field.String("year"),
+		field.String("image_url"),
+		field.String("runtimeStr"),
+		field.String("genres"),
+		field.String("imDbRating"),
+		field.String("plot"),
+		field.String("stars"),
+		field.String("metacriticRating"),
 	}
 }
 

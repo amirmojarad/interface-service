@@ -153,46 +153,6 @@ func (mu *MovieUpdate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Movie.title": %w`, err)}
 		}
 	}
-	if v, ok := mu.mutation.Year(); ok {
-		if err := movie.YearValidator(v); err != nil {
-			return &ValidationError{Name: "year", err: fmt.Errorf(`ent: validator failed for field "Movie.year": %w`, err)}
-		}
-	}
-	if v, ok := mu.mutation.ImageURL(); ok {
-		if err := movie.ImageURLValidator(v); err != nil {
-			return &ValidationError{Name: "image_url", err: fmt.Errorf(`ent: validator failed for field "Movie.image_url": %w`, err)}
-		}
-	}
-	if v, ok := mu.mutation.RuntimeStr(); ok {
-		if err := movie.RuntimeStrValidator(v); err != nil {
-			return &ValidationError{Name: "runtimeStr", err: fmt.Errorf(`ent: validator failed for field "Movie.runtimeStr": %w`, err)}
-		}
-	}
-	if v, ok := mu.mutation.Genres(); ok {
-		if err := movie.GenresValidator(v); err != nil {
-			return &ValidationError{Name: "genres", err: fmt.Errorf(`ent: validator failed for field "Movie.genres": %w`, err)}
-		}
-	}
-	if v, ok := mu.mutation.ImDbRating(); ok {
-		if err := movie.ImDbRatingValidator(v); err != nil {
-			return &ValidationError{Name: "imDbRating", err: fmt.Errorf(`ent: validator failed for field "Movie.imDbRating": %w`, err)}
-		}
-	}
-	if v, ok := mu.mutation.Plot(); ok {
-		if err := movie.PlotValidator(v); err != nil {
-			return &ValidationError{Name: "plot", err: fmt.Errorf(`ent: validator failed for field "Movie.plot": %w`, err)}
-		}
-	}
-	if v, ok := mu.mutation.Stars(); ok {
-		if err := movie.StarsValidator(v); err != nil {
-			return &ValidationError{Name: "stars", err: fmt.Errorf(`ent: validator failed for field "Movie.stars": %w`, err)}
-		}
-	}
-	if v, ok := mu.mutation.MetacriticRating(); ok {
-		if err := movie.MetacriticRatingValidator(v); err != nil {
-			return &ValidationError{Name: "metacriticRating", err: fmt.Errorf(`ent: validator failed for field "Movie.metacriticRating": %w`, err)}
-		}
-	}
 	return nil
 }
 
@@ -427,46 +387,6 @@ func (muo *MovieUpdateOne) check() error {
 	if v, ok := muo.mutation.Title(); ok {
 		if err := movie.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Movie.title": %w`, err)}
-		}
-	}
-	if v, ok := muo.mutation.Year(); ok {
-		if err := movie.YearValidator(v); err != nil {
-			return &ValidationError{Name: "year", err: fmt.Errorf(`ent: validator failed for field "Movie.year": %w`, err)}
-		}
-	}
-	if v, ok := muo.mutation.ImageURL(); ok {
-		if err := movie.ImageURLValidator(v); err != nil {
-			return &ValidationError{Name: "image_url", err: fmt.Errorf(`ent: validator failed for field "Movie.image_url": %w`, err)}
-		}
-	}
-	if v, ok := muo.mutation.RuntimeStr(); ok {
-		if err := movie.RuntimeStrValidator(v); err != nil {
-			return &ValidationError{Name: "runtimeStr", err: fmt.Errorf(`ent: validator failed for field "Movie.runtimeStr": %w`, err)}
-		}
-	}
-	if v, ok := muo.mutation.Genres(); ok {
-		if err := movie.GenresValidator(v); err != nil {
-			return &ValidationError{Name: "genres", err: fmt.Errorf(`ent: validator failed for field "Movie.genres": %w`, err)}
-		}
-	}
-	if v, ok := muo.mutation.ImDbRating(); ok {
-		if err := movie.ImDbRatingValidator(v); err != nil {
-			return &ValidationError{Name: "imDbRating", err: fmt.Errorf(`ent: validator failed for field "Movie.imDbRating": %w`, err)}
-		}
-	}
-	if v, ok := muo.mutation.Plot(); ok {
-		if err := movie.PlotValidator(v); err != nil {
-			return &ValidationError{Name: "plot", err: fmt.Errorf(`ent: validator failed for field "Movie.plot": %w`, err)}
-		}
-	}
-	if v, ok := muo.mutation.Stars(); ok {
-		if err := movie.StarsValidator(v); err != nil {
-			return &ValidationError{Name: "stars", err: fmt.Errorf(`ent: validator failed for field "Movie.stars": %w`, err)}
-		}
-	}
-	if v, ok := muo.mutation.MetacriticRating(); ok {
-		if err := movie.MetacriticRatingValidator(v); err != nil {
-			return &ValidationError{Name: "metacriticRating", err: fmt.Errorf(`ent: validator failed for field "Movie.metacriticRating": %w`, err)}
 		}
 	}
 	return nil
