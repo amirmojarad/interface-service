@@ -6,6 +6,14 @@ import (
 	"interface_project/usecases/generators"
 )
 
+func (crud Crud) GetAllUsers() ([]*ent.User, error) {
+	if users, err := crud.Client.User.Query().All(*crud.Ctx); err != nil {
+		return nil, err
+	} else {
+		return users, nil
+	}
+}
+
 func (crud Crud) GetUserByID(id int) (*ent.User, error) {
 	if u, err := crud.Client.User.Get(*crud.Ctx, id); err != nil {
 		return nil, err
