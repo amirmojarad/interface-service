@@ -32,7 +32,8 @@ type Movie struct {
 	// Stars holds the value of the "stars" field.
 	Stars string `json:"stars,omitempty"`
 	// MetacriticRating holds the value of the "metacriticRating" field.
-	MetacriticRating string `json:"metacriticRating,omitempty"`
+	MetacriticRating     string `json:"metacriticRating,omitempty"`
+	user_favorite_movies *int
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -44,6 +45,8 @@ func (*Movie) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case movie.FieldTitle, movie.FieldYear, movie.FieldImageURL, movie.FieldRuntimeStr, movie.FieldGenres, movie.FieldImDbRating, movie.FieldPlot, movie.FieldStars, movie.FieldMetacriticRating:
 			values[i] = new(sql.NullString)
+		case movie.ForeignKeys[0]: // user_favorite_movies
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Movie", columns[i])
 		}
@@ -118,6 +121,13 @@ func (m *Movie) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field metacriticRating", values[i])
 			} else if value.Valid {
 				m.MetacriticRating = value.String
+			}
+		case movie.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field user_favorite_movies", value)
+			} else if value.Valid {
+				m.user_favorite_movies = new(int)
+				*m.user_favorite_movies = int(value.Int64)
 			}
 		}
 	}

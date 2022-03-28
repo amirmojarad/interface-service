@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // ID filters vertices based on their ID field.
@@ -762,6 +763,62 @@ func IsAdminEQ(v bool) predicate.User {
 func IsAdminNEQ(v bool) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		s.Where(sql.NEQ(s.C(FieldIsAdmin), v))
+	})
+}
+
+// HasFavoriteMovies applies the HasEdge predicate on the "favorite_movies" edge.
+func HasFavoriteMovies() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(FavoriteMoviesTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, FavoriteMoviesTable, FavoriteMoviesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasFavoriteMoviesWith applies the HasEdge predicate on the "favorite_movies" edge with a given conditions (other predicates).
+func HasFavoriteMoviesWith(preds ...predicate.Movie) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(FavoriteMoviesInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, FavoriteMoviesTable, FavoriteMoviesColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasSearchedKeywords applies the HasEdge predicate on the "searched_keywords" edge.
+func HasSearchedKeywords() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(SearchedKeywordsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, SearchedKeywordsTable, SearchedKeywordsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasSearchedKeywordsWith applies the HasEdge predicate on the "searched_keywords" edge with a given conditions (other predicates).
+func HasSearchedKeywordsWith(preds ...predicate.SearchKeyword) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(SearchedKeywordsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, SearchedKeywordsTable, SearchedKeywordsColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
 	})
 }
 

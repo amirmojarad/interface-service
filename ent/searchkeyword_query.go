@@ -24,6 +24,7 @@ type SearchKeywordQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.SearchKeyword
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -311,9 +312,13 @@ func (skq *SearchKeywordQuery) prepareQuery(ctx context.Context) error {
 
 func (skq *SearchKeywordQuery) sqlAll(ctx context.Context) ([]*SearchKeyword, error) {
 	var (
-		nodes = []*SearchKeyword{}
-		_spec = skq.querySpec()
+		nodes   = []*SearchKeyword{}
+		withFKs = skq.withFKs
+		_spec   = skq.querySpec()
 	)
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, searchkeyword.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &SearchKeyword{config: skq.config}
 		nodes = append(nodes, node)

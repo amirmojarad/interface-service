@@ -20,24 +20,42 @@ var (
 		{Name: "plot", Type: field.TypeString},
 		{Name: "stars", Type: field.TypeString},
 		{Name: "metacritic_rating", Type: field.TypeString},
+		{Name: "user_favorite_movies", Type: field.TypeInt, Nullable: true},
 	}
 	// MoviesTable holds the schema information for the "movies" table.
 	MoviesTable = &schema.Table{
 		Name:       "movies",
 		Columns:    MoviesColumns,
 		PrimaryKey: []*schema.Column{MoviesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "movies_users_favorite_movies",
+				Columns:    []*schema.Column{MoviesColumns[10]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// SearchKeywordsColumns holds the columns for the "search_keywords" table.
 	SearchKeywordsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "title", Type: field.TypeString, Unique: true},
 		{Name: "rate", Type: field.TypeUint16, Default: 0},
+		{Name: "user_searched_keywords", Type: field.TypeInt, Nullable: true},
 	}
 	// SearchKeywordsTable holds the schema information for the "search_keywords" table.
 	SearchKeywordsTable = &schema.Table{
 		Name:       "search_keywords",
 		Columns:    SearchKeywordsColumns,
 		PrimaryKey: []*schema.Column{SearchKeywordsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "search_keywords_users_searched_keywords",
+				Columns:    []*schema.Column{SearchKeywordsColumns[3]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
@@ -80,4 +98,6 @@ var (
 )
 
 func init() {
+	MoviesTable.ForeignKeys[0].RefTable = UsersTable
+	SearchKeywordsTable.ForeignKeys[0].RefTable = UsersTable
 }

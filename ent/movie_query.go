@@ -24,6 +24,7 @@ type MovieQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.Movie
+	withFKs    bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -311,9 +312,13 @@ func (mq *MovieQuery) prepareQuery(ctx context.Context) error {
 
 func (mq *MovieQuery) sqlAll(ctx context.Context) ([]*Movie, error) {
 	var (
-		nodes = []*Movie{}
-		_spec = mq.querySpec()
+		nodes   = []*Movie{}
+		withFKs = mq.withFKs
+		_spec   = mq.querySpec()
 	)
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, movie.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Movie{config: mq.config}
 		nodes = append(nodes, node)

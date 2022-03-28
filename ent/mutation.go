@@ -1179,20 +1179,26 @@ func (m *SearchKeywordMutation) ResetEdge(name string) error {
 // UserMutation represents an operation that mutates the User nodes in the graph.
 type UserMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	username      *string
-	email         *string
-	password      *string
-	full_name     *string
-	created_date  *time.Time
-	updated_date  *time.Time
-	is_admin      *bool
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*User, error)
-	predicates    []predicate.User
+	op                       Op
+	typ                      string
+	id                       *int
+	username                 *string
+	email                    *string
+	password                 *string
+	full_name                *string
+	created_date             *time.Time
+	updated_date             *time.Time
+	is_admin                 *bool
+	clearedFields            map[string]struct{}
+	favorite_movies          map[int]struct{}
+	removedfavorite_movies   map[int]struct{}
+	clearedfavorite_movies   bool
+	searched_keywords        map[int]struct{}
+	removedsearched_keywords map[int]struct{}
+	clearedsearched_keywords bool
+	done                     bool
+	oldValue                 func(context.Context) (*User, error)
+	predicates               []predicate.User
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -1558,6 +1564,114 @@ func (m *UserMutation) ResetIsAdmin() {
 	m.is_admin = nil
 }
 
+// AddFavoriteMovieIDs adds the "favorite_movies" edge to the Movie entity by ids.
+func (m *UserMutation) AddFavoriteMovieIDs(ids ...int) {
+	if m.favorite_movies == nil {
+		m.favorite_movies = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.favorite_movies[ids[i]] = struct{}{}
+	}
+}
+
+// ClearFavoriteMovies clears the "favorite_movies" edge to the Movie entity.
+func (m *UserMutation) ClearFavoriteMovies() {
+	m.clearedfavorite_movies = true
+}
+
+// FavoriteMoviesCleared reports if the "favorite_movies" edge to the Movie entity was cleared.
+func (m *UserMutation) FavoriteMoviesCleared() bool {
+	return m.clearedfavorite_movies
+}
+
+// RemoveFavoriteMovieIDs removes the "favorite_movies" edge to the Movie entity by IDs.
+func (m *UserMutation) RemoveFavoriteMovieIDs(ids ...int) {
+	if m.removedfavorite_movies == nil {
+		m.removedfavorite_movies = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.favorite_movies, ids[i])
+		m.removedfavorite_movies[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedFavoriteMovies returns the removed IDs of the "favorite_movies" edge to the Movie entity.
+func (m *UserMutation) RemovedFavoriteMoviesIDs() (ids []int) {
+	for id := range m.removedfavorite_movies {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// FavoriteMoviesIDs returns the "favorite_movies" edge IDs in the mutation.
+func (m *UserMutation) FavoriteMoviesIDs() (ids []int) {
+	for id := range m.favorite_movies {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetFavoriteMovies resets all changes to the "favorite_movies" edge.
+func (m *UserMutation) ResetFavoriteMovies() {
+	m.favorite_movies = nil
+	m.clearedfavorite_movies = false
+	m.removedfavorite_movies = nil
+}
+
+// AddSearchedKeywordIDs adds the "searched_keywords" edge to the SearchKeyword entity by ids.
+func (m *UserMutation) AddSearchedKeywordIDs(ids ...int) {
+	if m.searched_keywords == nil {
+		m.searched_keywords = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.searched_keywords[ids[i]] = struct{}{}
+	}
+}
+
+// ClearSearchedKeywords clears the "searched_keywords" edge to the SearchKeyword entity.
+func (m *UserMutation) ClearSearchedKeywords() {
+	m.clearedsearched_keywords = true
+}
+
+// SearchedKeywordsCleared reports if the "searched_keywords" edge to the SearchKeyword entity was cleared.
+func (m *UserMutation) SearchedKeywordsCleared() bool {
+	return m.clearedsearched_keywords
+}
+
+// RemoveSearchedKeywordIDs removes the "searched_keywords" edge to the SearchKeyword entity by IDs.
+func (m *UserMutation) RemoveSearchedKeywordIDs(ids ...int) {
+	if m.removedsearched_keywords == nil {
+		m.removedsearched_keywords = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.searched_keywords, ids[i])
+		m.removedsearched_keywords[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedSearchedKeywords returns the removed IDs of the "searched_keywords" edge to the SearchKeyword entity.
+func (m *UserMutation) RemovedSearchedKeywordsIDs() (ids []int) {
+	for id := range m.removedsearched_keywords {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// SearchedKeywordsIDs returns the "searched_keywords" edge IDs in the mutation.
+func (m *UserMutation) SearchedKeywordsIDs() (ids []int) {
+	for id := range m.searched_keywords {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetSearchedKeywords resets all changes to the "searched_keywords" edge.
+func (m *UserMutation) ResetSearchedKeywords() {
+	m.searched_keywords = nil
+	m.clearedsearched_keywords = false
+	m.removedsearched_keywords = nil
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -1787,49 +1901,111 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.favorite_movies != nil {
+		edges = append(edges, user.EdgeFavoriteMovies)
+	}
+	if m.searched_keywords != nil {
+		edges = append(edges, user.EdgeSearchedKeywords)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case user.EdgeFavoriteMovies:
+		ids := make([]ent.Value, 0, len(m.favorite_movies))
+		for id := range m.favorite_movies {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeSearchedKeywords:
+		ids := make([]ent.Value, 0, len(m.searched_keywords))
+		for id := range m.searched_keywords {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.removedfavorite_movies != nil {
+		edges = append(edges, user.EdgeFavoriteMovies)
+	}
+	if m.removedsearched_keywords != nil {
+		edges = append(edges, user.EdgeSearchedKeywords)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case user.EdgeFavoriteMovies:
+		ids := make([]ent.Value, 0, len(m.removedfavorite_movies))
+		for id := range m.removedfavorite_movies {
+			ids = append(ids, id)
+		}
+		return ids
+	case user.EdgeSearchedKeywords:
+		ids := make([]ent.Value, 0, len(m.removedsearched_keywords))
+		for id := range m.removedsearched_keywords {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 2)
+	if m.clearedfavorite_movies {
+		edges = append(edges, user.EdgeFavoriteMovies)
+	}
+	if m.clearedsearched_keywords {
+		edges = append(edges, user.EdgeSearchedKeywords)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *UserMutation) EdgeCleared(name string) bool {
+	switch name {
+	case user.EdgeFavoriteMovies:
+		return m.clearedfavorite_movies
+	case user.EdgeSearchedKeywords:
+		return m.clearedsearched_keywords
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *UserMutation) ClearEdge(name string) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown User unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *UserMutation) ResetEdge(name string) error {
+	switch name {
+	case user.EdgeFavoriteMovies:
+		m.ResetFavoriteMovies()
+		return nil
+	case user.EdgeSearchedKeywords:
+		m.ResetSearchedKeywords()
+		return nil
+	}
 	return fmt.Errorf("unknown User edge %s", name)
 }
 

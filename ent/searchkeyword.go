@@ -18,7 +18,8 @@ type SearchKeyword struct {
 	// Title holds the value of the "title" field.
 	Title string `json:"title,omitempty"`
 	// Rate holds the value of the "rate" field.
-	Rate uint16 `json:"rate,omitempty"`
+	Rate                   uint16 `json:"rate,omitempty"`
+	user_searched_keywords *int
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -30,6 +31,8 @@ func (*SearchKeyword) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case searchkeyword.FieldTitle:
 			values[i] = new(sql.NullString)
+		case searchkeyword.ForeignKeys[0]: // user_searched_keywords
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type SearchKeyword", columns[i])
 		}
@@ -62,6 +65,13 @@ func (sk *SearchKeyword) assignValues(columns []string, values []interface{}) er
 				return fmt.Errorf("unexpected type %T for field rate", values[i])
 			} else if value.Valid {
 				sk.Rate = uint16(value.Int64)
+			}
+		case searchkeyword.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field user_searched_keywords", value)
+			} else if value.Valid {
+				sk.user_searched_keywords = new(int)
+				*sk.user_searched_keywords = int(value.Int64)
 			}
 		}
 	}

@@ -25,8 +25,26 @@ const (
 	FieldUpdatedDate = "updated_date"
 	// FieldIsAdmin holds the string denoting the is_admin field in the database.
 	FieldIsAdmin = "is_admin"
+	// EdgeFavoriteMovies holds the string denoting the favorite_movies edge name in mutations.
+	EdgeFavoriteMovies = "favorite_movies"
+	// EdgeSearchedKeywords holds the string denoting the searched_keywords edge name in mutations.
+	EdgeSearchedKeywords = "searched_keywords"
 	// Table holds the table name of the user in the database.
 	Table = "users"
+	// FavoriteMoviesTable is the table that holds the favorite_movies relation/edge.
+	FavoriteMoviesTable = "movies"
+	// FavoriteMoviesInverseTable is the table name for the Movie entity.
+	// It exists in this package in order to avoid circular dependency with the "movie" package.
+	FavoriteMoviesInverseTable = "movies"
+	// FavoriteMoviesColumn is the table column denoting the favorite_movies relation/edge.
+	FavoriteMoviesColumn = "user_favorite_movies"
+	// SearchedKeywordsTable is the table that holds the searched_keywords relation/edge.
+	SearchedKeywordsTable = "search_keywords"
+	// SearchedKeywordsInverseTable is the table name for the SearchKeyword entity.
+	// It exists in this package in order to avoid circular dependency with the "searchkeyword" package.
+	SearchedKeywordsInverseTable = "search_keywords"
+	// SearchedKeywordsColumn is the table column denoting the searched_keywords relation/edge.
+	SearchedKeywordsColumn = "user_searched_keywords"
 )
 
 // Columns holds all SQL columns for user fields.

@@ -6,6 +6,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"interface_project/ent/movie"
+	"interface_project/ent/searchkeyword"
 	"interface_project/ent/user"
 	"time"
 
@@ -92,6 +94,36 @@ func (uc *UserCreate) SetNillableIsAdmin(b *bool) *UserCreate {
 		uc.SetIsAdmin(*b)
 	}
 	return uc
+}
+
+// AddFavoriteMovieIDs adds the "favorite_movies" edge to the Movie entity by IDs.
+func (uc *UserCreate) AddFavoriteMovieIDs(ids ...int) *UserCreate {
+	uc.mutation.AddFavoriteMovieIDs(ids...)
+	return uc
+}
+
+// AddFavoriteMovies adds the "favorite_movies" edges to the Movie entity.
+func (uc *UserCreate) AddFavoriteMovies(m ...*Movie) *UserCreate {
+	ids := make([]int, len(m))
+	for i := range m {
+		ids[i] = m[i].ID
+	}
+	return uc.AddFavoriteMovieIDs(ids...)
+}
+
+// AddSearchedKeywordIDs adds the "searched_keywords" edge to the SearchKeyword entity by IDs.
+func (uc *UserCreate) AddSearchedKeywordIDs(ids ...int) *UserCreate {
+	uc.mutation.AddSearchedKeywordIDs(ids...)
+	return uc
+}
+
+// AddSearchedKeywords adds the "searched_keywords" edges to the SearchKeyword entity.
+func (uc *UserCreate) AddSearchedKeywords(s ...*SearchKeyword) *UserCreate {
+	ids := make([]int, len(s))
+	for i := range s {
+		ids[i] = s[i].ID
+	}
+	return uc.AddSearchedKeywordIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -300,6 +332,44 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldIsAdmin,
 		})
 		_node.IsAdmin = value
+	}
+	if nodes := uc.mutation.FavoriteMoviesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.FavoriteMoviesTable,
+			Columns: []string{user.FavoriteMoviesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: movie.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.SearchedKeywordsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.SearchedKeywordsTable,
+			Columns: []string{user.SearchedKeywordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: searchkeyword.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }
