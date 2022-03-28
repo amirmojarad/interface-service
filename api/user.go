@@ -1,11 +1,11 @@
 package api
 
 import (
+	"fmt"
 	"interface_project/api/middlewares"
 	"interface_project/ent"
 	"log"
 	"net/http"
-	"strings"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,7 +16,7 @@ func (api *API) userGroup(path string) {
 	userGroup := api.Engine.Group(path, middlewares.CheckAuth())
 	userGroup.DELETE("/", middlewares.IsSuperUser(), api.deleteUser())
 	userGroup.PATCH("/", api.changeUser())
-	userGroup.POST("/", middlewares.IsSuperUser(), api.getAllUsers())
+	userGroup.GET("/", middlewares.IsSuperUser(), api.getAllUsers())
 	userGroup.POST("/favoriteMovies", api.addMovieToFavorites())
 	userGroup.GET("/favoriteMovies", api.getFavoritesMovies())
 	userGroup.GET("/favoriteMovies/:id", api.getFavoriteMovie())
@@ -25,7 +25,8 @@ func (api *API) userGroup(path string) {
 }
 
 func (api *API) searchMovie() gin.HandlerFunc {
-	return func(ctx *gin.Context) {}
+	return func(ctx *gin.Context) {
+	}
 }
 
 func (api *API) deleteMovieFromFavorites() gin.HandlerFunc {
@@ -52,20 +53,22 @@ func (api *API) changeUser() gin.HandlerFunc {
 
 func (api *API) deleteUser() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		userSchema := &ent.User{}
-		header := ctx.Request.Header
-		token := strings.Split(header["Authorization"][0], " ")[1]
-		validatedToken, _ := api.jwtService.ValidateToken(token)
-		jwtClaims := api.jwtService.GetMapClaims(validatedToken)
-		if userSchema.Email == jwtClaims["email"] && jwtClaims["isAdmin"] == true {
+		userSchema := ent.User{}
+		ctx.BindJSON(&userSchema)
+		isAdmin := ctx.MustGet("isAdmin")
+		if isAdmin == true {
 			if deletedUser, err := api.Crud.DeleteUserByEmail(userSchema.Email); err != nil {
-				ctx.IndentedJSON(http.StatusInternalServerError, err)
+				ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
+					"error":   err.Error(),
+					"message": fmt.Sprint("no user found with email", &userSchema.Email),
+				})
 			} else {
+				log.Printf("DELETED USER: %+v", deletedUser)
 				ctx.IndentedJSON(http.StatusAccepted, deletedUser)
 			}
 		} else {
 			ctx.IndentedJSON(http.StatusUnauthorized, gin.H{
-				"message": "user not authorizated",
+				"message": "your not superuser.",
 			})
 		}
 	}

@@ -71,6 +71,6 @@ func (crud Crud) DeleteUserByEmail(email string) (*ent.User, error) {
 		return nil, err
 	} else {
 		err := crud.Client.User.DeleteOne(u).Exec(*crud.Ctx)
-		return nil, err
+		return u, err
 	}
 }

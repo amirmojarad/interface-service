@@ -35,6 +35,7 @@ func IsSuperUser() gin.HandlerFunc {
 			ctx.Set("isAdmin", true)
 		} else {
 			ctx.Set("isAdmin", false)
+			ctx.AbortWithError(http.StatusUnauthorized, http.ErrBodyNotAllowed)
 		}
 		ctx.Next()
 	}

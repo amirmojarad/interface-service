@@ -2,7 +2,6 @@ package auth
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"time"
 
@@ -55,7 +54,6 @@ func (service *jwtService) GenerateToken(email string, isUser bool) string {
 func (service *jwtService) ValidateToken(token string) (*jwt.Token, error) {
 	return jwt.Parse(token, func(t *jwt.Token) (interface{}, error) {
 		if _, isValid := t.Method.(*jwt.SigningMethodHMAC); !isValid {
-			log.Println("ASDASDASDSADASDASDASD", fmt.Errorf("invalid token %+v", t.Header["alg"]))
 			return nil, fmt.Errorf("invalid token %+v", t.Header["alg"])
 		}
 		return []byte(service.secretKey), nil
