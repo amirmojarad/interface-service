@@ -15,6 +15,7 @@ type API struct {
 
 func (api *API) groups() {
 	api.userGroup("/users")
+	api.authGroup("/")
 }
 
 func RunAPI(ctx *context.Context, client *ent.Client) {

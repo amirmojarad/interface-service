@@ -9,6 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// CheckAuth get token from payload and
+// check is it vald or not.
 func CheckAuth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		jwtService := auth.JWTAuthService()
