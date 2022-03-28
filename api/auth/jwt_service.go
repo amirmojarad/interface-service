@@ -17,8 +17,8 @@ type JWTService interface {
 
 type authCustomClaims struct {
 	Email string `json:"email"`
-	User  bool   `json:"password"`
-	jwt.StandardClaims
+	Admin bool   `json:"isAdmin"`
+	jwt.Claims
 }
 
 type jwtService struct {

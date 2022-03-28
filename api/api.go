@@ -2,6 +2,7 @@ package api
 
 import (
 	"context"
+	"interface_project/api/auth"
 	"interface_project/database/crud"
 	"interface_project/ent"
 
@@ -9,8 +10,9 @@ import (
 )
 
 type API struct {
-	Crud   *crud.Crud
-	Engine *gin.Engine
+	Crud       *crud.Crud
+	Engine     *gin.Engine
+	jwtService auth.JWTService
 }
 
 func (api *API) groups() {
@@ -25,6 +27,7 @@ func RunAPI(ctx *context.Context, client *ent.Client) {
 			Ctx:    ctx,
 			Client: client,
 		},
+		jwtService: auth.JWTAuthService(),
 	}
 	interfaceAPI.groups()
 	interfaceAPI.Engine.Run(":8080")

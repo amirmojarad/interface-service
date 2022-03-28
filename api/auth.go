@@ -15,18 +15,6 @@ func (api *API) authGroup(path string) {
 	userGroup.POST("/login", api.login())
 }
 
-func (api *API) allUsers() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		if users, err := api.Crud.GetAllUsers(); err != nil {
-			ctx.IndentedJSON(http.StatusInternalServerError, err)
-			return
-		} else {
-			ctx.IndentedJSON(http.StatusOK, users)
-			return
-		}
-	}
-}
-
 func (api *API) signUp() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		userSchema := &ent.User{}
@@ -51,8 +39,9 @@ func (api *API) login() gin.HandlerFunc {
 			})
 			return
 		} else {
+			log.Println("IS ADMIN: ", userSchema.IsAdmin)
 			jwtService := auth.JWTAuthService()
-			tokenString := jwtService.GenerateToken(userSchema.Email, true)
+			tokenString := jwtService.GenerateToken(userSchema.Email, userSchema.IsAdmin)
 			ctx.IndentedJSON(http.StatusOK, gin.H{
 				"token": tokenString,
 			})
