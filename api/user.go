@@ -20,18 +20,11 @@ func (api *API) userGroup(path string) {
 	userGroup.GET("/favoriteMovies", api.getFavoritesMovies())
 	userGroup.GET("/favoriteMovies/:id", api.getFavoriteMovie())
 	userGroup.DELETE("/favoriteMovies", api.deleteMovieFromFavorites())
-	userGroup.POST("/search", api.searchMovie())
-}
-
-func (api *API) searchMovie() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		userEmail := fmt.Sprint(ctx.MustGet("email"))
-	}
 }
 
 func (api *API) deleteMovieFromFavorites() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		userEmail := fmt.Sprint(ctx.MustGet("email"))
+		userEmail := fmt.Sprint(ctx.Query("email"))
 		var movieIDs []int
 		ctx.BindJSON(&movieIDs)
 		if movies, err := api.Crud.DeleteMovieFromFavorites(userEmail, movieIDs); err != nil {

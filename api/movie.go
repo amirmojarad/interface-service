@@ -15,7 +15,23 @@ func (api *API) movieGroup(path string) {
 	movieGroup := api.Engine.Group(path)
 	movieGroup.POST("/:title", api.addMovies())
 	movieGroup.GET("/", api.getAllMovies())
+	movieGroup.GET("/search", api.searchMovie())
 
+}
+
+func (api *API) searchMovie() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		movieTitle := fmt.Sprint(ctx.Query("title"))
+		log.Println("MOVIE TITLE: ", movieTitle)
+		if movies, err := api.Crud.SearchMovie(movieTitle); err != nil {
+			ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
+				"message": "some error!",
+				"error":   err.Error(),
+			})
+		} else {
+			ctx.IndentedJSON(http.StatusOK, movies)
+		}
+	}
 }
 
 func (api *API) getAllMovies() gin.HandlerFunc {

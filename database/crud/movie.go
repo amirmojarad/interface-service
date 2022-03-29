@@ -36,3 +36,11 @@ func (crud *Crud) DeleteMovie(movieID int) (bool, error) {
 		return true, nil
 	}
 }
+
+func (crud *Crud) SearchMovie(movieTitle string) ([]*ent.Movie, error) {
+	if movies, err := crud.Client.Movie.Query().Where(movie.TitleContains(movieTitle)).All(*crud.Ctx); err != nil {
+		return nil, err
+	} else {
+		return movies, nil
+	}
+}
