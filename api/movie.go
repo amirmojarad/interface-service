@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"interface_project/api/middlewares"
 	"interface_project/ent"
 	"log"
 	"net/http"
@@ -12,7 +13,7 @@ import (
 )
 
 func (api *API) movieGroup(path string) {
-	movieGroup := api.Engine.Group(path)
+	movieGroup := api.Engine.Group(path, middlewares.CheckAuth())
 	movieGroup.POST("/:title", api.addMovies())
 	movieGroup.GET("/", api.getAllMovies())
 	movieGroup.GET("/search", api.searchMovie())
@@ -22,6 +23,8 @@ func (api *API) movieGroup(path string) {
 func (api *API) searchMovie() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		movieTitle := fmt.Sprint(ctx.Query("title"))
+		email := fmt.Sprint(ctx.MustGet("email"))
+		api.Crud.AddSearchKeywordToUser(email, movieTitle)
 		log.Println("MOVIE TITLE: ", movieTitle)
 		if movies, err := api.Crud.SearchMovie(movieTitle); err != nil {
 			ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
