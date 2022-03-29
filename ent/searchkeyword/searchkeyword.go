@@ -11,8 +11,17 @@ const (
 	FieldTitle = "title"
 	// FieldRate holds the string denoting the rate field in the database.
 	FieldRate = "rate"
+	// EdgeUser holds the string denoting the user edge name in mutations.
+	EdgeUser = "user"
 	// Table holds the table name of the searchkeyword in the database.
 	Table = "search_keywords"
+	// UserTable is the table that holds the user relation/edge.
+	UserTable = "search_keywords"
+	// UserInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	UserInverseTable = "users"
+	// UserColumn is the table column denoting the user relation/edge.
+	UserColumn = "user_searched_keywords"
 )
 
 // Columns holds all SQL columns for searchkeyword fields.

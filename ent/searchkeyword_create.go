@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"interface_project/ent/searchkeyword"
+	"interface_project/ent/user"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -37,6 +38,25 @@ func (skc *SearchKeywordCreate) SetNillableRate(u *uint16) *SearchKeywordCreate 
 		skc.SetRate(*u)
 	}
 	return skc
+}
+
+// SetUserID sets the "user" edge to the User entity by ID.
+func (skc *SearchKeywordCreate) SetUserID(id int) *SearchKeywordCreate {
+	skc.mutation.SetUserID(id)
+	return skc
+}
+
+// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
+func (skc *SearchKeywordCreate) SetNillableUserID(id *int) *SearchKeywordCreate {
+	if id != nil {
+		skc = skc.SetUserID(*id)
+	}
+	return skc
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (skc *SearchKeywordCreate) SetUser(u *User) *SearchKeywordCreate {
+	return skc.SetUserID(u.ID)
 }
 
 // Mutation returns the SearchKeywordMutation object of the builder.
@@ -171,6 +191,26 @@ func (skc *SearchKeywordCreate) createSpec() (*SearchKeyword, *sqlgraph.CreateSp
 			Column: searchkeyword.FieldRate,
 		})
 		_node.Rate = value
+	}
+	if nodes := skc.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   searchkeyword.UserTable,
+			Columns: []string{searchkeyword.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.user_searched_keywords = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

@@ -319,6 +319,22 @@ func (c *SearchKeywordClient) GetX(ctx context.Context, id int) *SearchKeyword {
 	return obj
 }
 
+// QueryUser queries the user edge of a SearchKeyword.
+func (c *SearchKeywordClient) QueryUser(sk *SearchKeyword) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := sk.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(searchkeyword.Table, searchkeyword.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, searchkeyword.UserTable, searchkeyword.UserColumn),
+		)
+		fromV = sqlgraph.Neighbors(sk.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *SearchKeywordClient) Hooks() []Hook {
 	return c.hooks.SearchKeyword

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"interface_project/ent/predicate"
 	"interface_project/ent/searchkeyword"
+	"interface_project/ent/user"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -54,9 +55,34 @@ func (sku *SearchKeywordUpdate) AddRate(u int16) *SearchKeywordUpdate {
 	return sku
 }
 
+// SetUserID sets the "user" edge to the User entity by ID.
+func (sku *SearchKeywordUpdate) SetUserID(id int) *SearchKeywordUpdate {
+	sku.mutation.SetUserID(id)
+	return sku
+}
+
+// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
+func (sku *SearchKeywordUpdate) SetNillableUserID(id *int) *SearchKeywordUpdate {
+	if id != nil {
+		sku = sku.SetUserID(*id)
+	}
+	return sku
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (sku *SearchKeywordUpdate) SetUser(u *User) *SearchKeywordUpdate {
+	return sku.SetUserID(u.ID)
+}
+
 // Mutation returns the SearchKeywordMutation object of the builder.
 func (sku *SearchKeywordUpdate) Mutation() *SearchKeywordMutation {
 	return sku.mutation
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (sku *SearchKeywordUpdate) ClearUser() *SearchKeywordUpdate {
+	sku.mutation.ClearUser()
+	return sku
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -168,6 +194,41 @@ func (sku *SearchKeywordUpdate) sqlSave(ctx context.Context) (n int, err error) 
 			Column: searchkeyword.FieldRate,
 		})
 	}
+	if sku.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   searchkeyword.UserTable,
+			Columns: []string{searchkeyword.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := sku.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   searchkeyword.UserTable,
+			Columns: []string{searchkeyword.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, sku.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{searchkeyword.Label}
@@ -214,9 +275,34 @@ func (skuo *SearchKeywordUpdateOne) AddRate(u int16) *SearchKeywordUpdateOne {
 	return skuo
 }
 
+// SetUserID sets the "user" edge to the User entity by ID.
+func (skuo *SearchKeywordUpdateOne) SetUserID(id int) *SearchKeywordUpdateOne {
+	skuo.mutation.SetUserID(id)
+	return skuo
+}
+
+// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
+func (skuo *SearchKeywordUpdateOne) SetNillableUserID(id *int) *SearchKeywordUpdateOne {
+	if id != nil {
+		skuo = skuo.SetUserID(*id)
+	}
+	return skuo
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (skuo *SearchKeywordUpdateOne) SetUser(u *User) *SearchKeywordUpdateOne {
+	return skuo.SetUserID(u.ID)
+}
+
 // Mutation returns the SearchKeywordMutation object of the builder.
 func (skuo *SearchKeywordUpdateOne) Mutation() *SearchKeywordMutation {
 	return skuo.mutation
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (skuo *SearchKeywordUpdateOne) ClearUser() *SearchKeywordUpdateOne {
+	skuo.mutation.ClearUser()
+	return skuo
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -351,6 +437,41 @@ func (skuo *SearchKeywordUpdateOne) sqlSave(ctx context.Context) (_node *SearchK
 			Value:  value,
 			Column: searchkeyword.FieldRate,
 		})
+	}
+	if skuo.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   searchkeyword.UserTable,
+			Columns: []string{searchkeyword.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := skuo.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   searchkeyword.UserTable,
+			Columns: []string{searchkeyword.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &SearchKeyword{config: skuo.config}
 	_spec.Assign = _node.assignValues

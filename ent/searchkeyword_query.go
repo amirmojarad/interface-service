@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"interface_project/ent/predicate"
 	"interface_project/ent/searchkeyword"
+	"interface_project/ent/user"
 	"math"
 
 	"entgo.io/ent/dialect/sql"
@@ -24,7 +25,9 @@ type SearchKeywordQuery struct {
 	order      []OrderFunc
 	fields     []string
 	predicates []predicate.SearchKeyword
-	withFKs    bool
+	// eager-loading edges.
+	withUser *UserQuery
+	withFKs  bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -59,6 +62,28 @@ func (skq *SearchKeywordQuery) Unique(unique bool) *SearchKeywordQuery {
 func (skq *SearchKeywordQuery) Order(o ...OrderFunc) *SearchKeywordQuery {
 	skq.order = append(skq.order, o...)
 	return skq
+}
+
+// QueryUser chains the current query on the "user" edge.
+func (skq *SearchKeywordQuery) QueryUser() *UserQuery {
+	query := &UserQuery{config: skq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := skq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := skq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(searchkeyword.Table, searchkeyword.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, searchkeyword.UserTable, searchkeyword.UserColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(skq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
 }
 
 // First returns the first SearchKeyword entity from the query.
@@ -242,11 +267,23 @@ func (skq *SearchKeywordQuery) Clone() *SearchKeywordQuery {
 		offset:     skq.offset,
 		order:      append([]OrderFunc{}, skq.order...),
 		predicates: append([]predicate.SearchKeyword{}, skq.predicates...),
+		withUser:   skq.withUser.Clone(),
 		// clone intermediate query.
 		sql:    skq.sql.Clone(),
 		path:   skq.path,
 		unique: skq.unique,
 	}
+}
+
+// WithUser tells the query-builder to eager-load the nodes that are connected to
+// the "user" edge. The optional arguments are used to configure the query builder of the edge.
+func (skq *SearchKeywordQuery) WithUser(opts ...func(*UserQuery)) *SearchKeywordQuery {
+	query := &UserQuery{config: skq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	skq.withUser = query
+	return skq
 }
 
 // GroupBy is used to group vertices by one or more fields/columns.
@@ -312,10 +349,16 @@ func (skq *SearchKeywordQuery) prepareQuery(ctx context.Context) error {
 
 func (skq *SearchKeywordQuery) sqlAll(ctx context.Context) ([]*SearchKeyword, error) {
 	var (
-		nodes   = []*SearchKeyword{}
-		withFKs = skq.withFKs
-		_spec   = skq.querySpec()
+		nodes       = []*SearchKeyword{}
+		withFKs     = skq.withFKs
+		_spec       = skq.querySpec()
+		loadedTypes = [1]bool{
+			skq.withUser != nil,
+		}
 	)
+	if skq.withUser != nil {
+		withFKs = true
+	}
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, searchkeyword.ForeignKeys...)
 	}
@@ -329,6 +372,7 @@ func (skq *SearchKeywordQuery) sqlAll(ctx context.Context) ([]*SearchKeyword, er
 			return fmt.Errorf("ent: Assign called without calling ScanValues")
 		}
 		node := nodes[len(nodes)-1]
+		node.Edges.loadedTypes = loadedTypes
 		return node.assignValues(columns, values)
 	}
 	if err := sqlgraph.QueryNodes(ctx, skq.driver, _spec); err != nil {
@@ -337,6 +381,36 @@ func (skq *SearchKeywordQuery) sqlAll(ctx context.Context) ([]*SearchKeyword, er
 	if len(nodes) == 0 {
 		return nodes, nil
 	}
+
+	if query := skq.withUser; query != nil {
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*SearchKeyword)
+		for i := range nodes {
+			if nodes[i].user_searched_keywords == nil {
+				continue
+			}
+			fk := *nodes[i].user_searched_keywords
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(user.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "user_searched_keywords" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.User = n
+			}
+		}
+	}
+
 	return nodes, nil
 }
 
