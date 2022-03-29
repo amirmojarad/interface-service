@@ -6,18 +6,17 @@ import (
 	"interface_project/ent"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
-
-// -------- helper middlewares
 
 func (api *API) userGroup(path string) {
 	userGroup := api.Engine.Group(path, middlewares.CheckAuth())
 	userGroup.DELETE("/", middlewares.IsSuperUser(), api.deleteUser())
 	userGroup.PATCH("/", api.changeUser())
 	userGroup.GET("/", middlewares.IsSuperUser(), api.getAllUsers())
-	userGroup.POST("/favoriteMovies", api.addMovieToFavorites())
+	userGroup.POST("/favoriteMovies", api.addMoviesToFavorites())
 	userGroup.GET("/favoriteMovies", api.getFavoritesMovies())
 	userGroup.GET("/favoriteMovies/:id", api.getFavoriteMovie())
 	userGroup.DELETE("/favoriteMovies", api.deleteMovieFromFavorites())
@@ -26,23 +25,65 @@ func (api *API) userGroup(path string) {
 
 func (api *API) searchMovie() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		userEmail := fmt.Sprint(ctx.MustGet("email"))
 	}
 }
 
 func (api *API) deleteMovieFromFavorites() gin.HandlerFunc {
-	return func(ctx *gin.Context) {}
+	return func(ctx *gin.Context) {
+		userEmail := fmt.Sprint(ctx.MustGet("email"))
+		var movieIDs []int
+		ctx.BindJSON(&movieIDs)
+		if movies, err := api.Crud.DeleteMovieFromFavorites(userEmail, movieIDs); err != nil {
+			ctx.IndentedJSON(http.StatusServiceUnavailable, gin.H{
+				"message": "could not delete movies.",
+				"error":   err.Error(),
+			})
+		} else {
+			ctx.IndentedJSON(http.StatusAccepted, movies)
+		}
+	}
 }
 
 func (api *API) getFavoritesMovies() gin.HandlerFunc {
-	return func(ctx *gin.Context) {}
+	return func(ctx *gin.Context) {
+		userEmail := fmt.Sprint(ctx.MustGet("email"))
+		if movies, err := api.Crud.GetFavoriteMovies(userEmail); err != nil {
+			ctx.IndentedJSON(http.StatusServiceUnavailable, gin.H{
+				"message": "could not get movies.",
+				"error":   err.Error(),
+			})
+		} else {
+			ctx.IndentedJSON(http.StatusOK, movies)
+		}
+	}
 }
 
 func (api *API) getFavoriteMovie() gin.HandlerFunc {
-	return func(ctx *gin.Context) {}
+	return func(ctx *gin.Context) {
+		userEmail := ctx.MustGet("email")
+		movieID, _ := strconv.Atoi(ctx.Param("id"))
+		if movie, err := api.Crud.GetFavoriteMovie(fmt.Sprint(userEmail), movieID); err != nil {
+			ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"message": fmt.Sprintf("movie with id %d not found", movieID), "error": err.Error()})
+		} else {
+			ctx.IndentedJSON(http.StatusCreated, movie)
+		}
+	}
 }
 
-func (api *API) addMovieToFavorites() gin.HandlerFunc {
-	return func(ctx *gin.Context) {}
+func (api *API) addMoviesToFavorites() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		userEmail := ctx.MustGet("email")
+		var movieIDs []int
+		ctx.BindJSON(&movieIDs)
+		if movies, err := api.Crud.AddMoviesToUser(movieIDs, fmt.Sprint(userEmail)); err != nil {
+			ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
+				"message": "could not add movies to user.", "error": err.Error(),
+			})
+		} else {
+			ctx.IndentedJSON(http.StatusCreated, movies)
+		}
+	}
 }
 
 func (api *API) changeUser() gin.HandlerFunc {

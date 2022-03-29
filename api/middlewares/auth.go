@@ -15,10 +15,12 @@ func CheckAuth() gin.HandlerFunc {
 		jwtService := auth.JWTAuthService()
 		header := ctx.Request.Header
 		token := strings.Split(header["Authorization"][0], " ")[1]
-		if _, err := jwtService.ValidateToken(token); err != nil {
+		if t, err := jwtService.ValidateToken(token); err != nil {
 			ctx.AbortWithError(http.StatusUnauthorized, err)
 			return
 		} else {
+			claims := jwtService.GetMapClaims(t)
+			ctx.Set("email", claims["email"])
 			ctx.Next()
 		}
 	}

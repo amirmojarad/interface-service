@@ -2,6 +2,7 @@ package crud
 
 import (
 	"interface_project/ent"
+	"interface_project/ent/movie"
 	"interface_project/ent/user"
 	"interface_project/usecases/generators"
 )
@@ -72,5 +73,57 @@ func (crud Crud) DeleteUserByEmail(email string) (*ent.User, error) {
 	} else {
 		err := crud.Client.User.DeleteOne(u).Exec(*crud.Ctx)
 		return u, err
+	}
+}
+
+func (crud Crud) AddMoviesToUser(movieIDs []int, email string) (*ent.User, error) {
+	if u, err := crud.GetUserByEmail(email); err != nil {
+		return nil, err
+	} else {
+		u, err = u.Update().AddFavoriteMovieIDs(movieIDs...).Save(*crud.Ctx)
+		if err != nil {
+			return nil, err
+		}
+		return u, nil
+	}
+}
+
+func (crud Crud) GetFavoriteMovies(email string) ([]*ent.Movie, error) {
+	if u, err := crud.GetUserByEmail(email); err != nil {
+		return nil, err
+	} else {
+		if movies, err := u.QueryFavoriteMovies().All(*crud.Ctx); err != nil {
+			return nil, err
+		} else {
+			return movies, nil
+		}
+	}
+}
+
+func (crud Crud) GetFavoriteMovie(email string, movieID int) (*ent.Movie, error) {
+	if u, err := crud.GetUserByEmail(email); err != nil {
+		return nil, err
+	} else {
+		if movie, err := u.QueryFavoriteMovies().Where(movie.ID(movieID)).First(*crud.Ctx); err != nil {
+			return nil, err
+		} else {
+			return movie, nil
+		}
+	}
+}
+
+func (crud Crud) DeleteMovieFromFavorites(email string, movieIDs []int) ([]*ent.Movie, error) {
+	if u, err := crud.GetUserByEmail(email); err != nil {
+		return nil, err
+	} else {
+		if err = u.Update().RemoveFavoriteMovieIDs(movieIDs...).Exec(*crud.Ctx); err != nil {
+			return nil, err
+		} else {
+			if movies, err := u.QueryFavoriteMovies().All(*crud.Ctx); err != nil {
+				return nil, err
+			} else {
+				return movies, nil
+			}
+		}
 	}
 }
