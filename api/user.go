@@ -6,6 +6,7 @@ import (
 	"interface_project/ent"
 	"log"
 	"net/http"
+	"net/url"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -21,6 +22,10 @@ func (api *API) userGroup(path string) {
 	userGroup.GET("/favoriteMovies/:id", api.getFavoriteMovie())
 	userGroup.DELETE("/favoriteMovies", api.deleteMovieFromFavorites())
 	userGroup.GET("/searchKeywords", api.getSearchKeywords())
+	userGroup.GET("/upload", func(ctx *gin.Context) {
+		location := url.URL{Path: "/file"}
+		ctx.Redirect(http.StatusFound, location.RequestURI())
+	})
 }
 
 func (api API) getSearchKeywords() gin.HandlerFunc {
