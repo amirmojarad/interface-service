@@ -28,6 +28,12 @@ func (api *API) userGroup(path string) {
 	})
 }
 
+func (api API) userIndex() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		// ctx.HTML(http.StatusOK, )
+	}
+}
+
 func (api API) getSearchKeywords() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		email := fmt.Sprint(ctx.MustGet("email"))

@@ -12,11 +12,7 @@ import (
 
 func (api *API) fileGroup(path string) {
 	fileGroup := api.Engine.Group(path)
-	api.Engine.LoadHTMLGlob("template/*")
-	fileGroup.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "select_file.html", gin.H{})
-	})
-	fileGroup.StaticFS("/file", http.Dir("public"))
+	fileGroup.GET("/", api.fileIndex())
 	fileGroup.POST("/upload", api.upload())
 	fileGroup.GET("/download", api.download())
 }
@@ -24,6 +20,12 @@ func (api *API) fileGroup(path string) {
 func (api API) download() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// TODO
+	}
+}
+
+func (api API) fileIndex() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.HTML(http.StatusOK, "select_file.html", gin.H{})
 	}
 }
 
