@@ -81,12 +81,21 @@ var (
 		{Name: "meaning", Type: field.TypeString, Nullable: true},
 		{Name: "sentence", Type: field.TypeString, Nullable: true},
 		{Name: "duration", Type: field.TypeString, Nullable: true},
+		{Name: "word_movie", Type: field.TypeInt, Nullable: true},
 	}
 	// WordsTable holds the schema information for the "words" table.
 	WordsTable = &schema.Table{
 		Name:       "words",
 		Columns:    WordsColumns,
 		PrimaryKey: []*schema.Column{WordsColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "words_movies_movie",
+				Columns:    []*schema.Column{WordsColumns[5]},
+				RefColumns: []*schema.Column{MoviesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
@@ -100,4 +109,5 @@ var (
 func init() {
 	MoviesTable.ForeignKeys[0].RefTable = UsersTable
 	SearchKeywordsTable.ForeignKeys[0].RefTable = UsersTable
+	WordsTable.ForeignKeys[0].RefTable = MoviesTable
 }

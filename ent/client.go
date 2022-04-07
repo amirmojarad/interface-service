@@ -547,6 +547,22 @@ func (c *WordClient) GetX(ctx context.Context, id int) *Word {
 	return obj
 }
 
+// QueryMovie queries the movie edge of a Word.
+func (c *WordClient) QueryMovie(w *Word) *MovieQuery {
+	query := &MovieQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := w.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(word.Table, word.FieldID, id),
+			sqlgraph.To(movie.Table, movie.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, word.MovieTable, word.MovieColumn),
+		)
+		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *WordClient) Hooks() []Hook {
 	return c.hooks.Word

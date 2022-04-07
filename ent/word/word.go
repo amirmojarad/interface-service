@@ -15,8 +15,17 @@ const (
 	FieldSentence = "sentence"
 	// FieldDuration holds the string denoting the duration field in the database.
 	FieldDuration = "duration"
+	// EdgeMovie holds the string denoting the movie edge name in mutations.
+	EdgeMovie = "movie"
 	// Table holds the table name of the word in the database.
 	Table = "words"
+	// MovieTable is the table that holds the movie relation/edge.
+	MovieTable = "words"
+	// MovieInverseTable is the table name for the Movie entity.
+	// It exists in this package in order to avoid circular dependency with the "movie" package.
+	MovieInverseTable = "movies"
+	// MovieColumn is the table column denoting the movie relation/edge.
+	MovieColumn = "word_movie"
 )
 
 // Columns holds all SQL columns for word fields.
@@ -28,10 +37,21 @@ var Columns = []string{
 	FieldDuration,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "words"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"word_movie",
+}
+
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}

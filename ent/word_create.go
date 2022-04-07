@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"interface_project/ent/movie"
 	"interface_project/ent/word"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -65,6 +66,25 @@ func (wc *WordCreate) SetNillableDuration(s *string) *WordCreate {
 		wc.SetDuration(*s)
 	}
 	return wc
+}
+
+// SetMovieID sets the "movie" edge to the Movie entity by ID.
+func (wc *WordCreate) SetMovieID(id int) *WordCreate {
+	wc.mutation.SetMovieID(id)
+	return wc
+}
+
+// SetNillableMovieID sets the "movie" edge to the Movie entity by ID if the given value is not nil.
+func (wc *WordCreate) SetNillableMovieID(id *int) *WordCreate {
+	if id != nil {
+		wc = wc.SetMovieID(*id)
+	}
+	return wc
+}
+
+// SetMovie sets the "movie" edge to the Movie entity.
+func (wc *WordCreate) SetMovie(m *Movie) *WordCreate {
+	return wc.SetMovieID(m.ID)
 }
 
 // Mutation returns the WordMutation object of the builder.
@@ -203,6 +223,26 @@ func (wc *WordCreate) createSpec() (*Word, *sqlgraph.CreateSpec) {
 			Column: word.FieldDuration,
 		})
 		_node.Duration = value
+	}
+	if nodes := wc.mutation.MovieIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   word.MovieTable,
+			Columns: []string{word.MovieColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: movie.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.word_movie = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

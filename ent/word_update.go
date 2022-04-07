@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"interface_project/ent/movie"
 	"interface_project/ent/predicate"
 	"interface_project/ent/word"
 
@@ -93,9 +94,34 @@ func (wu *WordUpdate) ClearDuration() *WordUpdate {
 	return wu
 }
 
+// SetMovieID sets the "movie" edge to the Movie entity by ID.
+func (wu *WordUpdate) SetMovieID(id int) *WordUpdate {
+	wu.mutation.SetMovieID(id)
+	return wu
+}
+
+// SetNillableMovieID sets the "movie" edge to the Movie entity by ID if the given value is not nil.
+func (wu *WordUpdate) SetNillableMovieID(id *int) *WordUpdate {
+	if id != nil {
+		wu = wu.SetMovieID(*id)
+	}
+	return wu
+}
+
+// SetMovie sets the "movie" edge to the Movie entity.
+func (wu *WordUpdate) SetMovie(m *Movie) *WordUpdate {
+	return wu.SetMovieID(m.ID)
+}
+
 // Mutation returns the WordMutation object of the builder.
 func (wu *WordUpdate) Mutation() *WordMutation {
 	return wu.mutation
+}
+
+// ClearMovie clears the "movie" edge to the Movie entity.
+func (wu *WordUpdate) ClearMovie() *WordUpdate {
+	wu.mutation.ClearMovie()
+	return wu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -232,6 +258,41 @@ func (wu *WordUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: word.FieldDuration,
 		})
 	}
+	if wu.mutation.MovieCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   word.MovieTable,
+			Columns: []string{word.MovieColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: movie.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wu.mutation.MovieIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   word.MovieTable,
+			Columns: []string{word.MovieColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: movie.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, wu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{word.Label}
@@ -317,9 +378,34 @@ func (wuo *WordUpdateOne) ClearDuration() *WordUpdateOne {
 	return wuo
 }
 
+// SetMovieID sets the "movie" edge to the Movie entity by ID.
+func (wuo *WordUpdateOne) SetMovieID(id int) *WordUpdateOne {
+	wuo.mutation.SetMovieID(id)
+	return wuo
+}
+
+// SetNillableMovieID sets the "movie" edge to the Movie entity by ID if the given value is not nil.
+func (wuo *WordUpdateOne) SetNillableMovieID(id *int) *WordUpdateOne {
+	if id != nil {
+		wuo = wuo.SetMovieID(*id)
+	}
+	return wuo
+}
+
+// SetMovie sets the "movie" edge to the Movie entity.
+func (wuo *WordUpdateOne) SetMovie(m *Movie) *WordUpdateOne {
+	return wuo.SetMovieID(m.ID)
+}
+
 // Mutation returns the WordMutation object of the builder.
 func (wuo *WordUpdateOne) Mutation() *WordMutation {
 	return wuo.mutation
+}
+
+// ClearMovie clears the "movie" edge to the Movie entity.
+func (wuo *WordUpdateOne) ClearMovie() *WordUpdateOne {
+	wuo.mutation.ClearMovie()
+	return wuo
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -479,6 +565,41 @@ func (wuo *WordUpdateOne) sqlSave(ctx context.Context) (_node *Word, err error) 
 			Type:   field.TypeString,
 			Column: word.FieldDuration,
 		})
+	}
+	if wuo.mutation.MovieCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   word.MovieTable,
+			Columns: []string{word.MovieColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: movie.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wuo.mutation.MovieIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: false,
+			Table:   word.MovieTable,
+			Columns: []string{word.MovieColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: movie.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	_node = &Word{config: wuo.config}
 	_spec.Assign = _node.assignValues

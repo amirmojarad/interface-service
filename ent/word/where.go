@@ -6,6 +6,7 @@ import (
 	"interface_project/ent/predicate"
 
 	"entgo.io/ent/dialect/sql"
+	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // ID filters vertices based on their ID field.
@@ -602,6 +603,34 @@ func DurationEqualFold(v string) predicate.Word {
 func DurationContainsFold(v string) predicate.Word {
 	return predicate.Word(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldDuration), v))
+	})
+}
+
+// HasMovie applies the HasEdge predicate on the "movie" edge.
+func HasMovie() predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(MovieTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, MovieTable, MovieColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasMovieWith applies the HasEdge predicate on the "movie" edge with a given conditions (other predicates).
+func HasMovieWith(preds ...predicate.Movie) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(MovieInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, false, MovieTable, MovieColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
 	})
 }
 
