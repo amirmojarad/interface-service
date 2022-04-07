@@ -1,6 +1,7 @@
 package middlewares
 
 import (
+	"errors"
 	"interface_project/api/auth"
 	"net/http"
 	"strings"
@@ -14,14 +15,19 @@ func CheckAuth() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		jwtService := auth.JWTAuthService()
 		header := ctx.Request.Header
-		token := strings.Split(header["Authorization"][0], " ")[1]
-		if t, err := jwtService.ValidateToken(token); err != nil {
-			ctx.AbortWithError(http.StatusUnauthorized, err)
-			return
+		if authToken, ok := header["Authorization"]; ok {
+			token := strings.Split(authToken[0], " ")[1]
+			if t, err := jwtService.ValidateToken(token); err != nil {
+				ctx.AbortWithError(http.StatusUnauthorized, err)
+				return
+			} else {
+				claims := jwtService.GetMapClaims(t)
+				ctx.Set("email", claims["email"])
+				ctx.Next()
+			}
 		} else {
-			claims := jwtService.GetMapClaims(t)
-			ctx.Set("email", claims["email"])
-			ctx.Next()
+			ctx.AbortWithError(http.StatusUnauthorized, errors.New("request does not contain any token"))
+			return
 		}
 	}
 }

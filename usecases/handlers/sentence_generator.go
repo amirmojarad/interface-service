@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"bufio"
-	"fmt"
 	"interface_project/ent"
 	"os"
 	"strconv"
@@ -37,9 +36,6 @@ func GenerateSentences(file *os.File) []*sentence {
 			}
 
 		}
-	}
-	for _, sentence := range sentences {
-		fmt.Printf("- %+v\n", sentence)
 	}
 	return sentences
 }

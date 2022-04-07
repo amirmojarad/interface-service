@@ -1,6 +1,7 @@
 package api
 
 import (
+	"interface_project/api/middlewares"
 	"io"
 	"log"
 	"net/http"
@@ -11,7 +12,7 @@ import (
 )
 
 func (api *API) fileGroup(path string) {
-	fileGroup := api.Engine.Group(path)
+	fileGroup := api.Engine.Group(path, middlewares.CheckAuth())
 	fileGroup.GET("/", api.fileIndex())
 	fileGroup.POST("/upload", api.upload())
 	fileGroup.GET("/download", api.download())
@@ -31,6 +32,7 @@ func (api API) fileIndex() gin.HandlerFunc {
 
 func (api API) upload() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		log.Println(ctx.MustGet("email") == nil)
 		file, header, err := ctx.Request.FormFile("file")
 		if err != nil {
 			ctx.IndentedJSON(http.StatusBadRequest, gin.H{
