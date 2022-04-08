@@ -4,8 +4,8 @@ import (
 	"os"
 )
 
-func Open() (*os.File, error) {
-	if file, err := os.Open("subs/Rick and Morty.English.srt"); err != nil {
+func Open(filePath string) (*os.File, error) {
+	if file, err := os.Open(filePath); err != nil {
 		return nil, err
 	} else {
 		return file, nil
