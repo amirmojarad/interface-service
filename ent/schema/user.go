@@ -3,7 +3,9 @@ package schema
 import (
 	"time"
 
+	"entgo.io/contrib/entproto"
 	"entgo.io/ent"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
@@ -16,20 +18,40 @@ type User struct {
 // Fields of the User.
 func (User) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("username").Unique().NotEmpty(),
-		field.String("email").Unique().NotEmpty(),
-		field.String("password").NotEmpty(),
-		field.String("full_name").Default("").Optional(),
-		field.Time("created_date").Default(time.Now()),
-		field.Time("updated_date").Default(time.Now()),
-		field.Bool("is_admin").Default(false),
+		field.String("username").Unique().Annotations(
+			entproto.Field(2),
+		).NotEmpty(),
+		field.String("email").Unique().Annotations(
+			entproto.Field(3),
+		).NotEmpty(),
+		field.String("password").Annotations(
+			entproto.Field(4),
+		).NotEmpty(),
+		field.String("full_name").Default("").Annotations(
+			entproto.Field(5),
+		).Optional(),
+		field.Time("created_date").Annotations(
+			entproto.Field(6),
+		).Default(time.Now()),
+		field.Time("updated_date").Annotations(
+			entproto.Field(7),
+		).Default(time.Now()),
+		field.Bool("is_admin").Annotations(
+			entproto.Field(8),
+		).Default(false),
 	}
 }
 
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("favorite_movies", Movie.Type),
-		edge.To("searched_keywords", SearchKeyword.Type),
+		edge.To("favorite_movies", Movie.Type).Annotations(entproto.Field(9)),
+		edge.To("searched_keywords", SearchKeyword.Type).Annotations(entproto.Field(10)),
+	}
+}
+
+func (User) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entproto.Message(),
 	}
 }

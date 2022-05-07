@@ -1,7 +1,9 @@
 package schema
 
 import (
+	"entgo.io/contrib/entproto"
 	"entgo.io/ent"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/field"
 )
 
@@ -13,19 +15,25 @@ type Movie struct {
 // Fields of the Movie.
 func (Movie) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("title").NotEmpty(),
-		field.String("year"),
-		field.String("image_url"),
-		field.String("runtimeStr"),
-		field.String("genres"),
-		field.String("imDbRating"),
-		field.String("plot"),
-		field.String("stars"),
-		field.String("metacriticRating"),
+		field.String("title").NotEmpty().Annotations(entproto.Field(2)),
+		field.String("year").Annotations(entproto.Field(3)),
+		field.String("image_url").Annotations(entproto.Field(4)),
+		field.String("runtimeStr").Annotations(entproto.Field(5)),
+		field.String("genres").Annotations(entproto.Field(6)),
+		field.String("imDbRating").Annotations(entproto.Field(7)),
+		field.String("plot").Annotations(entproto.Field(8)),
+		field.String("stars").Annotations(entproto.Field(9)),
+		field.String("metacriticRating").Annotations(entproto.Field(10)),
 	}
 }
 
 // Edges of the Movie.
 func (Movie) Edges() []ent.Edge {
 	return nil
+}
+
+func (Movie) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entproto.Message(),
+	}
 }
