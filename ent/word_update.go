@@ -8,7 +8,9 @@ import (
 	"fmt"
 	"interface_project/ent/movie"
 	"interface_project/ent/predicate"
+	"interface_project/ent/user"
 	"interface_project/ent/word"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -94,6 +96,46 @@ func (wu *WordUpdate) ClearDuration() *WordUpdate {
 	return wu
 }
 
+// SetStart sets the "start" field.
+func (wu *WordUpdate) SetStart(t time.Time) *WordUpdate {
+	wu.mutation.SetStart(t)
+	return wu
+}
+
+// SetNillableStart sets the "start" field if the given value is not nil.
+func (wu *WordUpdate) SetNillableStart(t *time.Time) *WordUpdate {
+	if t != nil {
+		wu.SetStart(*t)
+	}
+	return wu
+}
+
+// ClearStart clears the value of the "start" field.
+func (wu *WordUpdate) ClearStart() *WordUpdate {
+	wu.mutation.ClearStart()
+	return wu
+}
+
+// SetEnd sets the "end" field.
+func (wu *WordUpdate) SetEnd(t time.Time) *WordUpdate {
+	wu.mutation.SetEnd(t)
+	return wu
+}
+
+// SetNillableEnd sets the "end" field if the given value is not nil.
+func (wu *WordUpdate) SetNillableEnd(t *time.Time) *WordUpdate {
+	if t != nil {
+		wu.SetEnd(*t)
+	}
+	return wu
+}
+
+// ClearEnd clears the value of the "end" field.
+func (wu *WordUpdate) ClearEnd() *WordUpdate {
+	wu.mutation.ClearEnd()
+	return wu
+}
+
 // SetMovieID sets the "movie" edge to the Movie entity by ID.
 func (wu *WordUpdate) SetMovieID(id int) *WordUpdate {
 	wu.mutation.SetMovieID(id)
@@ -113,6 +155,25 @@ func (wu *WordUpdate) SetMovie(m *Movie) *WordUpdate {
 	return wu.SetMovieID(m.ID)
 }
 
+// SetUserID sets the "user" edge to the User entity by ID.
+func (wu *WordUpdate) SetUserID(id int) *WordUpdate {
+	wu.mutation.SetUserID(id)
+	return wu
+}
+
+// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
+func (wu *WordUpdate) SetNillableUserID(id *int) *WordUpdate {
+	if id != nil {
+		wu = wu.SetUserID(*id)
+	}
+	return wu
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (wu *WordUpdate) SetUser(u *User) *WordUpdate {
+	return wu.SetUserID(u.ID)
+}
+
 // Mutation returns the WordMutation object of the builder.
 func (wu *WordUpdate) Mutation() *WordMutation {
 	return wu.mutation
@@ -121,6 +182,12 @@ func (wu *WordUpdate) Mutation() *WordMutation {
 // ClearMovie clears the "movie" edge to the Movie entity.
 func (wu *WordUpdate) ClearMovie() *WordUpdate {
 	wu.mutation.ClearMovie()
+	return wu
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (wu *WordUpdate) ClearUser() *WordUpdate {
+	wu.mutation.ClearUser()
 	return wu
 }
 
@@ -258,6 +325,32 @@ func (wu *WordUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: word.FieldDuration,
 		})
 	}
+	if value, ok := wu.mutation.Start(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: word.FieldStart,
+		})
+	}
+	if wu.mutation.StartCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: word.FieldStart,
+		})
+	}
+	if value, ok := wu.mutation.End(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: word.FieldEnd,
+		})
+	}
+	if wu.mutation.EndCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: word.FieldEnd,
+		})
+	}
 	if wu.mutation.MovieCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -285,6 +378,41 @@ func (wu *WordUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: movie.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if wu.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   word.UserTable,
+			Columns: []string{word.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wu.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   word.UserTable,
+			Columns: []string{word.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
 				},
 			},
 		}
@@ -378,6 +506,46 @@ func (wuo *WordUpdateOne) ClearDuration() *WordUpdateOne {
 	return wuo
 }
 
+// SetStart sets the "start" field.
+func (wuo *WordUpdateOne) SetStart(t time.Time) *WordUpdateOne {
+	wuo.mutation.SetStart(t)
+	return wuo
+}
+
+// SetNillableStart sets the "start" field if the given value is not nil.
+func (wuo *WordUpdateOne) SetNillableStart(t *time.Time) *WordUpdateOne {
+	if t != nil {
+		wuo.SetStart(*t)
+	}
+	return wuo
+}
+
+// ClearStart clears the value of the "start" field.
+func (wuo *WordUpdateOne) ClearStart() *WordUpdateOne {
+	wuo.mutation.ClearStart()
+	return wuo
+}
+
+// SetEnd sets the "end" field.
+func (wuo *WordUpdateOne) SetEnd(t time.Time) *WordUpdateOne {
+	wuo.mutation.SetEnd(t)
+	return wuo
+}
+
+// SetNillableEnd sets the "end" field if the given value is not nil.
+func (wuo *WordUpdateOne) SetNillableEnd(t *time.Time) *WordUpdateOne {
+	if t != nil {
+		wuo.SetEnd(*t)
+	}
+	return wuo
+}
+
+// ClearEnd clears the value of the "end" field.
+func (wuo *WordUpdateOne) ClearEnd() *WordUpdateOne {
+	wuo.mutation.ClearEnd()
+	return wuo
+}
+
 // SetMovieID sets the "movie" edge to the Movie entity by ID.
 func (wuo *WordUpdateOne) SetMovieID(id int) *WordUpdateOne {
 	wuo.mutation.SetMovieID(id)
@@ -397,6 +565,25 @@ func (wuo *WordUpdateOne) SetMovie(m *Movie) *WordUpdateOne {
 	return wuo.SetMovieID(m.ID)
 }
 
+// SetUserID sets the "user" edge to the User entity by ID.
+func (wuo *WordUpdateOne) SetUserID(id int) *WordUpdateOne {
+	wuo.mutation.SetUserID(id)
+	return wuo
+}
+
+// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
+func (wuo *WordUpdateOne) SetNillableUserID(id *int) *WordUpdateOne {
+	if id != nil {
+		wuo = wuo.SetUserID(*id)
+	}
+	return wuo
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (wuo *WordUpdateOne) SetUser(u *User) *WordUpdateOne {
+	return wuo.SetUserID(u.ID)
+}
+
 // Mutation returns the WordMutation object of the builder.
 func (wuo *WordUpdateOne) Mutation() *WordMutation {
 	return wuo.mutation
@@ -405,6 +592,12 @@ func (wuo *WordUpdateOne) Mutation() *WordMutation {
 // ClearMovie clears the "movie" edge to the Movie entity.
 func (wuo *WordUpdateOne) ClearMovie() *WordUpdateOne {
 	wuo.mutation.ClearMovie()
+	return wuo
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (wuo *WordUpdateOne) ClearUser() *WordUpdateOne {
+	wuo.mutation.ClearUser()
 	return wuo
 }
 
@@ -566,6 +759,32 @@ func (wuo *WordUpdateOne) sqlSave(ctx context.Context) (_node *Word, err error) 
 			Column: word.FieldDuration,
 		})
 	}
+	if value, ok := wuo.mutation.Start(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: word.FieldStart,
+		})
+	}
+	if wuo.mutation.StartCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: word.FieldStart,
+		})
+	}
+	if value, ok := wuo.mutation.End(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: word.FieldEnd,
+		})
+	}
+	if wuo.mutation.EndCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Column: word.FieldEnd,
+		})
+	}
 	if wuo.mutation.MovieCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -593,6 +812,41 @@ func (wuo *WordUpdateOne) sqlSave(ctx context.Context) (_node *Word, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: movie.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if wuo.mutation.UserCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   word.UserTable,
+			Columns: []string{word.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wuo.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   word.UserTable,
+			Columns: []string{word.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
 				},
 			},
 		}

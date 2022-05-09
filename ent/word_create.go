@@ -7,7 +7,9 @@ import (
 	"errors"
 	"fmt"
 	"interface_project/ent/movie"
+	"interface_project/ent/user"
 	"interface_project/ent/word"
+	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -68,6 +70,34 @@ func (wc *WordCreate) SetNillableDuration(s *string) *WordCreate {
 	return wc
 }
 
+// SetStart sets the "start" field.
+func (wc *WordCreate) SetStart(t time.Time) *WordCreate {
+	wc.mutation.SetStart(t)
+	return wc
+}
+
+// SetNillableStart sets the "start" field if the given value is not nil.
+func (wc *WordCreate) SetNillableStart(t *time.Time) *WordCreate {
+	if t != nil {
+		wc.SetStart(*t)
+	}
+	return wc
+}
+
+// SetEnd sets the "end" field.
+func (wc *WordCreate) SetEnd(t time.Time) *WordCreate {
+	wc.mutation.SetEnd(t)
+	return wc
+}
+
+// SetNillableEnd sets the "end" field if the given value is not nil.
+func (wc *WordCreate) SetNillableEnd(t *time.Time) *WordCreate {
+	if t != nil {
+		wc.SetEnd(*t)
+	}
+	return wc
+}
+
 // SetMovieID sets the "movie" edge to the Movie entity by ID.
 func (wc *WordCreate) SetMovieID(id int) *WordCreate {
 	wc.mutation.SetMovieID(id)
@@ -85,6 +115,25 @@ func (wc *WordCreate) SetNillableMovieID(id *int) *WordCreate {
 // SetMovie sets the "movie" edge to the Movie entity.
 func (wc *WordCreate) SetMovie(m *Movie) *WordCreate {
 	return wc.SetMovieID(m.ID)
+}
+
+// SetUserID sets the "user" edge to the User entity by ID.
+func (wc *WordCreate) SetUserID(id int) *WordCreate {
+	wc.mutation.SetUserID(id)
+	return wc
+}
+
+// SetNillableUserID sets the "user" edge to the User entity by ID if the given value is not nil.
+func (wc *WordCreate) SetNillableUserID(id *int) *WordCreate {
+	if id != nil {
+		wc = wc.SetUserID(*id)
+	}
+	return wc
+}
+
+// SetUser sets the "user" edge to the User entity.
+func (wc *WordCreate) SetUser(u *User) *WordCreate {
+	return wc.SetUserID(u.ID)
 }
 
 // Mutation returns the WordMutation object of the builder.
@@ -224,6 +273,22 @@ func (wc *WordCreate) createSpec() (*Word, *sqlgraph.CreateSpec) {
 		})
 		_node.Duration = value
 	}
+	if value, ok := wc.mutation.Start(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: word.FieldStart,
+		})
+		_node.Start = value
+	}
+	if value, ok := wc.mutation.End(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeTime,
+			Value:  value,
+			Column: word.FieldEnd,
+		})
+		_node.End = value
+	}
 	if nodes := wc.mutation.MovieIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2O,
@@ -242,6 +307,26 @@ func (wc *WordCreate) createSpec() (*Word, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.word_movie = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := wc.mutation.UserIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   word.UserTable,
+			Columns: []string{word.UserColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.user_favorite_words = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

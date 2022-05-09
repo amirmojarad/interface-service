@@ -1,7 +1,9 @@
 package schema
 
 import (
+	"entgo.io/contrib/entproto"
 	"entgo.io/ent"
+	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
@@ -14,16 +16,25 @@ type Word struct {
 // Fields of the Word.
 func (Word) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("title").NotEmpty(),
-		field.String("meaning").Optional(),
-		field.String("sentence").Optional(),
-		field.String("duration").Optional(),
+		field.String("title").NotEmpty().Annotations(entproto.Field(2)),
+		field.String("meaning").Optional().Annotations(entproto.Field(3)),
+		field.String("sentence").Optional().Annotations(entproto.Field(4)),
+		field.String("duration").Optional().Annotations(entproto.Field(5)),
+		field.Time("start").Optional().Annotations(entproto.Field(6)),
+		field.Time("end").Optional().Annotations(entproto.Field(7)),
 	}
 }
 
 // Edges of the Word.
 func (Word) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("movie", Movie.Type).Unique(),
+		edge.To("movie", Movie.Type).Unique().Annotations(entproto.Field(8)),
+		edge.From("user", User.Type).Ref("favorite_words").Unique().Annotations(entproto.Field(9)),
+	}
+}
+
+func (Word) Annotations() []schema.Annotation {
+	return []schema.Annotation{
+		entproto.Message(),
 	}
 }

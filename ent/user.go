@@ -41,9 +41,11 @@ type UserEdges struct {
 	FavoriteMovies []*Movie `json:"favorite_movies,omitempty"`
 	// SearchedKeywords holds the value of the searched_keywords edge.
 	SearchedKeywords []*SearchKeyword `json:"searched_keywords,omitempty"`
+	// FavoriteWords holds the value of the favorite_words edge.
+	FavoriteWords []*Word `json:"favorite_words,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // FavoriteMoviesOrErr returns the FavoriteMovies value or an error if the edge
@@ -62,6 +64,15 @@ func (e UserEdges) SearchedKeywordsOrErr() ([]*SearchKeyword, error) {
 		return e.SearchedKeywords, nil
 	}
 	return nil, &NotLoadedError{edge: "searched_keywords"}
+}
+
+// FavoriteWordsOrErr returns the FavoriteWords value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) FavoriteWordsOrErr() ([]*Word, error) {
+	if e.loadedTypes[2] {
+		return e.FavoriteWords, nil
+	}
+	return nil, &NotLoadedError{edge: "favorite_words"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -153,6 +164,11 @@ func (u *User) QueryFavoriteMovies() *MovieQuery {
 // QuerySearchedKeywords queries the "searched_keywords" edge of the User entity.
 func (u *User) QuerySearchedKeywords() *SearchKeywordQuery {
 	return (&UserClient{config: u.config}).QuerySearchedKeywords(u)
+}
+
+// QueryFavoriteWords queries the "favorite_words" edge of the User entity.
+func (u *User) QueryFavoriteWords() *WordQuery {
+	return (&UserClient{config: u.config}).QueryFavoriteWords(u)
 }
 
 // Update returns a builder for updating this User.

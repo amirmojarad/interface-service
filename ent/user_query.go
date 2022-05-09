@@ -11,6 +11,7 @@ import (
 	"interface_project/ent/predicate"
 	"interface_project/ent/searchkeyword"
 	"interface_project/ent/user"
+	"interface_project/ent/word"
 	"math"
 
 	"entgo.io/ent/dialect/sql"
@@ -30,6 +31,7 @@ type UserQuery struct {
 	// eager-loading edges.
 	withFavoriteMovies   *MovieQuery
 	withSearchedKeywords *SearchKeywordQuery
+	withFavoriteWords    *WordQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -80,7 +82,7 @@ func (uq *UserQuery) QueryFavoriteMovies() *MovieQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(movie.Table, movie.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.FavoriteMoviesTable, user.FavoriteMoviesColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.FavoriteMoviesTable, user.FavoriteMoviesPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -103,6 +105,28 @@ func (uq *UserQuery) QuerySearchedKeywords() *SearchKeywordQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(searchkeyword.Table, searchkeyword.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.SearchedKeywordsTable, user.SearchedKeywordsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryFavoriteWords chains the current query on the "favorite_words" edge.
+func (uq *UserQuery) QueryFavoriteWords() *WordQuery {
+	query := &WordQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(word.Table, word.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.FavoriteWordsTable, user.FavoriteWordsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -293,6 +317,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		predicates:           append([]predicate.User{}, uq.predicates...),
 		withFavoriteMovies:   uq.withFavoriteMovies.Clone(),
 		withSearchedKeywords: uq.withSearchedKeywords.Clone(),
+		withFavoriteWords:    uq.withFavoriteWords.Clone(),
 		// clone intermediate query.
 		sql:    uq.sql.Clone(),
 		path:   uq.path,
@@ -319,6 +344,17 @@ func (uq *UserQuery) WithSearchedKeywords(opts ...func(*SearchKeywordQuery)) *Us
 		opt(query)
 	}
 	uq.withSearchedKeywords = query
+	return uq
+}
+
+// WithFavoriteWords tells the query-builder to eager-load the nodes that are connected to
+// the "favorite_words" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithFavoriteWords(opts ...func(*WordQuery)) *UserQuery {
+	query := &WordQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withFavoriteWords = query
 	return uq
 }
 
@@ -387,9 +423,10 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [3]bool{
 			uq.withFavoriteMovies != nil,
 			uq.withSearchedKeywords != nil,
+			uq.withFavoriteWords != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -414,30 +451,66 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 
 	if query := uq.withFavoriteMovies; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*User)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.FavoriteMovies = []*Movie{}
+		ids := make(map[int]*User, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+			node.Edges.FavoriteMovies = []*Movie{}
 		}
-		query.withFKs = true
-		query.Where(predicate.Movie(func(s *sql.Selector) {
-			s.Where(sql.InValues(user.FavoriteMoviesColumn, fks...))
-		}))
+		var (
+			edgeids []int
+			edges   = make(map[int][]*User)
+		)
+		_spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: false,
+				Table:   user.FavoriteMoviesTable,
+				Columns: user.FavoriteMoviesPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(user.FavoriteMoviesPrimaryKey[0], fks...))
+			},
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{new(sql.NullInt64), new(sql.NullInt64)}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*sql.NullInt64)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*sql.NullInt64)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := int(eout.Int64)
+				inValue := int(ein.Int64)
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				if _, ok := edges[inValue]; !ok {
+					edgeids = append(edgeids, inValue)
+				}
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, uq.driver, _spec); err != nil {
+			return nil, fmt.Errorf(`query edges "favorite_movies": %w`, err)
+		}
+		query.Where(movie.IDIn(edgeids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.user_favorite_movies
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "user_favorite_movies" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := edges[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_favorite_movies" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected "favorite_movies" node returned %v`, n.ID)
 			}
-			node.Edges.FavoriteMovies = append(node.Edges.FavoriteMovies, n)
+			for i := range nodes {
+				nodes[i].Edges.FavoriteMovies = append(nodes[i].Edges.FavoriteMovies, n)
+			}
 		}
 	}
 
@@ -467,6 +540,35 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "user_searched_keywords" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.SearchedKeywords = append(node.Edges.SearchedKeywords, n)
+		}
+	}
+
+	if query := uq.withFavoriteWords; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.FavoriteWords = []*Word{}
+		}
+		query.withFKs = true
+		query.Where(predicate.Word(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.FavoriteWordsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.user_favorite_words
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "user_favorite_words" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "user_favorite_words" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.FavoriteWords = append(node.Edges.FavoriteWords, n)
 		}
 	}
 

@@ -1,7 +1,7 @@
 package api
 
 import (
-	"interface_project/api/middlewares"
+	"interface_project/usecases/handlers"
 	"io"
 	"log"
 	"net/http"
@@ -12,7 +12,7 @@ import (
 )
 
 func (api *API) fileGroup(path string) {
-	fileGroup := api.Engine.Group(path, middlewares.CheckAuth())
+	fileGroup := api.Engine.Group(path)
 	fileGroup.GET("/", api.fileIndex())
 	fileGroup.POST("/upload", api.upload())
 	fileGroup.GET("/download", api.download())
@@ -32,7 +32,7 @@ func (api API) fileIndex() gin.HandlerFunc {
 
 func (api API) upload() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		log.Println(ctx.MustGet("email") == nil)
+		// email := fmt.Sprint(ctx.MustGet("email"))
 		file, header, err := ctx.Request.FormFile("file")
 		if err != nil {
 			ctx.IndentedJSON(http.StatusBadRequest, gin.H{
@@ -47,19 +47,32 @@ func (api API) upload() gin.HandlerFunc {
 			})
 			return
 		}
-		out, err := os.Create("subs/" + fileName)
+		filePath := "subs/" + fileName
+		out, err := os.Create(filePath)
 		if err != nil {
 			log.Fatal(err)
 		}
+		openedFile, _ := handlers.Open(filePath)
 		defer out.Close()
 		written, err := io.Copy(out, file)
 		log.Println(written)
 		if err != nil {
 			log.Fatal(err)
 		}
-		filePath := "http://localhost:8080/file/" + fileName
-		ctx.IndentedJSON(http.StatusCreated, gin.H{
-			"filePath": filePath,
-		})
+		if user, err := api.Crud.GetUserByEmail("email"); err != nil {
+			ctx.IndentedJSON(http.StatusNotFound, gin.H{
+				"error": err.Error(),
+			})
+		} else {
+			words := handlers.GetSentences(api.Crud.Client, openedFile, user)
+			createdWords, err := api.Crud.AddWordsToUser(words)
+			if err != nil {
+				ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
+					"error": err.Error(),
+				})
+			} else {
+				ctx.IndentedJSON(http.StatusOK, createdWords)
+			}
+		}
 	}
 }

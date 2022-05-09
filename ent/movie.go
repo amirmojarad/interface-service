@@ -32,8 +32,28 @@ type Movie struct {
 	// Stars holds the value of the "stars" field.
 	Stars string `json:"stars,omitempty"`
 	// MetacriticRating holds the value of the "metacriticRating" field.
-	MetacriticRating     string `json:"metacriticRating,omitempty"`
-	user_favorite_movies *int
+	MetacriticRating string `json:"metacriticRating,omitempty"`
+	// Edges holds the relations/edges for other nodes in the graph.
+	// The values are being populated by the MovieQuery when eager-loading is set.
+	Edges MovieEdges `json:"edges"`
+}
+
+// MovieEdges holds the relations/edges for other nodes in the graph.
+type MovieEdges struct {
+	// Users holds the value of the users edge.
+	Users []*User `json:"users,omitempty"`
+	// loadedTypes holds the information for reporting if a
+	// type was loaded (or requested) in eager-loading or not.
+	loadedTypes [1]bool
+}
+
+// UsersOrErr returns the Users value or an error if the edge
+// was not loaded in eager-loading.
+func (e MovieEdges) UsersOrErr() ([]*User, error) {
+	if e.loadedTypes[0] {
+		return e.Users, nil
+	}
+	return nil, &NotLoadedError{edge: "users"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -45,8 +65,6 @@ func (*Movie) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case movie.FieldTitle, movie.FieldYear, movie.FieldImageURL, movie.FieldRuntimeStr, movie.FieldGenres, movie.FieldImDbRating, movie.FieldPlot, movie.FieldStars, movie.FieldMetacriticRating:
 			values[i] = new(sql.NullString)
-		case movie.ForeignKeys[0]: // user_favorite_movies
-			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Movie", columns[i])
 		}
@@ -122,16 +140,14 @@ func (m *Movie) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				m.MetacriticRating = value.String
 			}
-		case movie.ForeignKeys[0]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field user_favorite_movies", value)
-			} else if value.Valid {
-				m.user_favorite_movies = new(int)
-				*m.user_favorite_movies = int(value.Int64)
-			}
 		}
 	}
 	return nil
+}
+
+// QueryUsers queries the "users" edge of the Movie entity.
+func (m *Movie) QueryUsers() *UserQuery {
+	return (&MovieClient{config: m.config}).QueryUsers(m)
 }
 
 // Update returns a builder for updating this Movie.

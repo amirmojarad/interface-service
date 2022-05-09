@@ -29,15 +29,15 @@ const (
 	EdgeFavoriteMovies = "favorite_movies"
 	// EdgeSearchedKeywords holds the string denoting the searched_keywords edge name in mutations.
 	EdgeSearchedKeywords = "searched_keywords"
+	// EdgeFavoriteWords holds the string denoting the favorite_words edge name in mutations.
+	EdgeFavoriteWords = "favorite_words"
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// FavoriteMoviesTable is the table that holds the favorite_movies relation/edge.
-	FavoriteMoviesTable = "movies"
+	// FavoriteMoviesTable is the table that holds the favorite_movies relation/edge. The primary key declared below.
+	FavoriteMoviesTable = "user_favorite_movies"
 	// FavoriteMoviesInverseTable is the table name for the Movie entity.
 	// It exists in this package in order to avoid circular dependency with the "movie" package.
 	FavoriteMoviesInverseTable = "movies"
-	// FavoriteMoviesColumn is the table column denoting the favorite_movies relation/edge.
-	FavoriteMoviesColumn = "user_favorite_movies"
 	// SearchedKeywordsTable is the table that holds the searched_keywords relation/edge.
 	SearchedKeywordsTable = "search_keywords"
 	// SearchedKeywordsInverseTable is the table name for the SearchKeyword entity.
@@ -45,6 +45,13 @@ const (
 	SearchedKeywordsInverseTable = "search_keywords"
 	// SearchedKeywordsColumn is the table column denoting the searched_keywords relation/edge.
 	SearchedKeywordsColumn = "user_searched_keywords"
+	// FavoriteWordsTable is the table that holds the favorite_words relation/edge.
+	FavoriteWordsTable = "words"
+	// FavoriteWordsInverseTable is the table name for the Word entity.
+	// It exists in this package in order to avoid circular dependency with the "word" package.
+	FavoriteWordsInverseTable = "words"
+	// FavoriteWordsColumn is the table column denoting the favorite_words relation/edge.
+	FavoriteWordsColumn = "user_favorite_words"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -58,6 +65,12 @@ var Columns = []string{
 	FieldUpdatedDate,
 	FieldIsAdmin,
 }
+
+var (
+	// FavoriteMoviesPrimaryKey and FavoriteMoviesColumn2 are the table columns denoting the
+	// primary key for the favorite_movies relation (M2M).
+	FavoriteMoviesPrimaryKey = []string{"user_id", "movie_id"}
+)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {

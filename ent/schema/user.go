@@ -47,6 +47,7 @@ func (User) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("favorite_movies", Movie.Type).Annotations(entproto.Field(9)),
 		edge.To("searched_keywords", SearchKeyword.Type).Annotations(entproto.Field(10)),
+		edge.To("favorite_words", Word.Type).Annotations(entproto.Field(11)),
 	}
 }
 

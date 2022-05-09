@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"interface_project/ent/movie"
 	"interface_project/ent/predicate"
+	"interface_project/ent/user"
 	"interface_project/ent/word"
 	"math"
 
@@ -27,6 +28,7 @@ type WordQuery struct {
 	predicates []predicate.Word
 	// eager-loading edges.
 	withMovie *MovieQuery
+	withUser  *UserQuery
 	withFKs   bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -79,6 +81,28 @@ func (wq *WordQuery) QueryMovie() *MovieQuery {
 			sqlgraph.From(word.Table, word.FieldID, selector),
 			sqlgraph.To(movie.Table, movie.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, word.MovieTable, word.MovieColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(wq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryUser chains the current query on the "user" edge.
+func (wq *WordQuery) QueryUser() *UserQuery {
+	query := &UserQuery{config: wq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := wq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := wq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(word.Table, word.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, word.UserTable, word.UserColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(wq.driver.Dialect(), step)
 		return fromU, nil
@@ -268,6 +292,7 @@ func (wq *WordQuery) Clone() *WordQuery {
 		order:      append([]OrderFunc{}, wq.order...),
 		predicates: append([]predicate.Word{}, wq.predicates...),
 		withMovie:  wq.withMovie.Clone(),
+		withUser:   wq.withUser.Clone(),
 		// clone intermediate query.
 		sql:    wq.sql.Clone(),
 		path:   wq.path,
@@ -283,6 +308,17 @@ func (wq *WordQuery) WithMovie(opts ...func(*MovieQuery)) *WordQuery {
 		opt(query)
 	}
 	wq.withMovie = query
+	return wq
+}
+
+// WithUser tells the query-builder to eager-load the nodes that are connected to
+// the "user" edge. The optional arguments are used to configure the query builder of the edge.
+func (wq *WordQuery) WithUser(opts ...func(*UserQuery)) *WordQuery {
+	query := &UserQuery{config: wq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	wq.withUser = query
 	return wq
 }
 
@@ -352,11 +388,12 @@ func (wq *WordQuery) sqlAll(ctx context.Context) ([]*Word, error) {
 		nodes       = []*Word{}
 		withFKs     = wq.withFKs
 		_spec       = wq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			wq.withMovie != nil,
+			wq.withUser != nil,
 		}
 	)
-	if wq.withMovie != nil {
+	if wq.withMovie != nil || wq.withUser != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -407,6 +444,35 @@ func (wq *WordQuery) sqlAll(ctx context.Context) ([]*Word, error) {
 			}
 			for i := range nodes {
 				nodes[i].Edges.Movie = n
+			}
+		}
+	}
+
+	if query := wq.withUser; query != nil {
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*Word)
+		for i := range nodes {
+			if nodes[i].user_favorite_words == nil {
+				continue
+			}
+			fk := *nodes[i].user_favorite_words
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(user.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "user_favorite_words" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.User = n
 			}
 		}
 	}

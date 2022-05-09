@@ -229,6 +229,22 @@ func (c *MovieClient) GetX(ctx context.Context, id int) *Movie {
 	return obj
 }
 
+// QueryUsers queries the users edge of a Movie.
+func (c *MovieClient) QueryUsers(m *Movie) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(movie.Table, movie.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, movie.UsersTable, movie.UsersPrimaryKey...),
+		)
+		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *MovieClient) Hooks() []Hook {
 	return c.hooks.Movie
@@ -433,7 +449,7 @@ func (c *UserClient) QueryFavoriteMovies(u *User) *MovieQuery {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(movie.Table, movie.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.FavoriteMoviesTable, user.FavoriteMoviesColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.FavoriteMoviesTable, user.FavoriteMoviesPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
@@ -450,6 +466,22 @@ func (c *UserClient) QuerySearchedKeywords(u *User) *SearchKeywordQuery {
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(searchkeyword.Table, searchkeyword.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.SearchedKeywordsTable, user.SearchedKeywordsColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryFavoriteWords queries the favorite_words edge of a User.
+func (c *UserClient) QueryFavoriteWords(u *User) *WordQuery {
+	query := &WordQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(word.Table, word.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.FavoriteWordsTable, user.FavoriteWordsColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
@@ -556,6 +588,22 @@ func (c *WordClient) QueryMovie(w *Word) *MovieQuery {
 			sqlgraph.From(word.Table, word.FieldID, id),
 			sqlgraph.To(movie.Table, movie.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, word.MovieTable, word.MovieColumn),
+		)
+		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryUser queries the user edge of a Word.
+func (c *WordClient) QueryUser(w *Word) *UserQuery {
+	query := &UserQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := w.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(word.Table, word.FieldID, id),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, word.UserTable, word.UserColumn),
 		)
 		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
 		return fromV, nil

@@ -772,7 +772,7 @@ func HasFavoriteMovies() predicate.User {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(FavoriteMoviesTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, FavoriteMoviesTable, FavoriteMoviesColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, FavoriteMoviesTable, FavoriteMoviesPrimaryKey...),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
@@ -784,7 +784,7 @@ func HasFavoriteMoviesWith(preds ...predicate.Movie) predicate.User {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(FavoriteMoviesInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, FavoriteMoviesTable, FavoriteMoviesColumn),
+			sqlgraph.Edge(sqlgraph.M2M, false, FavoriteMoviesTable, FavoriteMoviesPrimaryKey...),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -813,6 +813,34 @@ func HasSearchedKeywordsWith(preds ...predicate.SearchKeyword) predicate.User {
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(SearchedKeywordsInverseTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, SearchedKeywordsTable, SearchedKeywordsColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasFavoriteWords applies the HasEdge predicate on the "favorite_words" edge.
+func HasFavoriteWords() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(FavoriteWordsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, FavoriteWordsTable, FavoriteWordsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasFavoriteWordsWith applies the HasEdge predicate on the "favorite_words" edge with a given conditions (other predicates).
+func HasFavoriteWordsWith(preds ...predicate.Word) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(FavoriteWordsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, FavoriteWordsTable, FavoriteWordsColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

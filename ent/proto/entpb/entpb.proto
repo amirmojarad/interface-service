@@ -29,6 +29,8 @@ message Movie {
   string stars = 9;
 
   string metacriticRating = 10;
+
+  repeated User users = 11;
 }
 
 message SearchKeyword {
@@ -61,4 +63,26 @@ message User {
   repeated Movie favorite_movies = 9;
 
   repeated SearchKeyword searched_keywords = 10;
+
+  repeated Word favorite_words = 11;
+}
+
+message Word {
+  int32 id = 1;
+
+  string title = 2;
+
+  google.protobuf.StringValue meaning = 3;
+
+  google.protobuf.StringValue sentence = 4;
+
+  google.protobuf.StringValue duration = 5;
+
+  google.protobuf.Timestamp start = 6;
+
+  google.protobuf.Timestamp end = 7;
+
+  Movie movie = 8;
+
+  User user = 9;
 }

@@ -9,6 +9,7 @@ import (
 	"interface_project/ent/movie"
 	"interface_project/ent/searchkeyword"
 	"interface_project/ent/user"
+	"interface_project/ent/word"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -124,6 +125,21 @@ func (uc *UserCreate) AddSearchedKeywords(s ...*SearchKeyword) *UserCreate {
 		ids[i] = s[i].ID
 	}
 	return uc.AddSearchedKeywordIDs(ids...)
+}
+
+// AddFavoriteWordIDs adds the "favorite_words" edge to the Word entity by IDs.
+func (uc *UserCreate) AddFavoriteWordIDs(ids ...int) *UserCreate {
+	uc.mutation.AddFavoriteWordIDs(ids...)
+	return uc
+}
+
+// AddFavoriteWords adds the "favorite_words" edges to the Word entity.
+func (uc *UserCreate) AddFavoriteWords(w ...*Word) *UserCreate {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uc.AddFavoriteWordIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -335,10 +351,10 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 	}
 	if nodes := uc.mutation.FavoriteMoviesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   user.FavoriteMoviesTable,
-			Columns: []string{user.FavoriteMoviesColumn},
+			Columns: user.FavoriteMoviesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -363,6 +379,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: searchkeyword.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.FavoriteWordsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.FavoriteWordsTable,
+			Columns: []string{user.FavoriteWordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: word.FieldID,
 				},
 			},
 		}

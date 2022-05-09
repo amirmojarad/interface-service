@@ -4,6 +4,7 @@ package word
 
 import (
 	"interface_project/ent/predicate"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -117,6 +118,20 @@ func Sentence(v string) predicate.Word {
 func Duration(v string) predicate.Word {
 	return predicate.Word(func(s *sql.Selector) {
 		s.Where(sql.EQ(s.C(FieldDuration), v))
+	})
+}
+
+// Start applies equality check predicate on the "start" field. It's identical to StartEQ.
+func Start(v time.Time) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldStart), v))
+	})
+}
+
+// End applies equality check predicate on the "end" field. It's identical to EndEQ.
+func End(v time.Time) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldEnd), v))
 	})
 }
 
@@ -606,6 +621,186 @@ func DurationContainsFold(v string) predicate.Word {
 	})
 }
 
+// StartEQ applies the EQ predicate on the "start" field.
+func StartEQ(v time.Time) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldStart), v))
+	})
+}
+
+// StartNEQ applies the NEQ predicate on the "start" field.
+func StartNEQ(v time.Time) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldStart), v))
+	})
+}
+
+// StartIn applies the In predicate on the "start" field.
+func StartIn(vs ...time.Time) predicate.Word {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Word(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldStart), v...))
+	})
+}
+
+// StartNotIn applies the NotIn predicate on the "start" field.
+func StartNotIn(vs ...time.Time) predicate.Word {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Word(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldStart), v...))
+	})
+}
+
+// StartGT applies the GT predicate on the "start" field.
+func StartGT(v time.Time) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldStart), v))
+	})
+}
+
+// StartGTE applies the GTE predicate on the "start" field.
+func StartGTE(v time.Time) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldStart), v))
+	})
+}
+
+// StartLT applies the LT predicate on the "start" field.
+func StartLT(v time.Time) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldStart), v))
+	})
+}
+
+// StartLTE applies the LTE predicate on the "start" field.
+func StartLTE(v time.Time) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldStart), v))
+	})
+}
+
+// StartIsNil applies the IsNil predicate on the "start" field.
+func StartIsNil() predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldStart)))
+	})
+}
+
+// StartNotNil applies the NotNil predicate on the "start" field.
+func StartNotNil() predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldStart)))
+	})
+}
+
+// EndEQ applies the EQ predicate on the "end" field.
+func EndEQ(v time.Time) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldEnd), v))
+	})
+}
+
+// EndNEQ applies the NEQ predicate on the "end" field.
+func EndNEQ(v time.Time) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldEnd), v))
+	})
+}
+
+// EndIn applies the In predicate on the "end" field.
+func EndIn(vs ...time.Time) predicate.Word {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Word(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldEnd), v...))
+	})
+}
+
+// EndNotIn applies the NotIn predicate on the "end" field.
+func EndNotIn(vs ...time.Time) predicate.Word {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Word(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldEnd), v...))
+	})
+}
+
+// EndGT applies the GT predicate on the "end" field.
+func EndGT(v time.Time) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldEnd), v))
+	})
+}
+
+// EndGTE applies the GTE predicate on the "end" field.
+func EndGTE(v time.Time) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldEnd), v))
+	})
+}
+
+// EndLT applies the LT predicate on the "end" field.
+func EndLT(v time.Time) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldEnd), v))
+	})
+}
+
+// EndLTE applies the LTE predicate on the "end" field.
+func EndLTE(v time.Time) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldEnd), v))
+	})
+}
+
+// EndIsNil applies the IsNil predicate on the "end" field.
+func EndIsNil() predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldEnd)))
+	})
+}
+
+// EndNotNil applies the NotNil predicate on the "end" field.
+func EndNotNil() predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldEnd)))
+	})
+}
+
 // HasMovie applies the HasEdge predicate on the "movie" edge.
 func HasMovie() predicate.Word {
 	return predicate.Word(func(s *sql.Selector) {
@@ -625,6 +820,34 @@ func HasMovieWith(preds ...predicate.Movie) predicate.Word {
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(MovieInverseTable, FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, false, MovieTable, MovieColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasUser applies the HasEdge predicate on the "user" edge.
+func HasUser() predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(UserTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasUserWith applies the HasEdge predicate on the "user" edge with a given conditions (other predicates).
+func HasUserWith(preds ...predicate.User) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(UserInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, UserTable, UserColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

@@ -48,6 +48,9 @@ type MovieMutation struct {
 	stars            *string
 	metacriticRating *string
 	clearedFields    map[string]struct{}
+	users            map[int]struct{}
+	removedusers     map[int]struct{}
+	clearedusers     bool
 	done             bool
 	oldValue         func(context.Context) (*Movie, error)
 	predicates       []predicate.Movie
@@ -475,6 +478,60 @@ func (m *MovieMutation) ResetMetacriticRating() {
 	m.metacriticRating = nil
 }
 
+// AddUserIDs adds the "users" edge to the User entity by ids.
+func (m *MovieMutation) AddUserIDs(ids ...int) {
+	if m.users == nil {
+		m.users = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.users[ids[i]] = struct{}{}
+	}
+}
+
+// ClearUsers clears the "users" edge to the User entity.
+func (m *MovieMutation) ClearUsers() {
+	m.clearedusers = true
+}
+
+// UsersCleared reports if the "users" edge to the User entity was cleared.
+func (m *MovieMutation) UsersCleared() bool {
+	return m.clearedusers
+}
+
+// RemoveUserIDs removes the "users" edge to the User entity by IDs.
+func (m *MovieMutation) RemoveUserIDs(ids ...int) {
+	if m.removedusers == nil {
+		m.removedusers = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.users, ids[i])
+		m.removedusers[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedUsers returns the removed IDs of the "users" edge to the User entity.
+func (m *MovieMutation) RemovedUsersIDs() (ids []int) {
+	for id := range m.removedusers {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// UsersIDs returns the "users" edge IDs in the mutation.
+func (m *MovieMutation) UsersIDs() (ids []int) {
+	for id := range m.users {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetUsers resets all changes to the "users" edge.
+func (m *MovieMutation) ResetUsers() {
+	m.users = nil
+	m.clearedusers = false
+	m.removedusers = nil
+}
+
 // Where appends a list predicates to the MovieMutation builder.
 func (m *MovieMutation) Where(ps ...predicate.Movie) {
 	m.predicates = append(m.predicates, ps...)
@@ -729,49 +786,85 @@ func (m *MovieMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *MovieMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.users != nil {
+		edges = append(edges, movie.EdgeUsers)
+	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
 func (m *MovieMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case movie.EdgeUsers:
+		ids := make([]ent.Value, 0, len(m.users))
+		for id := range m.users {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *MovieMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.removedusers != nil {
+		edges = append(edges, movie.EdgeUsers)
+	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
 func (m *MovieMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case movie.EdgeUsers:
+		ids := make([]ent.Value, 0, len(m.removedusers))
+		for id := range m.removedusers {
+			ids = append(ids, id)
+		}
+		return ids
+	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *MovieMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
+	edges := make([]string, 0, 1)
+	if m.clearedusers {
+		edges = append(edges, movie.EdgeUsers)
+	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
 func (m *MovieMutation) EdgeCleared(name string) bool {
+	switch name {
+	case movie.EdgeUsers:
+		return m.clearedusers
+	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
 func (m *MovieMutation) ClearEdge(name string) error {
+	switch name {
+	}
 	return fmt.Errorf("unknown Movie unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
 func (m *MovieMutation) ResetEdge(name string) error {
+	switch name {
+	case movie.EdgeUsers:
+		m.ResetUsers()
+		return nil
+	}
 	return fmt.Errorf("unknown Movie edge %s", name)
 }
 
@@ -1265,6 +1358,9 @@ type UserMutation struct {
 	searched_keywords        map[int]struct{}
 	removedsearched_keywords map[int]struct{}
 	clearedsearched_keywords bool
+	favorite_words           map[int]struct{}
+	removedfavorite_words    map[int]struct{}
+	clearedfavorite_words    bool
 	done                     bool
 	oldValue                 func(context.Context) (*User, error)
 	predicates               []predicate.User
@@ -1741,6 +1837,60 @@ func (m *UserMutation) ResetSearchedKeywords() {
 	m.removedsearched_keywords = nil
 }
 
+// AddFavoriteWordIDs adds the "favorite_words" edge to the Word entity by ids.
+func (m *UserMutation) AddFavoriteWordIDs(ids ...int) {
+	if m.favorite_words == nil {
+		m.favorite_words = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.favorite_words[ids[i]] = struct{}{}
+	}
+}
+
+// ClearFavoriteWords clears the "favorite_words" edge to the Word entity.
+func (m *UserMutation) ClearFavoriteWords() {
+	m.clearedfavorite_words = true
+}
+
+// FavoriteWordsCleared reports if the "favorite_words" edge to the Word entity was cleared.
+func (m *UserMutation) FavoriteWordsCleared() bool {
+	return m.clearedfavorite_words
+}
+
+// RemoveFavoriteWordIDs removes the "favorite_words" edge to the Word entity by IDs.
+func (m *UserMutation) RemoveFavoriteWordIDs(ids ...int) {
+	if m.removedfavorite_words == nil {
+		m.removedfavorite_words = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.favorite_words, ids[i])
+		m.removedfavorite_words[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedFavoriteWords returns the removed IDs of the "favorite_words" edge to the Word entity.
+func (m *UserMutation) RemovedFavoriteWordsIDs() (ids []int) {
+	for id := range m.removedfavorite_words {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// FavoriteWordsIDs returns the "favorite_words" edge IDs in the mutation.
+func (m *UserMutation) FavoriteWordsIDs() (ids []int) {
+	for id := range m.favorite_words {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetFavoriteWords resets all changes to the "favorite_words" edge.
+func (m *UserMutation) ResetFavoriteWords() {
+	m.favorite_words = nil
+	m.clearedfavorite_words = false
+	m.removedfavorite_words = nil
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -1970,12 +2120,15 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.favorite_movies != nil {
 		edges = append(edges, user.EdgeFavoriteMovies)
 	}
 	if m.searched_keywords != nil {
 		edges = append(edges, user.EdgeSearchedKeywords)
+	}
+	if m.favorite_words != nil {
+		edges = append(edges, user.EdgeFavoriteWords)
 	}
 	return edges
 }
@@ -1996,18 +2149,27 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeFavoriteWords:
+		ids := make([]ent.Value, 0, len(m.favorite_words))
+		for id := range m.favorite_words {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.removedfavorite_movies != nil {
 		edges = append(edges, user.EdgeFavoriteMovies)
 	}
 	if m.removedsearched_keywords != nil {
 		edges = append(edges, user.EdgeSearchedKeywords)
+	}
+	if m.removedfavorite_words != nil {
+		edges = append(edges, user.EdgeFavoriteWords)
 	}
 	return edges
 }
@@ -2028,18 +2190,27 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeFavoriteWords:
+		ids := make([]ent.Value, 0, len(m.removedfavorite_words))
+		for id := range m.removedfavorite_words {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+	edges := make([]string, 0, 3)
 	if m.clearedfavorite_movies {
 		edges = append(edges, user.EdgeFavoriteMovies)
 	}
 	if m.clearedsearched_keywords {
 		edges = append(edges, user.EdgeSearchedKeywords)
+	}
+	if m.clearedfavorite_words {
+		edges = append(edges, user.EdgeFavoriteWords)
 	}
 	return edges
 }
@@ -2052,6 +2223,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedfavorite_movies
 	case user.EdgeSearchedKeywords:
 		return m.clearedsearched_keywords
+	case user.EdgeFavoriteWords:
+		return m.clearedfavorite_words
 	}
 	return false
 }
@@ -2074,6 +2247,9 @@ func (m *UserMutation) ResetEdge(name string) error {
 	case user.EdgeSearchedKeywords:
 		m.ResetSearchedKeywords()
 		return nil
+	case user.EdgeFavoriteWords:
+		m.ResetFavoriteWords()
+		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)
 }
@@ -2088,9 +2264,13 @@ type WordMutation struct {
 	meaning       *string
 	sentence      *string
 	duration      *string
+	start         *time.Time
+	end           *time.Time
 	clearedFields map[string]struct{}
 	movie         *int
 	clearedmovie  bool
+	user          *int
+	cleareduser   bool
 	done          bool
 	oldValue      func(context.Context) (*Word, error)
 	predicates    []predicate.Word
@@ -2377,6 +2557,104 @@ func (m *WordMutation) ResetDuration() {
 	delete(m.clearedFields, word.FieldDuration)
 }
 
+// SetStart sets the "start" field.
+func (m *WordMutation) SetStart(t time.Time) {
+	m.start = &t
+}
+
+// Start returns the value of the "start" field in the mutation.
+func (m *WordMutation) Start() (r time.Time, exists bool) {
+	v := m.start
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStart returns the old "start" field's value of the Word entity.
+// If the Word object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WordMutation) OldStart(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStart is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStart requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStart: %w", err)
+	}
+	return oldValue.Start, nil
+}
+
+// ClearStart clears the value of the "start" field.
+func (m *WordMutation) ClearStart() {
+	m.start = nil
+	m.clearedFields[word.FieldStart] = struct{}{}
+}
+
+// StartCleared returns if the "start" field was cleared in this mutation.
+func (m *WordMutation) StartCleared() bool {
+	_, ok := m.clearedFields[word.FieldStart]
+	return ok
+}
+
+// ResetStart resets all changes to the "start" field.
+func (m *WordMutation) ResetStart() {
+	m.start = nil
+	delete(m.clearedFields, word.FieldStart)
+}
+
+// SetEnd sets the "end" field.
+func (m *WordMutation) SetEnd(t time.Time) {
+	m.end = &t
+}
+
+// End returns the value of the "end" field in the mutation.
+func (m *WordMutation) End() (r time.Time, exists bool) {
+	v := m.end
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEnd returns the old "end" field's value of the Word entity.
+// If the Word object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WordMutation) OldEnd(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEnd is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEnd requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEnd: %w", err)
+	}
+	return oldValue.End, nil
+}
+
+// ClearEnd clears the value of the "end" field.
+func (m *WordMutation) ClearEnd() {
+	m.end = nil
+	m.clearedFields[word.FieldEnd] = struct{}{}
+}
+
+// EndCleared returns if the "end" field was cleared in this mutation.
+func (m *WordMutation) EndCleared() bool {
+	_, ok := m.clearedFields[word.FieldEnd]
+	return ok
+}
+
+// ResetEnd resets all changes to the "end" field.
+func (m *WordMutation) ResetEnd() {
+	m.end = nil
+	delete(m.clearedFields, word.FieldEnd)
+}
+
 // SetMovieID sets the "movie" edge to the Movie entity by id.
 func (m *WordMutation) SetMovieID(id int) {
 	m.movie = &id
@@ -2416,6 +2694,45 @@ func (m *WordMutation) ResetMovie() {
 	m.clearedmovie = false
 }
 
+// SetUserID sets the "user" edge to the User entity by id.
+func (m *WordMutation) SetUserID(id int) {
+	m.user = &id
+}
+
+// ClearUser clears the "user" edge to the User entity.
+func (m *WordMutation) ClearUser() {
+	m.cleareduser = true
+}
+
+// UserCleared reports if the "user" edge to the User entity was cleared.
+func (m *WordMutation) UserCleared() bool {
+	return m.cleareduser
+}
+
+// UserID returns the "user" edge ID in the mutation.
+func (m *WordMutation) UserID() (id int, exists bool) {
+	if m.user != nil {
+		return *m.user, true
+	}
+	return
+}
+
+// UserIDs returns the "user" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// UserID instead. It exists only for internal usage by the builders.
+func (m *WordMutation) UserIDs() (ids []int) {
+	if id := m.user; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetUser resets all changes to the "user" edge.
+func (m *WordMutation) ResetUser() {
+	m.user = nil
+	m.cleareduser = false
+}
+
 // Where appends a list predicates to the WordMutation builder.
 func (m *WordMutation) Where(ps ...predicate.Word) {
 	m.predicates = append(m.predicates, ps...)
@@ -2435,7 +2752,7 @@ func (m *WordMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *WordMutation) Fields() []string {
-	fields := make([]string, 0, 4)
+	fields := make([]string, 0, 6)
 	if m.title != nil {
 		fields = append(fields, word.FieldTitle)
 	}
@@ -2447,6 +2764,12 @@ func (m *WordMutation) Fields() []string {
 	}
 	if m.duration != nil {
 		fields = append(fields, word.FieldDuration)
+	}
+	if m.start != nil {
+		fields = append(fields, word.FieldStart)
+	}
+	if m.end != nil {
+		fields = append(fields, word.FieldEnd)
 	}
 	return fields
 }
@@ -2464,6 +2787,10 @@ func (m *WordMutation) Field(name string) (ent.Value, bool) {
 		return m.Sentence()
 	case word.FieldDuration:
 		return m.Duration()
+	case word.FieldStart:
+		return m.Start()
+	case word.FieldEnd:
+		return m.End()
 	}
 	return nil, false
 }
@@ -2481,6 +2808,10 @@ func (m *WordMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldSentence(ctx)
 	case word.FieldDuration:
 		return m.OldDuration(ctx)
+	case word.FieldStart:
+		return m.OldStart(ctx)
+	case word.FieldEnd:
+		return m.OldEnd(ctx)
 	}
 	return nil, fmt.Errorf("unknown Word field %s", name)
 }
@@ -2517,6 +2848,20 @@ func (m *WordMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDuration(v)
+		return nil
+	case word.FieldStart:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStart(v)
+		return nil
+	case word.FieldEnd:
+		v, ok := value.(time.Time)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEnd(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Word field %s", name)
@@ -2557,6 +2902,12 @@ func (m *WordMutation) ClearedFields() []string {
 	if m.FieldCleared(word.FieldDuration) {
 		fields = append(fields, word.FieldDuration)
 	}
+	if m.FieldCleared(word.FieldStart) {
+		fields = append(fields, word.FieldStart)
+	}
+	if m.FieldCleared(word.FieldEnd) {
+		fields = append(fields, word.FieldEnd)
+	}
 	return fields
 }
 
@@ -2580,6 +2931,12 @@ func (m *WordMutation) ClearField(name string) error {
 	case word.FieldDuration:
 		m.ClearDuration()
 		return nil
+	case word.FieldStart:
+		m.ClearStart()
+		return nil
+	case word.FieldEnd:
+		m.ClearEnd()
+		return nil
 	}
 	return fmt.Errorf("unknown Word nullable field %s", name)
 }
@@ -2600,15 +2957,24 @@ func (m *WordMutation) ResetField(name string) error {
 	case word.FieldDuration:
 		m.ResetDuration()
 		return nil
+	case word.FieldStart:
+		m.ResetStart()
+		return nil
+	case word.FieldEnd:
+		m.ResetEnd()
+		return nil
 	}
 	return fmt.Errorf("unknown Word field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *WordMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.movie != nil {
 		edges = append(edges, word.EdgeMovie)
+	}
+	if m.user != nil {
+		edges = append(edges, word.EdgeUser)
 	}
 	return edges
 }
@@ -2621,13 +2987,17 @@ func (m *WordMutation) AddedIDs(name string) []ent.Value {
 		if id := m.movie; id != nil {
 			return []ent.Value{*id}
 		}
+	case word.EdgeUser:
+		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *WordMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	return edges
 }
 
@@ -2641,9 +3011,12 @@ func (m *WordMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *WordMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.clearedmovie {
 		edges = append(edges, word.EdgeMovie)
+	}
+	if m.cleareduser {
+		edges = append(edges, word.EdgeUser)
 	}
 	return edges
 }
@@ -2654,6 +3027,8 @@ func (m *WordMutation) EdgeCleared(name string) bool {
 	switch name {
 	case word.EdgeMovie:
 		return m.clearedmovie
+	case word.EdgeUser:
+		return m.cleareduser
 	}
 	return false
 }
@@ -2665,6 +3040,9 @@ func (m *WordMutation) ClearEdge(name string) error {
 	case word.EdgeMovie:
 		m.ClearMovie()
 		return nil
+	case word.EdgeUser:
+		m.ClearUser()
+		return nil
 	}
 	return fmt.Errorf("unknown Word unique edge %s", name)
 }
@@ -2675,6 +3053,9 @@ func (m *WordMutation) ResetEdge(name string) error {
 	switch name {
 	case word.EdgeMovie:
 		m.ResetMovie()
+		return nil
+	case word.EdgeUser:
+		m.ResetUser()
 		return nil
 	}
 	return fmt.Errorf("unknown Word edge %s", name)

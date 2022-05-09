@@ -4,6 +4,7 @@ import (
 	"entgo.io/contrib/entproto"
 	"entgo.io/ent"
 	"entgo.io/ent/schema"
+	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
 )
 
@@ -29,7 +30,9 @@ func (Movie) Fields() []ent.Field {
 
 // Edges of the Movie.
 func (Movie) Edges() []ent.Edge {
-	return nil
+	return []ent.Edge{
+		edge.From("users", User.Type).Ref("favorite_movies").Annotations(entproto.Field(11)),
+	}
 }
 
 func (Movie) Annotations() []schema.Annotation {

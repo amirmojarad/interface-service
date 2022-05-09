@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"interface_project/ent/movie"
+	"interface_project/ent/user"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -71,6 +72,21 @@ func (mc *MovieCreate) SetStars(s string) *MovieCreate {
 func (mc *MovieCreate) SetMetacriticRating(s string) *MovieCreate {
 	mc.mutation.SetMetacriticRating(s)
 	return mc
+}
+
+// AddUserIDs adds the "users" edge to the User entity by IDs.
+func (mc *MovieCreate) AddUserIDs(ids ...int) *MovieCreate {
+	mc.mutation.AddUserIDs(ids...)
+	return mc
+}
+
+// AddUsers adds the "users" edges to the User entity.
+func (mc *MovieCreate) AddUsers(u ...*User) *MovieCreate {
+	ids := make([]int, len(u))
+	for i := range u {
+		ids[i] = u[i].ID
+	}
+	return mc.AddUserIDs(ids...)
 }
 
 // Mutation returns the MovieMutation object of the builder.
@@ -273,6 +289,25 @@ func (mc *MovieCreate) createSpec() (*Movie, *sqlgraph.CreateSpec) {
 			Column: movie.FieldMetacriticRating,
 		})
 		_node.MetacriticRating = value
+	}
+	if nodes := mc.mutation.UsersIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: true,
+			Table:   movie.UsersTable,
+			Columns: movie.UsersPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec
 }

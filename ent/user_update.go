@@ -10,6 +10,7 @@ import (
 	"interface_project/ent/predicate"
 	"interface_project/ent/searchkeyword"
 	"interface_project/ent/user"
+	"interface_project/ent/word"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -140,6 +141,21 @@ func (uu *UserUpdate) AddSearchedKeywords(s ...*SearchKeyword) *UserUpdate {
 	return uu.AddSearchedKeywordIDs(ids...)
 }
 
+// AddFavoriteWordIDs adds the "favorite_words" edge to the Word entity by IDs.
+func (uu *UserUpdate) AddFavoriteWordIDs(ids ...int) *UserUpdate {
+	uu.mutation.AddFavoriteWordIDs(ids...)
+	return uu
+}
+
+// AddFavoriteWords adds the "favorite_words" edges to the Word entity.
+func (uu *UserUpdate) AddFavoriteWords(w ...*Word) *UserUpdate {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uu.AddFavoriteWordIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -185,6 +201,27 @@ func (uu *UserUpdate) RemoveSearchedKeywords(s ...*SearchKeyword) *UserUpdate {
 		ids[i] = s[i].ID
 	}
 	return uu.RemoveSearchedKeywordIDs(ids...)
+}
+
+// ClearFavoriteWords clears all "favorite_words" edges to the Word entity.
+func (uu *UserUpdate) ClearFavoriteWords() *UserUpdate {
+	uu.mutation.ClearFavoriteWords()
+	return uu
+}
+
+// RemoveFavoriteWordIDs removes the "favorite_words" edge to Word entities by IDs.
+func (uu *UserUpdate) RemoveFavoriteWordIDs(ids ...int) *UserUpdate {
+	uu.mutation.RemoveFavoriteWordIDs(ids...)
+	return uu
+}
+
+// RemoveFavoriteWords removes "favorite_words" edges to Word entities.
+func (uu *UserUpdate) RemoveFavoriteWords(w ...*Word) *UserUpdate {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uu.RemoveFavoriteWordIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -342,10 +379,10 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if uu.mutation.FavoriteMoviesCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   user.FavoriteMoviesTable,
-			Columns: []string{user.FavoriteMoviesColumn},
+			Columns: user.FavoriteMoviesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -358,10 +395,10 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := uu.mutation.RemovedFavoriteMoviesIDs(); len(nodes) > 0 && !uu.mutation.FavoriteMoviesCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   user.FavoriteMoviesTable,
-			Columns: []string{user.FavoriteMoviesColumn},
+			Columns: user.FavoriteMoviesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -377,10 +414,10 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if nodes := uu.mutation.FavoriteMoviesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   user.FavoriteMoviesTable,
-			Columns: []string{user.FavoriteMoviesColumn},
+			Columns: user.FavoriteMoviesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -440,6 +477,60 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: searchkeyword.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.FavoriteWordsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.FavoriteWordsTable,
+			Columns: []string{user.FavoriteWordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: word.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedFavoriteWordsIDs(); len(nodes) > 0 && !uu.mutation.FavoriteWordsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.FavoriteWordsTable,
+			Columns: []string{user.FavoriteWordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: word.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.FavoriteWordsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.FavoriteWordsTable,
+			Columns: []string{user.FavoriteWordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: word.FieldID,
 				},
 			},
 		}
@@ -577,6 +668,21 @@ func (uuo *UserUpdateOne) AddSearchedKeywords(s ...*SearchKeyword) *UserUpdateOn
 	return uuo.AddSearchedKeywordIDs(ids...)
 }
 
+// AddFavoriteWordIDs adds the "favorite_words" edge to the Word entity by IDs.
+func (uuo *UserUpdateOne) AddFavoriteWordIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.AddFavoriteWordIDs(ids...)
+	return uuo
+}
+
+// AddFavoriteWords adds the "favorite_words" edges to the Word entity.
+func (uuo *UserUpdateOne) AddFavoriteWords(w ...*Word) *UserUpdateOne {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uuo.AddFavoriteWordIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -622,6 +728,27 @@ func (uuo *UserUpdateOne) RemoveSearchedKeywords(s ...*SearchKeyword) *UserUpdat
 		ids[i] = s[i].ID
 	}
 	return uuo.RemoveSearchedKeywordIDs(ids...)
+}
+
+// ClearFavoriteWords clears all "favorite_words" edges to the Word entity.
+func (uuo *UserUpdateOne) ClearFavoriteWords() *UserUpdateOne {
+	uuo.mutation.ClearFavoriteWords()
+	return uuo
+}
+
+// RemoveFavoriteWordIDs removes the "favorite_words" edge to Word entities by IDs.
+func (uuo *UserUpdateOne) RemoveFavoriteWordIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.RemoveFavoriteWordIDs(ids...)
+	return uuo
+}
+
+// RemoveFavoriteWords removes "favorite_words" edges to Word entities.
+func (uuo *UserUpdateOne) RemoveFavoriteWords(w ...*Word) *UserUpdateOne {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uuo.RemoveFavoriteWordIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -803,10 +930,10 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if uuo.mutation.FavoriteMoviesCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   user.FavoriteMoviesTable,
-			Columns: []string{user.FavoriteMoviesColumn},
+			Columns: user.FavoriteMoviesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -819,10 +946,10 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if nodes := uuo.mutation.RemovedFavoriteMoviesIDs(); len(nodes) > 0 && !uuo.mutation.FavoriteMoviesCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   user.FavoriteMoviesTable,
-			Columns: []string{user.FavoriteMoviesColumn},
+			Columns: user.FavoriteMoviesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -838,10 +965,10 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 	}
 	if nodes := uuo.mutation.FavoriteMoviesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
+			Rel:     sqlgraph.M2M,
 			Inverse: false,
 			Table:   user.FavoriteMoviesTable,
-			Columns: []string{user.FavoriteMoviesColumn},
+			Columns: user.FavoriteMoviesPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -901,6 +1028,60 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: searchkeyword.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.FavoriteWordsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.FavoriteWordsTable,
+			Columns: []string{user.FavoriteWordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: word.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedFavoriteWordsIDs(); len(nodes) > 0 && !uuo.mutation.FavoriteWordsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.FavoriteWordsTable,
+			Columns: []string{user.FavoriteWordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: word.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.FavoriteWordsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.FavoriteWordsTable,
+			Columns: []string{user.FavoriteWordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: word.FieldID,
 				},
 			},
 		}

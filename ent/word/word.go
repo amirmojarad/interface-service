@@ -15,8 +15,14 @@ const (
 	FieldSentence = "sentence"
 	// FieldDuration holds the string denoting the duration field in the database.
 	FieldDuration = "duration"
+	// FieldStart holds the string denoting the start field in the database.
+	FieldStart = "start"
+	// FieldEnd holds the string denoting the end field in the database.
+	FieldEnd = "end"
 	// EdgeMovie holds the string denoting the movie edge name in mutations.
 	EdgeMovie = "movie"
+	// EdgeUser holds the string denoting the user edge name in mutations.
+	EdgeUser = "user"
 	// Table holds the table name of the word in the database.
 	Table = "words"
 	// MovieTable is the table that holds the movie relation/edge.
@@ -26,6 +32,13 @@ const (
 	MovieInverseTable = "movies"
 	// MovieColumn is the table column denoting the movie relation/edge.
 	MovieColumn = "word_movie"
+	// UserTable is the table that holds the user relation/edge.
+	UserTable = "words"
+	// UserInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	UserInverseTable = "users"
+	// UserColumn is the table column denoting the user relation/edge.
+	UserColumn = "user_favorite_words"
 )
 
 // Columns holds all SQL columns for word fields.
@@ -35,11 +48,14 @@ var Columns = []string{
 	FieldMeaning,
 	FieldSentence,
 	FieldDuration,
+	FieldStart,
+	FieldEnd,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "words"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
+	"user_favorite_words",
 	"word_movie",
 }
 
