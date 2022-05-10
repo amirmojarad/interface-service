@@ -1,7 +1,9 @@
 package api
 
 import (
-	"interface_project/usecases/handlers"
+	file_handler "interface_project/usecases/handlers/file_handler"
+	sentences "interface_project/usecases/handlers/sentences"
+
 	"io"
 	"log"
 	"net/http"
@@ -52,7 +54,8 @@ func (api API) upload() gin.HandlerFunc {
 		if err != nil {
 			log.Fatal(err)
 		}
-		openedFile, _ := handlers.Open(filePath)
+
+		openedFile, _ := file_handler.Open(filePath)
 		defer out.Close()
 		written, err := io.Copy(out, file)
 		log.Println(written)
@@ -64,7 +67,7 @@ func (api API) upload() gin.HandlerFunc {
 				"error": err.Error(),
 			})
 		} else {
-			words := handlers.GetSentences(api.Crud.Client, openedFile, user)
+			words := sentences.GetSentences(api.Crud.Client, openedFile, user)
 			createdWords, err := api.Crud.AddWordsToUser(words)
 			if err != nil {
 				ctx.IndentedJSON(http.StatusInternalServerError, gin.H{

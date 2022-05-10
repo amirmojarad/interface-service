@@ -1,4 +1,4 @@
-package handlers
+package sentences
 
 import (
 	"bufio"
