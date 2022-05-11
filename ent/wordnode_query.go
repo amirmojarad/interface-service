@@ -7,6 +7,7 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
+	"interface_project/ent/movie"
 	"interface_project/ent/predicate"
 	"interface_project/ent/word"
 	"interface_project/ent/wordnode"
@@ -27,7 +28,8 @@ type WordNodeQuery struct {
 	fields     []string
 	predicates []predicate.WordNode
 	// eager-loading edges.
-	withWords *WordQuery
+	withWords         *WordQuery
+	withMovieWordnode *MovieQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -79,6 +81,28 @@ func (wnq *WordNodeQuery) QueryWords() *WordQuery {
 			sqlgraph.From(wordnode.Table, wordnode.FieldID, selector),
 			sqlgraph.To(word.Table, word.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, wordnode.WordsTable, wordnode.WordsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(wnq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryMovieWordnode chains the current query on the "movie_wordnode" edge.
+func (wnq *WordNodeQuery) QueryMovieWordnode() *MovieQuery {
+	query := &MovieQuery{config: wnq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := wnq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := wnq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(wordnode.Table, wordnode.FieldID, selector),
+			sqlgraph.To(movie.Table, movie.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, wordnode.MovieWordnodeTable, wordnode.MovieWordnodeColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(wnq.driver.Dialect(), step)
 		return fromU, nil
@@ -262,12 +286,13 @@ func (wnq *WordNodeQuery) Clone() *WordNodeQuery {
 		return nil
 	}
 	return &WordNodeQuery{
-		config:     wnq.config,
-		limit:      wnq.limit,
-		offset:     wnq.offset,
-		order:      append([]OrderFunc{}, wnq.order...),
-		predicates: append([]predicate.WordNode{}, wnq.predicates...),
-		withWords:  wnq.withWords.Clone(),
+		config:            wnq.config,
+		limit:             wnq.limit,
+		offset:            wnq.offset,
+		order:             append([]OrderFunc{}, wnq.order...),
+		predicates:        append([]predicate.WordNode{}, wnq.predicates...),
+		withWords:         wnq.withWords.Clone(),
+		withMovieWordnode: wnq.withMovieWordnode.Clone(),
 		// clone intermediate query.
 		sql:    wnq.sql.Clone(),
 		path:   wnq.path,
@@ -283,6 +308,17 @@ func (wnq *WordNodeQuery) WithWords(opts ...func(*WordQuery)) *WordNodeQuery {
 		opt(query)
 	}
 	wnq.withWords = query
+	return wnq
+}
+
+// WithMovieWordnode tells the query-builder to eager-load the nodes that are connected to
+// the "movie_wordnode" edge. The optional arguments are used to configure the query builder of the edge.
+func (wnq *WordNodeQuery) WithMovieWordnode(opts ...func(*MovieQuery)) *WordNodeQuery {
+	query := &MovieQuery{config: wnq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	wnq.withMovieWordnode = query
 	return wnq
 }
 
@@ -351,8 +387,9 @@ func (wnq *WordNodeQuery) sqlAll(ctx context.Context) ([]*WordNode, error) {
 	var (
 		nodes       = []*WordNode{}
 		_spec       = wnq.querySpec()
-		loadedTypes = [1]bool{
+		loadedTypes = [2]bool{
 			wnq.withWords != nil,
+			wnq.withMovieWordnode != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -401,6 +438,34 @@ func (wnq *WordNodeQuery) sqlAll(ctx context.Context) ([]*WordNode, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "word_node_words" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Words = append(node.Edges.Words, n)
+		}
+	}
+
+	if query := wnq.withMovieWordnode; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*WordNode)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.Movie(func(s *sql.Selector) {
+			s.Where(sql.InValues(wordnode.MovieWordnodeColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.word_node_movie_wordnode
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "word_node_movie_wordnode" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "word_node_movie_wordnode" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.MovieWordnode = n
 		}
 	}
 

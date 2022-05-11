@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"interface_project/ent/movie"
 	"interface_project/ent/predicate"
 	"interface_project/ent/word"
 	"interface_project/ent/wordnode"
@@ -82,6 +83,25 @@ func (wnu *WordNodeUpdate) AddWords(w ...*Word) *WordNodeUpdate {
 	return wnu.AddWordIDs(ids...)
 }
 
+// SetMovieWordnodeID sets the "movie_wordnode" edge to the Movie entity by ID.
+func (wnu *WordNodeUpdate) SetMovieWordnodeID(id int) *WordNodeUpdate {
+	wnu.mutation.SetMovieWordnodeID(id)
+	return wnu
+}
+
+// SetNillableMovieWordnodeID sets the "movie_wordnode" edge to the Movie entity by ID if the given value is not nil.
+func (wnu *WordNodeUpdate) SetNillableMovieWordnodeID(id *int) *WordNodeUpdate {
+	if id != nil {
+		wnu = wnu.SetMovieWordnodeID(*id)
+	}
+	return wnu
+}
+
+// SetMovieWordnode sets the "movie_wordnode" edge to the Movie entity.
+func (wnu *WordNodeUpdate) SetMovieWordnode(m *Movie) *WordNodeUpdate {
+	return wnu.SetMovieWordnodeID(m.ID)
+}
+
 // Mutation returns the WordNodeMutation object of the builder.
 func (wnu *WordNodeUpdate) Mutation() *WordNodeMutation {
 	return wnu.mutation
@@ -106,6 +126,12 @@ func (wnu *WordNodeUpdate) RemoveWords(w ...*Word) *WordNodeUpdate {
 		ids[i] = w[i].ID
 	}
 	return wnu.RemoveWordIDs(ids...)
+}
+
+// ClearMovieWordnode clears the "movie_wordnode" edge to the Movie entity.
+func (wnu *WordNodeUpdate) ClearMovieWordnode() *WordNodeUpdate {
+	wnu.mutation.ClearMovieWordnode()
+	return wnu
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -284,6 +310,41 @@ func (wnu *WordNodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if wnu.mutation.MovieWordnodeCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   wordnode.MovieWordnodeTable,
+			Columns: []string{wordnode.MovieWordnodeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: movie.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wnu.mutation.MovieWordnodeIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   wordnode.MovieWordnodeTable,
+			Columns: []string{wordnode.MovieWordnodeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: movie.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, wnu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{wordnode.Label}
@@ -357,6 +418,25 @@ func (wnuo *WordNodeUpdateOne) AddWords(w ...*Word) *WordNodeUpdateOne {
 	return wnuo.AddWordIDs(ids...)
 }
 
+// SetMovieWordnodeID sets the "movie_wordnode" edge to the Movie entity by ID.
+func (wnuo *WordNodeUpdateOne) SetMovieWordnodeID(id int) *WordNodeUpdateOne {
+	wnuo.mutation.SetMovieWordnodeID(id)
+	return wnuo
+}
+
+// SetNillableMovieWordnodeID sets the "movie_wordnode" edge to the Movie entity by ID if the given value is not nil.
+func (wnuo *WordNodeUpdateOne) SetNillableMovieWordnodeID(id *int) *WordNodeUpdateOne {
+	if id != nil {
+		wnuo = wnuo.SetMovieWordnodeID(*id)
+	}
+	return wnuo
+}
+
+// SetMovieWordnode sets the "movie_wordnode" edge to the Movie entity.
+func (wnuo *WordNodeUpdateOne) SetMovieWordnode(m *Movie) *WordNodeUpdateOne {
+	return wnuo.SetMovieWordnodeID(m.ID)
+}
+
 // Mutation returns the WordNodeMutation object of the builder.
 func (wnuo *WordNodeUpdateOne) Mutation() *WordNodeMutation {
 	return wnuo.mutation
@@ -381,6 +461,12 @@ func (wnuo *WordNodeUpdateOne) RemoveWords(w ...*Word) *WordNodeUpdateOne {
 		ids[i] = w[i].ID
 	}
 	return wnuo.RemoveWordIDs(ids...)
+}
+
+// ClearMovieWordnode clears the "movie_wordnode" edge to the Movie entity.
+func (wnuo *WordNodeUpdateOne) ClearMovieWordnode() *WordNodeUpdateOne {
+	wnuo.mutation.ClearMovieWordnode()
+	return wnuo
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -575,6 +661,41 @@ func (wnuo *WordNodeUpdateOne) sqlSave(ctx context.Context) (_node *WordNode, er
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: word.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if wnuo.mutation.MovieWordnodeCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   wordnode.MovieWordnodeTable,
+			Columns: []string{wordnode.MovieWordnodeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: movie.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wnuo.mutation.MovieWordnodeIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   wordnode.MovieWordnodeTable,
+			Columns: []string{wordnode.MovieWordnodeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: movie.FieldID,
 				},
 			},
 		}

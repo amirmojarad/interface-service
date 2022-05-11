@@ -4,6 +4,7 @@ package ent
 
 import (
 	"fmt"
+	"interface_project/ent/movie"
 	"interface_project/ent/wordnode"
 	"strings"
 
@@ -30,9 +31,11 @@ type WordNode struct {
 type WordNodeEdges struct {
 	// Words holds the value of the words edge.
 	Words []*Word `json:"words,omitempty"`
+	// MovieWordnode holds the value of the movie_wordnode edge.
+	MovieWordnode *Movie `json:"movie_wordnode,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // WordsOrErr returns the Words value or an error if the edge
@@ -42,6 +45,20 @@ func (e WordNodeEdges) WordsOrErr() ([]*Word, error) {
 		return e.Words, nil
 	}
 	return nil, &NotLoadedError{edge: "words"}
+}
+
+// MovieWordnodeOrErr returns the MovieWordnode value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e WordNodeEdges) MovieWordnodeOrErr() (*Movie, error) {
+	if e.loadedTypes[1] {
+		if e.MovieWordnode == nil {
+			// The edge movie_wordnode was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: movie.Label}
+		}
+		return e.MovieWordnode, nil
+	}
+	return nil, &NotLoadedError{edge: "movie_wordnode"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -102,6 +119,11 @@ func (wn *WordNode) assignValues(columns []string, values []interface{}) error {
 // QueryWords queries the "words" edge of the WordNode entity.
 func (wn *WordNode) QueryWords() *WordQuery {
 	return (&WordNodeClient{config: wn.config}).QueryWords(wn)
+}
+
+// QueryMovieWordnode queries the "movie_wordnode" edge of the WordNode entity.
+func (wn *WordNode) QueryMovieWordnode() *MovieQuery {
+	return (&WordNodeClient{config: wn.config}).QueryMovieWordnode(wn)
 }
 
 // Update returns a builder for updating this WordNode.

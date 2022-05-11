@@ -1182,6 +1182,34 @@ func HasUsersWith(preds ...predicate.User) predicate.Movie {
 	})
 }
 
+// HasWordNodes applies the HasEdge predicate on the "word_nodes" edge.
+func HasWordNodes() predicate.Movie {
+	return predicate.Movie(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(WordNodesTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, WordNodesTable, WordNodesColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasWordNodesWith applies the HasEdge predicate on the "word_nodes" edge with a given conditions (other predicates).
+func HasWordNodesWith(preds ...predicate.WordNode) predicate.Movie {
+	return predicate.Movie(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(WordNodesInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, WordNodesTable, WordNodesColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.Movie) predicate.Movie {
 	return predicate.Movie(func(s *sql.Selector) {

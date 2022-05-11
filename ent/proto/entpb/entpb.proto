@@ -31,6 +31,8 @@ message Movie {
   string metacriticRating = 10;
 
   repeated User users = 11;
+
+  WordNode word_nodes = 12;
 }
 
 message SearchKeyword {
@@ -85,4 +87,18 @@ message Word {
   Movie movie = 8;
 
   User user = 9;
+}
+
+message WordNode {
+  int32 id = 1;
+
+  string title = 2;
+
+  bool is_preposition = 3;
+
+  google.protobuf.Int32Value occurence = 4;
+
+  repeated Word words = 5;
+
+  Movie movie_wordnode = 6;
 }

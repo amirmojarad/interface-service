@@ -27,6 +27,8 @@ const (
 	FieldMetacriticRating = "metacritic_rating"
 	// EdgeUsers holds the string denoting the users edge name in mutations.
 	EdgeUsers = "users"
+	// EdgeWordNodes holds the string denoting the word_nodes edge name in mutations.
+	EdgeWordNodes = "word_nodes"
 	// Table holds the table name of the movie in the database.
 	Table = "movies"
 	// UsersTable is the table that holds the users relation/edge. The primary key declared below.
@@ -34,6 +36,13 @@ const (
 	// UsersInverseTable is the table name for the User entity.
 	// It exists in this package in order to avoid circular dependency with the "user" package.
 	UsersInverseTable = "users"
+	// WordNodesTable is the table that holds the word_nodes relation/edge.
+	WordNodesTable = "movies"
+	// WordNodesInverseTable is the table name for the WordNode entity.
+	// It exists in this package in order to avoid circular dependency with the "wordnode" package.
+	WordNodesInverseTable = "word_nodes"
+	// WordNodesColumn is the table column denoting the word_nodes relation/edge.
+	WordNodesColumn = "word_node_movie_wordnode"
 )
 
 // Columns holds all SQL columns for movie fields.
@@ -50,6 +59,12 @@ var Columns = []string{
 	FieldMetacriticRating,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "movies"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"word_node_movie_wordnode",
+}
+
 var (
 	// UsersPrimaryKey and UsersColumn2 are the table columns denoting the
 	// primary key for the users relation (M2M).
@@ -60,6 +75,11 @@ var (
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}

@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"interface_project/ent/movie"
 	"interface_project/ent/user"
+	"interface_project/ent/wordnode"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -87,6 +88,17 @@ func (mc *MovieCreate) AddUsers(u ...*User) *MovieCreate {
 		ids[i] = u[i].ID
 	}
 	return mc.AddUserIDs(ids...)
+}
+
+// SetWordNodesID sets the "word_nodes" edge to the WordNode entity by ID.
+func (mc *MovieCreate) SetWordNodesID(id int) *MovieCreate {
+	mc.mutation.SetWordNodesID(id)
+	return mc
+}
+
+// SetWordNodes sets the "word_nodes" edge to the WordNode entity.
+func (mc *MovieCreate) SetWordNodes(w *WordNode) *MovieCreate {
+	return mc.SetWordNodesID(w.ID)
 }
 
 // Mutation returns the MovieMutation object of the builder.
@@ -190,6 +202,9 @@ func (mc *MovieCreate) check() error {
 	}
 	if _, ok := mc.mutation.MetacriticRating(); !ok {
 		return &ValidationError{Name: "metacriticRating", err: errors.New(`ent: missing required field "Movie.metacriticRating"`)}
+	}
+	if _, ok := mc.mutation.WordNodesID(); !ok {
+		return &ValidationError{Name: "word_nodes", err: errors.New(`ent: missing required edge "Movie.word_nodes"`)}
 	}
 	return nil
 }
@@ -307,6 +322,26 @@ func (mc *MovieCreate) createSpec() (*Movie, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := mc.mutation.WordNodesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: true,
+			Table:   movie.WordNodesTable,
+			Columns: []string{movie.WordNodesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: wordnode.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.word_node_movie_wordnode = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

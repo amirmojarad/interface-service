@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"interface_project/ent/movie"
 	"interface_project/ent/word"
 	"interface_project/ent/wordnode"
 
@@ -59,6 +60,25 @@ func (wnc *WordNodeCreate) AddWords(w ...*Word) *WordNodeCreate {
 		ids[i] = w[i].ID
 	}
 	return wnc.AddWordIDs(ids...)
+}
+
+// SetMovieWordnodeID sets the "movie_wordnode" edge to the Movie entity by ID.
+func (wnc *WordNodeCreate) SetMovieWordnodeID(id int) *WordNodeCreate {
+	wnc.mutation.SetMovieWordnodeID(id)
+	return wnc
+}
+
+// SetNillableMovieWordnodeID sets the "movie_wordnode" edge to the Movie entity by ID if the given value is not nil.
+func (wnc *WordNodeCreate) SetNillableMovieWordnodeID(id *int) *WordNodeCreate {
+	if id != nil {
+		wnc = wnc.SetMovieWordnodeID(*id)
+	}
+	return wnc
+}
+
+// SetMovieWordnode sets the "movie_wordnode" edge to the Movie entity.
+func (wnc *WordNodeCreate) SetMovieWordnode(m *Movie) *WordNodeCreate {
+	return wnc.SetMovieWordnodeID(m.ID)
 }
 
 // Mutation returns the WordNodeMutation object of the builder.
@@ -204,6 +224,25 @@ func (wnc *WordNodeCreate) createSpec() (*WordNode, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: word.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := wnc.mutation.MovieWordnodeIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2O,
+			Inverse: false,
+			Table:   wordnode.MovieWordnodeTable,
+			Columns: []string{wordnode.MovieWordnodeColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: movie.FieldID,
 				},
 			},
 		}

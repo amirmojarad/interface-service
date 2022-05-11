@@ -20,12 +20,21 @@ var (
 		{Name: "plot", Type: field.TypeString},
 		{Name: "stars", Type: field.TypeString},
 		{Name: "metacritic_rating", Type: field.TypeString},
+		{Name: "word_node_movie_wordnode", Type: field.TypeInt, Unique: true},
 	}
 	// MoviesTable holds the schema information for the "movies" table.
 	MoviesTable = &schema.Table{
 		Name:       "movies",
 		Columns:    MoviesColumns,
 		PrimaryKey: []*schema.Column{MoviesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "movies_word_nodes_movie_wordnode",
+				Columns:    []*schema.Column{MoviesColumns[10]},
+				RefColumns: []*schema.Column{WordNodesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 	}
 	// SearchKeywordsColumns holds the columns for the "search_keywords" table.
 	SearchKeywordsColumns = []*schema.Column{
@@ -154,6 +163,7 @@ var (
 )
 
 func init() {
+	MoviesTable.ForeignKeys[0].RefTable = WordNodesTable
 	SearchKeywordsTable.ForeignKeys[0].RefTable = UsersTable
 	WordsTable.ForeignKeys[0].RefTable = UsersTable
 	WordsTable.ForeignKeys[1].RefTable = MoviesTable

@@ -252,6 +252,22 @@ func (c *MovieClient) QueryUsers(m *Movie) *UserQuery {
 	return query
 }
 
+// QueryWordNodes queries the word_nodes edge of a Movie.
+func (c *MovieClient) QueryWordNodes(m *Movie) *WordNodeQuery {
+	query := &WordNodeQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := m.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(movie.Table, movie.FieldID, id),
+			sqlgraph.To(wordnode.Table, wordnode.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, true, movie.WordNodesTable, movie.WordNodesColumn),
+		)
+		fromV = sqlgraph.Neighbors(m.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *MovieClient) Hooks() []Hook {
 	return c.hooks.Movie
@@ -717,6 +733,22 @@ func (c *WordNodeClient) QueryWords(wn *WordNode) *WordQuery {
 			sqlgraph.From(wordnode.Table, wordnode.FieldID, id),
 			sqlgraph.To(word.Table, word.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, wordnode.WordsTable, wordnode.WordsColumn),
+		)
+		fromV = sqlgraph.Neighbors(wn.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryMovieWordnode queries the movie_wordnode edge of a WordNode.
+func (c *WordNodeClient) QueryMovieWordnode(wn *WordNode) *MovieQuery {
+	query := &MovieQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := wn.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(wordnode.Table, wordnode.FieldID, id),
+			sqlgraph.To(movie.Table, movie.FieldID),
+			sqlgraph.Edge(sqlgraph.O2O, false, wordnode.MovieWordnodeTable, wordnode.MovieWordnodeColumn),
 		)
 		fromV = sqlgraph.Neighbors(wn.driver.Dialect(), step)
 		return fromV, nil

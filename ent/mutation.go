@@ -37,25 +37,27 @@ const (
 // MovieMutation represents an operation that mutates the Movie nodes in the graph.
 type MovieMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int
-	title            *string
-	year             *string
-	image_url        *string
-	runtimeStr       *string
-	genres           *string
-	imDbRating       *string
-	plot             *string
-	stars            *string
-	metacriticRating *string
-	clearedFields    map[string]struct{}
-	users            map[int]struct{}
-	removedusers     map[int]struct{}
-	clearedusers     bool
-	done             bool
-	oldValue         func(context.Context) (*Movie, error)
-	predicates       []predicate.Movie
+	op                Op
+	typ               string
+	id                *int
+	title             *string
+	year              *string
+	image_url         *string
+	runtimeStr        *string
+	genres            *string
+	imDbRating        *string
+	plot              *string
+	stars             *string
+	metacriticRating  *string
+	clearedFields     map[string]struct{}
+	users             map[int]struct{}
+	removedusers      map[int]struct{}
+	clearedusers      bool
+	word_nodes        *int
+	clearedword_nodes bool
+	done              bool
+	oldValue          func(context.Context) (*Movie, error)
+	predicates        []predicate.Movie
 }
 
 var _ ent.Mutation = (*MovieMutation)(nil)
@@ -534,6 +536,45 @@ func (m *MovieMutation) ResetUsers() {
 	m.removedusers = nil
 }
 
+// SetWordNodesID sets the "word_nodes" edge to the WordNode entity by id.
+func (m *MovieMutation) SetWordNodesID(id int) {
+	m.word_nodes = &id
+}
+
+// ClearWordNodes clears the "word_nodes" edge to the WordNode entity.
+func (m *MovieMutation) ClearWordNodes() {
+	m.clearedword_nodes = true
+}
+
+// WordNodesCleared reports if the "word_nodes" edge to the WordNode entity was cleared.
+func (m *MovieMutation) WordNodesCleared() bool {
+	return m.clearedword_nodes
+}
+
+// WordNodesID returns the "word_nodes" edge ID in the mutation.
+func (m *MovieMutation) WordNodesID() (id int, exists bool) {
+	if m.word_nodes != nil {
+		return *m.word_nodes, true
+	}
+	return
+}
+
+// WordNodesIDs returns the "word_nodes" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// WordNodesID instead. It exists only for internal usage by the builders.
+func (m *MovieMutation) WordNodesIDs() (ids []int) {
+	if id := m.word_nodes; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetWordNodes resets all changes to the "word_nodes" edge.
+func (m *MovieMutation) ResetWordNodes() {
+	m.word_nodes = nil
+	m.clearedword_nodes = false
+}
+
 // Where appends a list predicates to the MovieMutation builder.
 func (m *MovieMutation) Where(ps ...predicate.Movie) {
 	m.predicates = append(m.predicates, ps...)
@@ -788,9 +829,12 @@ func (m *MovieMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *MovieMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.users != nil {
 		edges = append(edges, movie.EdgeUsers)
+	}
+	if m.word_nodes != nil {
+		edges = append(edges, movie.EdgeWordNodes)
 	}
 	return edges
 }
@@ -805,13 +849,17 @@ func (m *MovieMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case movie.EdgeWordNodes:
+		if id := m.word_nodes; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *MovieMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.removedusers != nil {
 		edges = append(edges, movie.EdgeUsers)
 	}
@@ -834,9 +882,12 @@ func (m *MovieMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *MovieMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.clearedusers {
 		edges = append(edges, movie.EdgeUsers)
+	}
+	if m.clearedword_nodes {
+		edges = append(edges, movie.EdgeWordNodes)
 	}
 	return edges
 }
@@ -847,6 +898,8 @@ func (m *MovieMutation) EdgeCleared(name string) bool {
 	switch name {
 	case movie.EdgeUsers:
 		return m.clearedusers
+	case movie.EdgeWordNodes:
+		return m.clearedword_nodes
 	}
 	return false
 }
@@ -855,6 +908,9 @@ func (m *MovieMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *MovieMutation) ClearEdge(name string) error {
 	switch name {
+	case movie.EdgeWordNodes:
+		m.ClearWordNodes()
+		return nil
 	}
 	return fmt.Errorf("unknown Movie unique edge %s", name)
 }
@@ -865,6 +921,9 @@ func (m *MovieMutation) ResetEdge(name string) error {
 	switch name {
 	case movie.EdgeUsers:
 		m.ResetUsers()
+		return nil
+	case movie.EdgeWordNodes:
+		m.ResetWordNodes()
 		return nil
 	}
 	return fmt.Errorf("unknown Movie edge %s", name)
@@ -3066,20 +3125,22 @@ func (m *WordMutation) ResetEdge(name string) error {
 // WordNodeMutation represents an operation that mutates the WordNode nodes in the graph.
 type WordNodeMutation struct {
 	config
-	op             Op
-	typ            string
-	id             *int
-	title          *string
-	is_preposition *bool
-	occurence      *int
-	addoccurence   *int
-	clearedFields  map[string]struct{}
-	words          map[int]struct{}
-	removedwords   map[int]struct{}
-	clearedwords   bool
-	done           bool
-	oldValue       func(context.Context) (*WordNode, error)
-	predicates     []predicate.WordNode
+	op                    Op
+	typ                   string
+	id                    *int
+	title                 *string
+	is_preposition        *bool
+	occurence             *int
+	addoccurence          *int
+	clearedFields         map[string]struct{}
+	words                 map[int]struct{}
+	removedwords          map[int]struct{}
+	clearedwords          bool
+	movie_wordnode        *int
+	clearedmovie_wordnode bool
+	done                  bool
+	oldValue              func(context.Context) (*WordNode, error)
+	predicates            []predicate.WordNode
 }
 
 var _ ent.Mutation = (*WordNodeMutation)(nil)
@@ -3376,6 +3437,45 @@ func (m *WordNodeMutation) ResetWords() {
 	m.removedwords = nil
 }
 
+// SetMovieWordnodeID sets the "movie_wordnode" edge to the Movie entity by id.
+func (m *WordNodeMutation) SetMovieWordnodeID(id int) {
+	m.movie_wordnode = &id
+}
+
+// ClearMovieWordnode clears the "movie_wordnode" edge to the Movie entity.
+func (m *WordNodeMutation) ClearMovieWordnode() {
+	m.clearedmovie_wordnode = true
+}
+
+// MovieWordnodeCleared reports if the "movie_wordnode" edge to the Movie entity was cleared.
+func (m *WordNodeMutation) MovieWordnodeCleared() bool {
+	return m.clearedmovie_wordnode
+}
+
+// MovieWordnodeID returns the "movie_wordnode" edge ID in the mutation.
+func (m *WordNodeMutation) MovieWordnodeID() (id int, exists bool) {
+	if m.movie_wordnode != nil {
+		return *m.movie_wordnode, true
+	}
+	return
+}
+
+// MovieWordnodeIDs returns the "movie_wordnode" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// MovieWordnodeID instead. It exists only for internal usage by the builders.
+func (m *WordNodeMutation) MovieWordnodeIDs() (ids []int) {
+	if id := m.movie_wordnode; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetMovieWordnode resets all changes to the "movie_wordnode" edge.
+func (m *WordNodeMutation) ResetMovieWordnode() {
+	m.movie_wordnode = nil
+	m.clearedmovie_wordnode = false
+}
+
 // Where appends a list predicates to the WordNodeMutation builder.
 func (m *WordNodeMutation) Where(ps ...predicate.WordNode) {
 	m.predicates = append(m.predicates, ps...)
@@ -3552,9 +3652,12 @@ func (m *WordNodeMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *WordNodeMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.words != nil {
 		edges = append(edges, wordnode.EdgeWords)
+	}
+	if m.movie_wordnode != nil {
+		edges = append(edges, wordnode.EdgeMovieWordnode)
 	}
 	return edges
 }
@@ -3569,13 +3672,17 @@ func (m *WordNodeMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case wordnode.EdgeMovieWordnode:
+		if id := m.movie_wordnode; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *WordNodeMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.removedwords != nil {
 		edges = append(edges, wordnode.EdgeWords)
 	}
@@ -3598,9 +3705,12 @@ func (m *WordNodeMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *WordNodeMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
+	edges := make([]string, 0, 2)
 	if m.clearedwords {
 		edges = append(edges, wordnode.EdgeWords)
+	}
+	if m.clearedmovie_wordnode {
+		edges = append(edges, wordnode.EdgeMovieWordnode)
 	}
 	return edges
 }
@@ -3611,6 +3721,8 @@ func (m *WordNodeMutation) EdgeCleared(name string) bool {
 	switch name {
 	case wordnode.EdgeWords:
 		return m.clearedwords
+	case wordnode.EdgeMovieWordnode:
+		return m.clearedmovie_wordnode
 	}
 	return false
 }
@@ -3619,6 +3731,9 @@ func (m *WordNodeMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *WordNodeMutation) ClearEdge(name string) error {
 	switch name {
+	case wordnode.EdgeMovieWordnode:
+		m.ClearMovieWordnode()
+		return nil
 	}
 	return fmt.Errorf("unknown WordNode unique edge %s", name)
 }
@@ -3629,6 +3744,9 @@ func (m *WordNodeMutation) ResetEdge(name string) error {
 	switch name {
 	case wordnode.EdgeWords:
 		m.ResetWords()
+		return nil
+	case wordnode.EdgeMovieWordnode:
+		m.ResetMovieWordnode()
 		return nil
 	}
 	return fmt.Errorf("unknown WordNode edge %s", name)
