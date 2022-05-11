@@ -54,7 +54,6 @@ func (api API) upload() gin.HandlerFunc {
 		if err != nil {
 			log.Fatal(err)
 		}
-
 		openedFile, _ := file_handler.Open(filePath)
 		defer out.Close()
 		written, err := io.Copy(out, file)
