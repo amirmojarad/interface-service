@@ -11,6 +11,7 @@ import (
 	"interface_project/ent/searchkeyword"
 	"interface_project/ent/user"
 	"interface_project/ent/word"
+	"interface_project/ent/wordnode"
 	"sync"
 	"time"
 
@@ -30,6 +31,7 @@ const (
 	TypeSearchKeyword = "SearchKeyword"
 	TypeUser          = "User"
 	TypeWord          = "Word"
+	TypeWordNode      = "WordNode"
 )
 
 // MovieMutation represents an operation that mutates the Movie nodes in the graph.
@@ -3059,4 +3061,575 @@ func (m *WordMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown Word edge %s", name)
+}
+
+// WordNodeMutation represents an operation that mutates the WordNode nodes in the graph.
+type WordNodeMutation struct {
+	config
+	op             Op
+	typ            string
+	id             *int
+	title          *string
+	is_preposition *bool
+	occurence      *int
+	addoccurence   *int
+	clearedFields  map[string]struct{}
+	words          map[int]struct{}
+	removedwords   map[int]struct{}
+	clearedwords   bool
+	done           bool
+	oldValue       func(context.Context) (*WordNode, error)
+	predicates     []predicate.WordNode
+}
+
+var _ ent.Mutation = (*WordNodeMutation)(nil)
+
+// wordnodeOption allows management of the mutation configuration using functional options.
+type wordnodeOption func(*WordNodeMutation)
+
+// newWordNodeMutation creates new mutation for the WordNode entity.
+func newWordNodeMutation(c config, op Op, opts ...wordnodeOption) *WordNodeMutation {
+	m := &WordNodeMutation{
+		config:        c,
+		op:            op,
+		typ:           TypeWordNode,
+		clearedFields: make(map[string]struct{}),
+	}
+	for _, opt := range opts {
+		opt(m)
+	}
+	return m
+}
+
+// withWordNodeID sets the ID field of the mutation.
+func withWordNodeID(id int) wordnodeOption {
+	return func(m *WordNodeMutation) {
+		var (
+			err   error
+			once  sync.Once
+			value *WordNode
+		)
+		m.oldValue = func(ctx context.Context) (*WordNode, error) {
+			once.Do(func() {
+				if m.done {
+					err = errors.New("querying old values post mutation is not allowed")
+				} else {
+					value, err = m.Client().WordNode.Get(ctx, id)
+				}
+			})
+			return value, err
+		}
+		m.id = &id
+	}
+}
+
+// withWordNode sets the old WordNode of the mutation.
+func withWordNode(node *WordNode) wordnodeOption {
+	return func(m *WordNodeMutation) {
+		m.oldValue = func(context.Context) (*WordNode, error) {
+			return node, nil
+		}
+		m.id = &node.ID
+	}
+}
+
+// Client returns a new `ent.Client` from the mutation. If the mutation was
+// executed in a transaction (ent.Tx), a transactional client is returned.
+func (m WordNodeMutation) Client() *Client {
+	client := &Client{config: m.config}
+	client.init()
+	return client
+}
+
+// Tx returns an `ent.Tx` for mutations that were executed in transactions;
+// it returns an error otherwise.
+func (m WordNodeMutation) Tx() (*Tx, error) {
+	if _, ok := m.driver.(*txDriver); !ok {
+		return nil, errors.New("ent: mutation is not running in a transaction")
+	}
+	tx := &Tx{config: m.config}
+	tx.init()
+	return tx, nil
+}
+
+// ID returns the ID value in the mutation. Note that the ID is only available
+// if it was provided to the builder or after it was returned from the database.
+func (m *WordNodeMutation) ID() (id int, exists bool) {
+	if m.id == nil {
+		return
+	}
+	return *m.id, true
+}
+
+// IDs queries the database and returns the entity ids that match the mutation's predicate.
+// That means, if the mutation is applied within a transaction with an isolation level such
+// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
+// or updated by the mutation.
+func (m *WordNodeMutation) IDs(ctx context.Context) ([]int, error) {
+	switch {
+	case m.op.Is(OpUpdateOne | OpDeleteOne):
+		id, exists := m.ID()
+		if exists {
+			return []int{id}, nil
+		}
+		fallthrough
+	case m.op.Is(OpUpdate | OpDelete):
+		return m.Client().WordNode.Query().Where(m.predicates...).IDs(ctx)
+	default:
+		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
+	}
+}
+
+// SetTitle sets the "title" field.
+func (m *WordNodeMutation) SetTitle(s string) {
+	m.title = &s
+}
+
+// Title returns the value of the "title" field in the mutation.
+func (m *WordNodeMutation) Title() (r string, exists bool) {
+	v := m.title
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldTitle returns the old "title" field's value of the WordNode entity.
+// If the WordNode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WordNodeMutation) OldTitle(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldTitle requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
+	}
+	return oldValue.Title, nil
+}
+
+// ResetTitle resets all changes to the "title" field.
+func (m *WordNodeMutation) ResetTitle() {
+	m.title = nil
+}
+
+// SetIsPreposition sets the "is_preposition" field.
+func (m *WordNodeMutation) SetIsPreposition(b bool) {
+	m.is_preposition = &b
+}
+
+// IsPreposition returns the value of the "is_preposition" field in the mutation.
+func (m *WordNodeMutation) IsPreposition() (r bool, exists bool) {
+	v := m.is_preposition
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsPreposition returns the old "is_preposition" field's value of the WordNode entity.
+// If the WordNode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WordNodeMutation) OldIsPreposition(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsPreposition is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsPreposition requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsPreposition: %w", err)
+	}
+	return oldValue.IsPreposition, nil
+}
+
+// ResetIsPreposition resets all changes to the "is_preposition" field.
+func (m *WordNodeMutation) ResetIsPreposition() {
+	m.is_preposition = nil
+}
+
+// SetOccurence sets the "occurence" field.
+func (m *WordNodeMutation) SetOccurence(i int) {
+	m.occurence = &i
+	m.addoccurence = nil
+}
+
+// Occurence returns the value of the "occurence" field in the mutation.
+func (m *WordNodeMutation) Occurence() (r int, exists bool) {
+	v := m.occurence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldOccurence returns the old "occurence" field's value of the WordNode entity.
+// If the WordNode object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WordNodeMutation) OldOccurence(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldOccurence is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldOccurence requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldOccurence: %w", err)
+	}
+	return oldValue.Occurence, nil
+}
+
+// AddOccurence adds i to the "occurence" field.
+func (m *WordNodeMutation) AddOccurence(i int) {
+	if m.addoccurence != nil {
+		*m.addoccurence += i
+	} else {
+		m.addoccurence = &i
+	}
+}
+
+// AddedOccurence returns the value that was added to the "occurence" field in this mutation.
+func (m *WordNodeMutation) AddedOccurence() (r int, exists bool) {
+	v := m.addoccurence
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ClearOccurence clears the value of the "occurence" field.
+func (m *WordNodeMutation) ClearOccurence() {
+	m.occurence = nil
+	m.addoccurence = nil
+	m.clearedFields[wordnode.FieldOccurence] = struct{}{}
+}
+
+// OccurenceCleared returns if the "occurence" field was cleared in this mutation.
+func (m *WordNodeMutation) OccurenceCleared() bool {
+	_, ok := m.clearedFields[wordnode.FieldOccurence]
+	return ok
+}
+
+// ResetOccurence resets all changes to the "occurence" field.
+func (m *WordNodeMutation) ResetOccurence() {
+	m.occurence = nil
+	m.addoccurence = nil
+	delete(m.clearedFields, wordnode.FieldOccurence)
+}
+
+// AddWordIDs adds the "words" edge to the Word entity by ids.
+func (m *WordNodeMutation) AddWordIDs(ids ...int) {
+	if m.words == nil {
+		m.words = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.words[ids[i]] = struct{}{}
+	}
+}
+
+// ClearWords clears the "words" edge to the Word entity.
+func (m *WordNodeMutation) ClearWords() {
+	m.clearedwords = true
+}
+
+// WordsCleared reports if the "words" edge to the Word entity was cleared.
+func (m *WordNodeMutation) WordsCleared() bool {
+	return m.clearedwords
+}
+
+// RemoveWordIDs removes the "words" edge to the Word entity by IDs.
+func (m *WordNodeMutation) RemoveWordIDs(ids ...int) {
+	if m.removedwords == nil {
+		m.removedwords = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.words, ids[i])
+		m.removedwords[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedWords returns the removed IDs of the "words" edge to the Word entity.
+func (m *WordNodeMutation) RemovedWordsIDs() (ids []int) {
+	for id := range m.removedwords {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// WordsIDs returns the "words" edge IDs in the mutation.
+func (m *WordNodeMutation) WordsIDs() (ids []int) {
+	for id := range m.words {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetWords resets all changes to the "words" edge.
+func (m *WordNodeMutation) ResetWords() {
+	m.words = nil
+	m.clearedwords = false
+	m.removedwords = nil
+}
+
+// Where appends a list predicates to the WordNodeMutation builder.
+func (m *WordNodeMutation) Where(ps ...predicate.WordNode) {
+	m.predicates = append(m.predicates, ps...)
+}
+
+// Op returns the operation name.
+func (m *WordNodeMutation) Op() Op {
+	return m.op
+}
+
+// Type returns the node type of this mutation (WordNode).
+func (m *WordNodeMutation) Type() string {
+	return m.typ
+}
+
+// Fields returns all fields that were changed during this mutation. Note that in
+// order to get all numeric fields that were incremented/decremented, call
+// AddedFields().
+func (m *WordNodeMutation) Fields() []string {
+	fields := make([]string, 0, 3)
+	if m.title != nil {
+		fields = append(fields, wordnode.FieldTitle)
+	}
+	if m.is_preposition != nil {
+		fields = append(fields, wordnode.FieldIsPreposition)
+	}
+	if m.occurence != nil {
+		fields = append(fields, wordnode.FieldOccurence)
+	}
+	return fields
+}
+
+// Field returns the value of a field with the given name. The second boolean
+// return value indicates that this field was not set, or was not defined in the
+// schema.
+func (m *WordNodeMutation) Field(name string) (ent.Value, bool) {
+	switch name {
+	case wordnode.FieldTitle:
+		return m.Title()
+	case wordnode.FieldIsPreposition:
+		return m.IsPreposition()
+	case wordnode.FieldOccurence:
+		return m.Occurence()
+	}
+	return nil, false
+}
+
+// OldField returns the old value of the field from the database. An error is
+// returned if the mutation operation is not UpdateOne, or the query to the
+// database failed.
+func (m *WordNodeMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+	switch name {
+	case wordnode.FieldTitle:
+		return m.OldTitle(ctx)
+	case wordnode.FieldIsPreposition:
+		return m.OldIsPreposition(ctx)
+	case wordnode.FieldOccurence:
+		return m.OldOccurence(ctx)
+	}
+	return nil, fmt.Errorf("unknown WordNode field %s", name)
+}
+
+// SetField sets the value of a field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *WordNodeMutation) SetField(name string, value ent.Value) error {
+	switch name {
+	case wordnode.FieldTitle:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetTitle(v)
+		return nil
+	case wordnode.FieldIsPreposition:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsPreposition(v)
+		return nil
+	case wordnode.FieldOccurence:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetOccurence(v)
+		return nil
+	}
+	return fmt.Errorf("unknown WordNode field %s", name)
+}
+
+// AddedFields returns all numeric fields that were incremented/decremented during
+// this mutation.
+func (m *WordNodeMutation) AddedFields() []string {
+	var fields []string
+	if m.addoccurence != nil {
+		fields = append(fields, wordnode.FieldOccurence)
+	}
+	return fields
+}
+
+// AddedField returns the numeric value that was incremented/decremented on a field
+// with the given name. The second boolean return value indicates that this field
+// was not set, or was not defined in the schema.
+func (m *WordNodeMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case wordnode.FieldOccurence:
+		return m.AddedOccurence()
+	}
+	return nil, false
+}
+
+// AddField adds the value to the field with the given name. It returns an error if
+// the field is not defined in the schema, or if the type mismatched the field
+// type.
+func (m *WordNodeMutation) AddField(name string, value ent.Value) error {
+	switch name {
+	case wordnode.FieldOccurence:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddOccurence(v)
+		return nil
+	}
+	return fmt.Errorf("unknown WordNode numeric field %s", name)
+}
+
+// ClearedFields returns all nullable fields that were cleared during this
+// mutation.
+func (m *WordNodeMutation) ClearedFields() []string {
+	var fields []string
+	if m.FieldCleared(wordnode.FieldOccurence) {
+		fields = append(fields, wordnode.FieldOccurence)
+	}
+	return fields
+}
+
+// FieldCleared returns a boolean indicating if a field with the given name was
+// cleared in this mutation.
+func (m *WordNodeMutation) FieldCleared(name string) bool {
+	_, ok := m.clearedFields[name]
+	return ok
+}
+
+// ClearField clears the value of the field with the given name. It returns an
+// error if the field is not defined in the schema.
+func (m *WordNodeMutation) ClearField(name string) error {
+	switch name {
+	case wordnode.FieldOccurence:
+		m.ClearOccurence()
+		return nil
+	}
+	return fmt.Errorf("unknown WordNode nullable field %s", name)
+}
+
+// ResetField resets all changes in the mutation for the field with the given name.
+// It returns an error if the field is not defined in the schema.
+func (m *WordNodeMutation) ResetField(name string) error {
+	switch name {
+	case wordnode.FieldTitle:
+		m.ResetTitle()
+		return nil
+	case wordnode.FieldIsPreposition:
+		m.ResetIsPreposition()
+		return nil
+	case wordnode.FieldOccurence:
+		m.ResetOccurence()
+		return nil
+	}
+	return fmt.Errorf("unknown WordNode field %s", name)
+}
+
+// AddedEdges returns all edge names that were set/added in this mutation.
+func (m *WordNodeMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.words != nil {
+		edges = append(edges, wordnode.EdgeWords)
+	}
+	return edges
+}
+
+// AddedIDs returns all IDs (to other nodes) that were added for the given edge
+// name in this mutation.
+func (m *WordNodeMutation) AddedIDs(name string) []ent.Value {
+	switch name {
+	case wordnode.EdgeWords:
+		ids := make([]ent.Value, 0, len(m.words))
+		for id := range m.words {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// RemovedEdges returns all edge names that were removed in this mutation.
+func (m *WordNodeMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.removedwords != nil {
+		edges = append(edges, wordnode.EdgeWords)
+	}
+	return edges
+}
+
+// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
+// the given name in this mutation.
+func (m *WordNodeMutation) RemovedIDs(name string) []ent.Value {
+	switch name {
+	case wordnode.EdgeWords:
+		ids := make([]ent.Value, 0, len(m.removedwords))
+		for id := range m.removedwords {
+			ids = append(ids, id)
+		}
+		return ids
+	}
+	return nil
+}
+
+// ClearedEdges returns all edge names that were cleared in this mutation.
+func (m *WordNodeMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
+	if m.clearedwords {
+		edges = append(edges, wordnode.EdgeWords)
+	}
+	return edges
+}
+
+// EdgeCleared returns a boolean which indicates if the edge with the given name
+// was cleared in this mutation.
+func (m *WordNodeMutation) EdgeCleared(name string) bool {
+	switch name {
+	case wordnode.EdgeWords:
+		return m.clearedwords
+	}
+	return false
+}
+
+// ClearEdge clears the value of the edge with the given name. It returns an error
+// if that edge is not defined in the schema.
+func (m *WordNodeMutation) ClearEdge(name string) error {
+	switch name {
+	}
+	return fmt.Errorf("unknown WordNode unique edge %s", name)
+}
+
+// ResetEdge resets all changes to the edge with the given name in this mutation.
+// It returns an error if the edge is not defined in the schema.
+func (m *WordNodeMutation) ResetEdge(name string) error {
+	switch name {
+	case wordnode.EdgeWords:
+		m.ResetWords()
+		return nil
+	}
+	return fmt.Errorf("unknown WordNode edge %s", name)
 }

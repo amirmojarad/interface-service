@@ -20,6 +20,8 @@ type Tx struct {
 	User *UserClient
 	// Word is the client for interacting with the Word builders.
 	Word *WordClient
+	// WordNode is the client for interacting with the WordNode builders.
+	WordNode *WordNodeClient
 
 	// lazily loaded.
 	client     *Client
@@ -159,6 +161,7 @@ func (tx *Tx) init() {
 	tx.SearchKeyword = NewSearchKeywordClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.Word = NewWordClient(tx.config)
+	tx.WordNode = NewWordNodeClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.

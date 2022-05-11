@@ -35,6 +35,7 @@ type Word struct {
 	Edges               WordEdges `json:"edges"`
 	user_favorite_words *int
 	word_movie          *int
+	word_node_words     *int
 }
 
 // WordEdges holds the relations/edges for other nodes in the graph.
@@ -90,6 +91,8 @@ func (*Word) scanValues(columns []string) ([]interface{}, error) {
 		case word.ForeignKeys[0]: // user_favorite_words
 			values[i] = new(sql.NullInt64)
 		case word.ForeignKeys[1]: // word_movie
+			values[i] = new(sql.NullInt64)
+		case word.ForeignKeys[2]: // word_node_words
 			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Word", columns[i])
@@ -161,6 +164,13 @@ func (w *Word) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				w.word_movie = new(int)
 				*w.word_movie = int(value.Int64)
+			}
+		case word.ForeignKeys[2]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field word_node_words", value)
+			} else if value.Valid {
+				w.word_node_words = new(int)
+				*w.word_node_words = int(value.Int64)
 			}
 		}
 	}

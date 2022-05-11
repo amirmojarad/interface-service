@@ -57,6 +57,7 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"user_favorite_words",
 	"word_movie",
+	"word_node_words",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).

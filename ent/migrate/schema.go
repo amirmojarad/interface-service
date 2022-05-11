@@ -76,6 +76,7 @@ var (
 		{Name: "end", Type: field.TypeTime, Nullable: true},
 		{Name: "user_favorite_words", Type: field.TypeInt, Nullable: true},
 		{Name: "word_movie", Type: field.TypeInt, Nullable: true},
+		{Name: "word_node_words", Type: field.TypeInt, Nullable: true},
 	}
 	// WordsTable holds the schema information for the "words" table.
 	WordsTable = &schema.Table{
@@ -95,7 +96,26 @@ var (
 				RefColumns: []*schema.Column{MoviesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
+			{
+				Symbol:     "words_word_nodes_words",
+				Columns:    []*schema.Column{WordsColumns[9]},
+				RefColumns: []*schema.Column{WordNodesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
 		},
+	}
+	// WordNodesColumns holds the columns for the "word_nodes" table.
+	WordNodesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "title", Type: field.TypeString},
+		{Name: "is_preposition", Type: field.TypeBool},
+		{Name: "occurence", Type: field.TypeInt, Nullable: true},
+	}
+	// WordNodesTable holds the schema information for the "word_nodes" table.
+	WordNodesTable = &schema.Table{
+		Name:       "word_nodes",
+		Columns:    WordNodesColumns,
+		PrimaryKey: []*schema.Column{WordNodesColumns[0]},
 	}
 	// UserFavoriteMoviesColumns holds the columns for the "user_favorite_movies" table.
 	UserFavoriteMoviesColumns = []*schema.Column{
@@ -128,6 +148,7 @@ var (
 		SearchKeywordsTable,
 		UsersTable,
 		WordsTable,
+		WordNodesTable,
 		UserFavoriteMoviesTable,
 	}
 )
@@ -136,6 +157,7 @@ func init() {
 	SearchKeywordsTable.ForeignKeys[0].RefTable = UsersTable
 	WordsTable.ForeignKeys[0].RefTable = UsersTable
 	WordsTable.ForeignKeys[1].RefTable = MoviesTable
+	WordsTable.ForeignKeys[2].RefTable = WordNodesTable
 	UserFavoriteMoviesTable.ForeignKeys[0].RefTable = UsersTable
 	UserFavoriteMoviesTable.ForeignKeys[1].RefTable = MoviesTable
 }

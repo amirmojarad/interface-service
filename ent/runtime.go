@@ -8,6 +8,7 @@ import (
 	"interface_project/ent/searchkeyword"
 	"interface_project/ent/user"
 	"interface_project/ent/word"
+	"interface_project/ent/wordnode"
 	"time"
 )
 
@@ -67,4 +68,10 @@ func init() {
 	wordDescTitle := wordFields[0].Descriptor()
 	// word.TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	word.TitleValidator = wordDescTitle.Validators[0].(func(string) error)
+	wordnodeFields := schema.WordNode{}.Fields()
+	_ = wordnodeFields
+	// wordnodeDescTitle is the schema descriptor for title field.
+	wordnodeDescTitle := wordnodeFields[0].Descriptor()
+	// wordnode.TitleValidator is a validator for the "title" field. It is called by the builders before save.
+	wordnode.TitleValidator = wordnodeDescTitle.Validators[0].(func(string) error)
 }
