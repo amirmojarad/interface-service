@@ -1,3 +1,4 @@
+// Package database manages database configs, and setup.
 package database
 
 import "os"

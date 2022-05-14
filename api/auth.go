@@ -2,6 +2,8 @@ package api
 
 import (
 	"interface_project/api/auth"
+	"interface_project/usecases/generators"
+
 	"interface_project/ent"
 	"log"
 	"net/http"
@@ -23,7 +25,11 @@ func (api *API) signUp() gin.HandlerFunc {
 		if newUser, err := api.Crud.AddUser(userSchema); err != nil {
 			ctx.IndentedJSON(http.StatusBadRequest, err.Error())
 		} else {
-			ctx.IndentedJSON(http.StatusCreated, newUser)
+			token := api.jwtService.GenerateToken(userSchema.Email, userSchema.IsAdmin)
+			ctx.IndentedJSON(http.StatusCreated, gin.H{
+				"user":  newUser,
+				"token": token,
+			})
 		}
 	}
 }
@@ -32,14 +38,19 @@ func (api *API) login() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		userSchema := &ent.User{}
 		ctx.BindJSON(&userSchema)
-		if _, err := api.Crud.GetUserByEmail(userSchema.Email); err != nil {
+		if fetchedUser, err := api.Crud.GetUserByEmail(userSchema.Email); err != nil {
 			ctx.IndentedJSON(http.StatusBadRequest, gin.H{
 				"message": "invalid credentials",
 				"error":   err.Error(),
 			})
 			return
 		} else {
-			log.Println("IS ADMIN: ", userSchema.IsAdmin)
+			if !generators.CheckPasswordHash(userSchema.Password, fetchedUser.Password) {
+				ctx.IndentedJSON(http.StatusBadRequest, gin.H{
+					"message": "wrong password",
+				})
+				return
+			}
 			jwtService := auth.JWTAuthService()
 			tokenString := jwtService.GenerateToken(userSchema.Email, userSchema.IsAdmin)
 			ctx.IndentedJSON(http.StatusOK, gin.H{
