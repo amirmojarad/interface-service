@@ -104,6 +104,14 @@ func (mu *MovieUpdate) SetWordNodesID(id int) *MovieUpdate {
 	return mu
 }
 
+// SetNillableWordNodesID sets the "word_nodes" edge to the WordNode entity by ID if the given value is not nil.
+func (mu *MovieUpdate) SetNillableWordNodesID(id *int) *MovieUpdate {
+	if id != nil {
+		mu = mu.SetWordNodesID(*id)
+	}
+	return mu
+}
+
 // SetWordNodes sets the "word_nodes" edge to the WordNode entity.
 func (mu *MovieUpdate) SetWordNodes(w *WordNode) *MovieUpdate {
 	return mu.SetWordNodesID(w.ID)
@@ -207,9 +215,6 @@ func (mu *MovieUpdate) check() error {
 		if err := movie.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Movie.title": %w`, err)}
 		}
-	}
-	if _, ok := mu.mutation.WordNodesID(); mu.mutation.WordNodesCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "Movie.word_nodes"`)
 	}
 	return nil
 }
@@ -478,6 +483,14 @@ func (muo *MovieUpdateOne) SetWordNodesID(id int) *MovieUpdateOne {
 	return muo
 }
 
+// SetNillableWordNodesID sets the "word_nodes" edge to the WordNode entity by ID if the given value is not nil.
+func (muo *MovieUpdateOne) SetNillableWordNodesID(id *int) *MovieUpdateOne {
+	if id != nil {
+		muo = muo.SetWordNodesID(*id)
+	}
+	return muo
+}
+
 // SetWordNodes sets the "word_nodes" edge to the WordNode entity.
 func (muo *MovieUpdateOne) SetWordNodes(w *WordNode) *MovieUpdateOne {
 	return muo.SetWordNodesID(w.ID)
@@ -588,9 +601,6 @@ func (muo *MovieUpdateOne) check() error {
 		if err := movie.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Movie.title": %w`, err)}
 		}
-	}
-	if _, ok := muo.mutation.WordNodesID(); muo.mutation.WordNodesCleared() && !ok {
-		return errors.New(`ent: clearing a required unique edge "Movie.word_nodes"`)
 	}
 	return nil
 }

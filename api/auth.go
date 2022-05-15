@@ -55,6 +55,7 @@ func (api *API) login() gin.HandlerFunc {
 			tokenString := jwtService.GenerateToken(userSchema.Email, userSchema.IsAdmin)
 			ctx.IndentedJSON(http.StatusOK, gin.H{
 				"token": tokenString,
+				"user":  fetchedUser,
 			})
 			return
 		}

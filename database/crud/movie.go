@@ -3,10 +3,12 @@ package crud
 import (
 	"interface_project/ent"
 	"interface_project/ent/movie"
+	"log"
 )
 
 func (crud *Crud) AddMovies(movies []*ent.MovieCreate) ([]*ent.Movie, error) {
 	if movies, err := crud.Client.Movie.CreateBulk(movies...).Save(*crud.Ctx); err != nil {
+		log.Printf("%+v", err)
 		return nil, err
 	} else {
 		return movies, nil

@@ -96,6 +96,14 @@ func (mc *MovieCreate) SetWordNodesID(id int) *MovieCreate {
 	return mc
 }
 
+// SetNillableWordNodesID sets the "word_nodes" edge to the WordNode entity by ID if the given value is not nil.
+func (mc *MovieCreate) SetNillableWordNodesID(id *int) *MovieCreate {
+	if id != nil {
+		mc = mc.SetWordNodesID(*id)
+	}
+	return mc
+}
+
 // SetWordNodes sets the "word_nodes" edge to the WordNode entity.
 func (mc *MovieCreate) SetWordNodes(w *WordNode) *MovieCreate {
 	return mc.SetWordNodesID(w.ID)
@@ -202,9 +210,6 @@ func (mc *MovieCreate) check() error {
 	}
 	if _, ok := mc.mutation.MetacriticRating(); !ok {
 		return &ValidationError{Name: "metacriticRating", err: errors.New(`ent: missing required field "Movie.metacriticRating"`)}
-	}
-	if _, ok := mc.mutation.WordNodesID(); !ok {
-		return &ValidationError{Name: "word_nodes", err: errors.New(`ent: missing required edge "Movie.word_nodes"`)}
 	}
 	return nil
 }

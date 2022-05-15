@@ -32,7 +32,7 @@ func (Movie) Fields() []ent.Field {
 func (Movie) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("users", User.Type).Ref("favorite_movies").Annotations(entproto.Field(11)),
-		edge.From("word_nodes", WordNode.Type).Ref("movie_wordnode").Required().Unique().Annotations(entproto.Field(12)),
+		edge.From("word_nodes", WordNode.Type).Ref("movie_wordnode").Unique().Annotations(entproto.Field(12)),
 	}
 }
 

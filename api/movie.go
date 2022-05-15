@@ -56,6 +56,7 @@ func (api *API) addMovies() gin.HandlerFunc {
 				"message": "error occured when fetching data from imdb",
 			})
 		} else {
+			log.Printf("%+v\n", imdbMovies[0])
 			movies := make([]*ent.MovieCreate, len(imdbMovies))
 			for i, imdbMovie := range imdbMovies {
 				movies[i] = api.Crud.Client.Movie.Create().
@@ -108,6 +109,8 @@ func queryMovieFromIMDB(title string) ([]*imdbMovie, error) {
 		return nil, err
 	} else {
 		log.Println(fmt.Sprintf("%s/%s?title=%s&count=250", imdbPathURL, apiKey, title))
+		log.Println(response.StatusCode)
+		log.Println(fmt.Sprintf("%+v", response.Body))
 		defer response.Body.Close()
 		decoder := json.NewDecoder(response.Body)
 		var queryResult QueryResult

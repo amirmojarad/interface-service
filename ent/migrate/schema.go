@@ -20,7 +20,7 @@ var (
 		{Name: "plot", Type: field.TypeString},
 		{Name: "stars", Type: field.TypeString},
 		{Name: "metacritic_rating", Type: field.TypeString},
-		{Name: "word_node_movie_wordnode", Type: field.TypeInt, Unique: true},
+		{Name: "word_node_movie_wordnode", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// MoviesTable holds the schema information for the "movies" table.
 	MoviesTable = &schema.Table{
@@ -32,7 +32,7 @@ var (
 				Symbol:     "movies_word_nodes_movie_wordnode",
 				Columns:    []*schema.Column{MoviesColumns[10]},
 				RefColumns: []*schema.Column{WordNodesColumns[0]},
-				OnDelete:   schema.NoAction,
+				OnDelete:   schema.SetNull,
 			},
 		},
 	}
