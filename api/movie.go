@@ -7,6 +7,7 @@ import (
 	"interface_project/ent"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -14,10 +15,30 @@ import (
 
 func (api *API) movieGroup(path string) {
 	movieGroup := api.Engine.Group(path, middlewares.CheckAuth())
-	movieGroup.POST("/:title", api.addMovies())
+	movieGroup.GET("/:title", api.addMovies())
 	movieGroup.GET("/", api.getAllMovies())
 	movieGroup.GET("/search", api.searchMovie())
+	movieGroup.GET("/search/query/:title", api.queryMovies())
 
+}
+
+func (api *API) queryMovies() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		movieTitle := fmt.Sprint(ctx.Query("title"))
+		if movies, err := api.Crud.SearchMovie(movieTitle); err != nil {
+			ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
+				"message": "some error!",
+				"error":   err.Error(),
+			})
+		} else {
+			if len(movies) == 0 {
+				location := url.URL{Path: "/movies/:title"}
+				ctx.Redirect(http.StatusFound, location.RequestURI())
+			} else {
+				ctx.IndentedJSON(http.StatusOK, movies)
+			}
+		}
+	}
 }
 
 func (api *API) searchMovie() gin.HandlerFunc {
@@ -73,7 +94,7 @@ func (api *API) addMovies() gin.HandlerFunc {
 			if newMovies, err := api.Crud.AddMovies(movies); err != nil {
 				ctx.IndentedJSON(http.StatusInternalServerError, err)
 			} else {
-				ctx.IndentedJSON(http.StatusCreated, newMovies)
+				ctx.IndentedJSON(http.StatusOK, newMovies)
 			}
 		}
 
