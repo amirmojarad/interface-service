@@ -13,7 +13,6 @@ import (
 	"interface_project/api/auth"
 	"interface_project/database/crud"
 	"interface_project/ent"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
@@ -22,15 +21,6 @@ type API struct {
 	Crud       *crud.Crud
 	Engine     *gin.Engine
 	jwtService auth.JWTService
-}
-
-// startEngine call all api groups and html templates.
-func (api *API) startEngine() {
-	api.groups()
-	api.Engine.LoadHTMLGlob("template/*")
-	api.Engine.GET("/", func(ctx *gin.Context) {
-		ctx.HTML(http.StatusOK, "index.html", gin.H{})
-	})
 }
 
 // groups call all api groups (routers)
@@ -54,7 +44,7 @@ func (api *API) groups() {
 }
 
 // RunAPI gives context and client to run api and start program.
-func RunAPI(ctx *context.Context, client *ent.Client) {
+func RunAPI(ctx *context.Context, client *ent.Client) *API {
 	interfaceAPI := &API{
 		Engine: gin.Default(),
 		Crud: &crud.Crud{
@@ -63,6 +53,6 @@ func RunAPI(ctx *context.Context, client *ent.Client) {
 		},
 		jwtService: auth.JWTAuthService(),
 	}
-	interfaceAPI.startEngine()
-	interfaceAPI.Engine.Run(":8080")
+	interfaceAPI.groups()
+	return interfaceAPI
 }

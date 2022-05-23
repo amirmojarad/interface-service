@@ -1,6 +1,7 @@
 package crud
 
 import (
+	"interface_project/api/dto"
 	"interface_project/ent"
 	"interface_project/ent/movie"
 	"log"
@@ -39,10 +40,11 @@ func (crud *Crud) DeleteMovie(movieID int) (bool, error) {
 	}
 }
 
-func (crud *Crud) SearchMovie(movieTitle string) ([]*ent.Movie, error) {
-	if movies, err := crud.Client.Movie.Query().Where(movie.TitleContains(movieTitle)).All(*crud.Ctx); err != nil {
+func (crud *Crud) SearchMovieSortByID(searchMovieSchema dto.SearchMovieSchema) ([]*ent.Movie, error) {
+	if movies, err := crud.Client.Movie.Query().Where(movie.TitleContainsFold(searchMovieSchema.Title)).Order(ent.Asc(movie.FieldID)).All(*crud.Ctx); err != nil {
 		return nil, err
 	} else {
+		log.Println(len(movies))
 		return movies, nil
 	}
 }

@@ -36,5 +36,6 @@ func main() {
 		log.Fatalf("failed creating schema changes: %+v", err)
 	}
 
-	api.RunAPI(&ctx, &client)
+	apiInstance := api.RunAPI(&ctx, &client)
+	apiInstance.Engine.Run(":8080")
 }
