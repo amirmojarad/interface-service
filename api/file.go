@@ -1,10 +1,12 @@
 package api
 
 import (
-	file_handler "interface_project/usecases/handlers/file_handler"
-	sentences "interface_project/usecases/handlers/sentences"
-
+	"fmt"
+	"interface_project/api/dto"
+	"interface_project/api/middlewares"
+	"interface_project/usecases/handlers/file_handler"
 	"io"
+
 	"log"
 	"net/http"
 	"os"
@@ -14,7 +16,7 @@ import (
 )
 
 func (api *API) fileGroup(path string) {
-	fileGroup := api.Engine.Group(path)
+	fileGroup := api.Engine.Group(path, middlewares.CheckAuth())
 	fileGroup.GET("/", api.fileIndex())
 	fileGroup.POST("/upload", api.upload())
 	fileGroup.GET("/download", api.download())
@@ -32,14 +34,43 @@ func (api API) fileIndex() gin.HandlerFunc {
 	}
 }
 
-func (api API) upload() gin.HandlerFunc {
+func (api API) sendSubtitleText() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		// email := fmt.Sprint(ctx.MustGet("email"))
+		var subtitleText dto.SubtitleText
+		if err := ctx.BindJSON(&subtitleText); err != nil {
+			ctx.IndentedJSON(http.StatusBadRequest, gin.H{
+				"message": "invalid json file",
+				"error":   err.Error(),
+			})
+			return
+		}
+		if !strings.Contains(subtitleText.Title, ".srt") {
+			ctx.IndentedJSON(http.StatusBadRequest, gin.H{
+				"message": "send srt file only",
+			})
+			return
+		}
+		filePath := "subs/" + subtitleText.Title
+		_, err := os.Create(filePath)
+		if err != nil {
+			log.Fatal(err)
+		}
+		ctx.IndentedJSON(http.StatusCreated, gin.H{
+			"message": fmt.Sprintf("file with path %s created successfully.", filePath),
+		})
+	}
+}
+
+func (api API) upload() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		email := fmt.Sprint(ctx.MustGet("email"))
 		file, header, err := ctx.Request.FormFile("file")
 		if err != nil {
 			ctx.IndentedJSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),
 			})
+			log.Println(err.Error())
 			return
 		}
 		fileName := header.Filename
@@ -47,6 +78,7 @@ func (api API) upload() gin.HandlerFunc {
 			ctx.IndentedJSON(http.StatusBadRequest, gin.H{
 				"message": "uploaded file is not an srt file.",
 			})
+			log.Println("uploaded file is not an srt file.")
 			return
 		}
 		filePath := "subs/" + fileName
@@ -61,20 +93,16 @@ func (api API) upload() gin.HandlerFunc {
 		if err != nil {
 			log.Fatal(err)
 		}
-		if user, err := api.Crud.GetUserByEmail("email"); err != nil {
+		if user, err := api.Crud.GetUserByEmail(email); err != nil {
 			ctx.IndentedJSON(http.StatusNotFound, gin.H{
 				"error": err.Error(),
 			})
 		} else {
-			words := sentences.GetSentences(api.Crud.Client, openedFile, user)
-			createdWords, err := api.Crud.AddWordsToUser(words)
-			if err != nil {
-				ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
-					"error": err.Error(),
-				})
-			} else {
-				ctx.IndentedJSON(http.StatusOK, createdWords)
-			}
+			ctx.IndentedJSON(http.StatusOK, gin.H{
+				"message":   "file downloaded successfuly",
+				"user":      user,
+				"file_name": openedFile.Name(),
+			})
 		}
 	}
 }

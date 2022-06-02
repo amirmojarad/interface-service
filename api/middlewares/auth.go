@@ -26,7 +26,11 @@ func CheckAuth() gin.HandlerFunc {
 				ctx.Next()
 			}
 		} else {
-			ctx.AbortWithError(http.StatusUnauthorized, errors.New("request does not contain any token"))
+			ctx.IndentedJSON(http.StatusUnauthorized, gin.H{
+				"error":   errors.New("request does not contain any token"),
+				"message": "401 UnAuthorized",
+			})
+			ctx.AbortWithStatus(http.StatusUnauthorized)
 			return
 		}
 	}

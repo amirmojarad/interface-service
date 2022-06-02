@@ -16,7 +16,7 @@ type SearchKeyword struct {
 // Fields of the SearchKeyword.
 func (SearchKeyword) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("title").NotEmpty().Unique().Annotations(entproto.Field(2)),
+		field.String("title").NotEmpty().Annotations(entproto.Field(2)),
 		field.Uint16("rate").Default(0).Annotations(entproto.Field(3)),
 	}
 }

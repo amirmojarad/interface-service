@@ -24,7 +24,7 @@ func (crud Crud) GetUserByID(id int) (*ent.User, error) {
 }
 
 func (crud Crud) GetUserByEmail(email string) (*ent.User, error) {
-	if u, err := crud.Client.User.Query().Where(user.Email(email)).First(*crud.Ctx); err != nil {
+	if u, err := crud.Client.User.Query().Where(user.EmailEQ(email)).First(*crud.Ctx); err != nil {
 		return nil, err
 	} else {
 		return u, nil
@@ -76,7 +76,7 @@ func (crud Crud) DeleteUserByEmail(email string) (*ent.User, error) {
 	}
 }
 
-func (crud Crud) AddMoviesToUser(movieIDs []int, email string) (*ent.User, error) {
+func (crud Crud) AddMoviesToUser(movieIDs []int, email string) ([]*ent.Movie, error) {
 	if u, err := crud.GetUserByEmail(email); err != nil {
 		return nil, err
 	} else {
@@ -84,7 +84,7 @@ func (crud Crud) AddMoviesToUser(movieIDs []int, email string) (*ent.User, error
 		if err != nil {
 			return nil, err
 		}
-		return u, nil
+		return u.QueryFavoriteMovies().AllX(*crud.Ctx), nil
 	}
 }
 
@@ -141,7 +141,6 @@ func (crud Crud) AddSearchKeywordToUser(email string, keyword string) ([]*ent.Se
 		}
 	}
 }
-
 func (crud Crud) GetUserSearchKeyword(email string) ([]*ent.SearchKeyword, error) {
 	if u, err := crud.GetUserByEmail(email); err != nil {
 		return nil, err

@@ -39,7 +39,7 @@ var (
 	// SearchKeywordsColumns holds the columns for the "search_keywords" table.
 	SearchKeywordsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "title", Type: field.TypeString, Unique: true},
+		{Name: "title", Type: field.TypeString},
 		{Name: "rate", Type: field.TypeUint16, Default: 0},
 		{Name: "user_searched_keywords", Type: field.TypeInt, Nullable: true},
 	}

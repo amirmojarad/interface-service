@@ -31,6 +31,16 @@ func (api API) searchMovies() gin.HandlerFunc {
 			})
 			return
 		}
+		// adding searched keyword to database
+		email := ctx.GetString("email")
+		_, err := api.Crud.AddSearchKeywordToUser(email, searchMovieSchema.Title)
+		if err != nil {
+			ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
+				"message": "error while adding keywords database.",
+				"error":   err.Error(),
+			})
+			return
+		}
 		if searchedMovies, err := api.Crud.SearchMovieSortByID(searchMovieSchema); err != nil {
 			ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
 				"message": "error while fetching movies from database.",
@@ -216,7 +226,7 @@ func addSearchedImdbMoviesToDatabase(searchedMovies []*imdbMovie, api *API) ([]*
 			SetMetacriticRating(imdbMovie.MetacriticRating)
 	}
 	if addedMovies, err := api.Crud.AddMovies(movies); err != nil {
-		return nil, errors.New("error while adding MovieCreate slices to database.")
+		return nil, errors.New("error while adding MovieCreate slices to database")
 	} else {
 		return addedMovies, nil
 	}

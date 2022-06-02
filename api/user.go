@@ -21,6 +21,7 @@ func (api *API) userGroup(path string) {
 	userGroup.GET("/favoriteMovies/:id", api.getFavoriteMovie())
 	userGroup.DELETE("/favoriteMovies", api.deleteMovieFromFavorites())
 	userGroup.GET("/searchKeywords", api.getSearchKeywords())
+	userGroup.POST("/upload", api.sendSubtitleText())
 	// userGroup.GET("/upload", func(ctx *gin.Context) {
 	// 	location := url.URL{Path: "/file"}
 	// 	ctx.Redirect(http.StatusFound, location.RequestURI())
@@ -39,14 +40,18 @@ func (api API) getSearchKeywords() gin.HandlerFunc {
 		if keywords, err := api.Crud.GetUserSearchKeyword(email); err != nil {
 			ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"message": "some error happend", "error": err.Error()})
 		} else {
-			ctx.IndentedJSON(http.StatusOK, keywords)
+			searchTitles := []string{}
+			for _, keyword := range keywords {
+				searchTitles = append(searchTitles, keyword.Title)
+			}
+			ctx.IndentedJSON(http.StatusOK, searchTitles)
 		}
 	}
 }
 
 func (api *API) deleteMovieFromFavorites() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		userEmail := fmt.Sprint(ctx.Query("email"))
+		userEmail := fmt.Sprint(ctx.MustGet("email"))
 		var movieIDs []int
 		ctx.BindJSON(&movieIDs)
 		if movies, err := api.Crud.DeleteMovieFromFavorites(userEmail, movieIDs); err != nil {
@@ -79,9 +84,9 @@ func (api *API) getFavoriteMovie() gin.HandlerFunc {
 		userEmail := ctx.MustGet("email")
 		movieID, _ := strconv.Atoi(ctx.Param("id"))
 		if movie, err := api.Crud.GetFavoriteMovie(fmt.Sprint(userEmail), movieID); err != nil {
-			ctx.IndentedJSON(http.StatusInternalServerError, gin.H{"message": fmt.Sprintf("movie with id %d not found", movieID), "error": err.Error()})
+			ctx.IndentedJSON(http.StatusNotFound, gin.H{"message": fmt.Sprintf("movie with id %d not found", movieID), "error": err.Error()})
 		} else {
-			ctx.IndentedJSON(http.StatusCreated, movie)
+			ctx.IndentedJSON(http.StatusOK, movie)
 		}
 	}
 }
