@@ -5,6 +5,8 @@ import (
 	"interface_project/ent/movie"
 	"interface_project/ent/user"
 	"interface_project/usecases/generators"
+	"os"
+	"time"
 )
 
 func (crud Crud) GetAllUsers() ([]*ent.User, error) {
@@ -152,4 +154,22 @@ func (crud Crud) GetUserSearchKeyword(email string) ([]*ent.SearchKeyword, error
 		}
 	}
 
+}
+
+func (crud Crud) AddFileToUser(user *ent.User, file *os.File, path string) (*ent.File, error) {
+	fileStat, err := file.Stat()
+	if err != nil {
+		return nil, err
+	}
+	if createdFile, err := crud.Client.File.Create().
+		SetOwner(user).
+		SetCreatedDate(time.Now()).
+		SetDeleted(false).
+		SetName(file.Name()).
+		SetPath(path).
+		SetSize(int16(fileStat.Size())).Save(*crud.Ctx); err != nil {
+		return nil, err
+	} else {
+		return createdFile, nil
+	}
 }

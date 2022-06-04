@@ -98,10 +98,18 @@ func (api API) upload() gin.HandlerFunc {
 				"error": err.Error(),
 			})
 		} else {
+			createdFile, err := api.Crud.AddFileToUser(
+				user, openedFile, filePath,
+			)
+			if err != nil {
+				ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
+					"message": "error occured when file entity created in database",
+					"error":   err,
+				})
+			}
 			ctx.IndentedJSON(http.StatusOK, gin.H{
-				"message":   "file downloaded successfuly",
-				"user":      user,
-				"file_name": openedFile.Name(),
+				"message": "file downloaded successfuly",
+				"file":    createdFile,
 			})
 		}
 	}
