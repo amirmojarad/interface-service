@@ -7,6 +7,7 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
+	"interface_project/ent/file"
 	"interface_project/ent/movie"
 	"interface_project/ent/predicate"
 	"interface_project/ent/searchkeyword"
@@ -32,6 +33,7 @@ type UserQuery struct {
 	withFavoriteMovies   *MovieQuery
 	withSearchedKeywords *SearchKeywordQuery
 	withFavoriteWords    *WordQuery
+	withFiles            *FileQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -127,6 +129,28 @@ func (uq *UserQuery) QueryFavoriteWords() *WordQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(word.Table, word.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.FavoriteWordsTable, user.FavoriteWordsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryFiles chains the current query on the "files" edge.
+func (uq *UserQuery) QueryFiles() *FileQuery {
+	query := &FileQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.FilesTable, user.FilesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -318,6 +342,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withFavoriteMovies:   uq.withFavoriteMovies.Clone(),
 		withSearchedKeywords: uq.withSearchedKeywords.Clone(),
 		withFavoriteWords:    uq.withFavoriteWords.Clone(),
+		withFiles:            uq.withFiles.Clone(),
 		// clone intermediate query.
 		sql:    uq.sql.Clone(),
 		path:   uq.path,
@@ -355,6 +380,17 @@ func (uq *UserQuery) WithFavoriteWords(opts ...func(*WordQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withFavoriteWords = query
+	return uq
+}
+
+// WithFiles tells the query-builder to eager-load the nodes that are connected to
+// the "files" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithFiles(opts ...func(*FileQuery)) *UserQuery {
+	query := &FileQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withFiles = query
 	return uq
 }
 
@@ -423,10 +459,11 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			uq.withFavoriteMovies != nil,
 			uq.withSearchedKeywords != nil,
 			uq.withFavoriteWords != nil,
+			uq.withFiles != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -569,6 +606,35 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "user_favorite_words" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.FavoriteWords = append(node.Edges.FavoriteWords, n)
+		}
+	}
+
+	if query := uq.withFiles; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Files = []*File{}
+		}
+		query.withFKs = true
+		query.Where(predicate.File(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.FilesColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.user_files
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "user_files" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "user_files" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Files = append(node.Edges.Files, n)
 		}
 	}
 

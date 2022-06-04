@@ -9,6 +9,22 @@ import "google/protobuf/wrappers.proto";
 
 option go_package = "interface_project/ent/proto/entpb";
 
+message File {
+  int32 id = 1;
+
+  string path = 2;
+
+  string name = 3;
+
+  int32 size = 4;
+
+  bool deleted = 5;
+
+  google.protobuf.Timestamp created_date = 6;
+
+  User owner = 7;
+}
+
 message Movie {
   int32 id = 1;
 
@@ -67,6 +83,8 @@ message User {
   repeated SearchKeyword searched_keywords = 10;
 
   repeated Word favorite_words = 11;
+
+  repeated File files = 12;
 }
 
 message Word {

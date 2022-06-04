@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"interface_project/ent/file"
 	"interface_project/ent/movie"
 	"interface_project/ent/searchkeyword"
 	"interface_project/ent/user"
@@ -140,6 +141,21 @@ func (uc *UserCreate) AddFavoriteWords(w ...*Word) *UserCreate {
 		ids[i] = w[i].ID
 	}
 	return uc.AddFavoriteWordIDs(ids...)
+}
+
+// AddFileIDs adds the "files" edge to the File entity by IDs.
+func (uc *UserCreate) AddFileIDs(ids ...int) *UserCreate {
+	uc.mutation.AddFileIDs(ids...)
+	return uc
+}
+
+// AddFiles adds the "files" edges to the File entity.
+func (uc *UserCreate) AddFiles(f ...*File) *UserCreate {
+	ids := make([]int, len(f))
+	for i := range f {
+		ids[i] = f[i].ID
+	}
+	return uc.AddFileIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -398,6 +414,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: word.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.FilesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.FilesTable,
+			Columns: []string{user.FilesColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: file.FieldID,
 				},
 			},
 		}

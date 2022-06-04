@@ -8,6 +8,30 @@ import (
 )
 
 var (
+	// FilesColumns holds the columns for the "files" table.
+	FilesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "path", Type: field.TypeString},
+		{Name: "name", Type: field.TypeString},
+		{Name: "size", Type: field.TypeInt16},
+		{Name: "deleted", Type: field.TypeBool},
+		{Name: "created_date", Type: field.TypeTime},
+		{Name: "user_files", Type: field.TypeInt, Nullable: true},
+	}
+	// FilesTable holds the schema information for the "files" table.
+	FilesTable = &schema.Table{
+		Name:       "files",
+		Columns:    FilesColumns,
+		PrimaryKey: []*schema.Column{FilesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "files_users_files",
+				Columns:    []*schema.Column{FilesColumns[6]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+		},
+	}
 	// MoviesColumns holds the columns for the "movies" table.
 	MoviesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -153,6 +177,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		FilesTable,
 		MoviesTable,
 		SearchKeywordsTable,
 		UsersTable,
@@ -163,6 +188,7 @@ var (
 )
 
 func init() {
+	FilesTable.ForeignKeys[0].RefTable = UsersTable
 	MoviesTable.ForeignKeys[0].RefTable = WordNodesTable
 	SearchKeywordsTable.ForeignKeys[0].RefTable = UsersTable
 	WordsTable.ForeignKeys[0].RefTable = UsersTable

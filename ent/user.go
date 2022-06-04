@@ -43,9 +43,11 @@ type UserEdges struct {
 	SearchedKeywords []*SearchKeyword `json:"searched_keywords,omitempty"`
 	// FavoriteWords holds the value of the favorite_words edge.
 	FavoriteWords []*Word `json:"favorite_words,omitempty"`
+	// Files holds the value of the files edge.
+	Files []*File `json:"files,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // FavoriteMoviesOrErr returns the FavoriteMovies value or an error if the edge
@@ -73,6 +75,15 @@ func (e UserEdges) FavoriteWordsOrErr() ([]*Word, error) {
 		return e.FavoriteWords, nil
 	}
 	return nil, &NotLoadedError{edge: "favorite_words"}
+}
+
+// FilesOrErr returns the Files value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) FilesOrErr() ([]*File, error) {
+	if e.loadedTypes[3] {
+		return e.Files, nil
+	}
+	return nil, &NotLoadedError{edge: "files"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -169,6 +180,11 @@ func (u *User) QuerySearchedKeywords() *SearchKeywordQuery {
 // QueryFavoriteWords queries the "favorite_words" edge of the User entity.
 func (u *User) QueryFavoriteWords() *WordQuery {
 	return (&UserClient{config: u.config}).QueryFavoriteWords(u)
+}
+
+// QueryFiles queries the "files" edge of the User entity.
+func (u *User) QueryFiles() *FileQuery {
+	return (&UserClient{config: u.config}).QueryFiles(u)
 }
 
 // Update returns a builder for updating this User.

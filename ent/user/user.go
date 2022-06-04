@@ -31,6 +31,8 @@ const (
 	EdgeSearchedKeywords = "searched_keywords"
 	// EdgeFavoriteWords holds the string denoting the favorite_words edge name in mutations.
 	EdgeFavoriteWords = "favorite_words"
+	// EdgeFiles holds the string denoting the files edge name in mutations.
+	EdgeFiles = "files"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// FavoriteMoviesTable is the table that holds the favorite_movies relation/edge. The primary key declared below.
@@ -52,6 +54,13 @@ const (
 	FavoriteWordsInverseTable = "words"
 	// FavoriteWordsColumn is the table column denoting the favorite_words relation/edge.
 	FavoriteWordsColumn = "user_favorite_words"
+	// FilesTable is the table that holds the files relation/edge.
+	FilesTable = "files"
+	// FilesInverseTable is the table name for the File entity.
+	// It exists in this package in order to avoid circular dependency with the "file" package.
+	FilesInverseTable = "files"
+	// FilesColumn is the table column denoting the files relation/edge.
+	FilesColumn = "user_files"
 )
 
 // Columns holds all SQL columns for user fields.
