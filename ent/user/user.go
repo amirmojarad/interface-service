@@ -25,6 +25,8 @@ const (
 	FieldUpdatedDate = "updated_date"
 	// FieldIsAdmin holds the string denoting the is_admin field in the database.
 	FieldIsAdmin = "is_admin"
+	// FieldImageURL holds the string denoting the image_url field in the database.
+	FieldImageURL = "image_url"
 	// EdgeFavoriteMovies holds the string denoting the favorite_movies edge name in mutations.
 	EdgeFavoriteMovies = "favorite_movies"
 	// EdgeSearchedKeywords holds the string denoting the searched_keywords edge name in mutations.
@@ -73,6 +75,7 @@ var Columns = []string{
 	FieldCreatedDate,
 	FieldUpdatedDate,
 	FieldIsAdmin,
+	FieldImageURL,
 }
 
 var (

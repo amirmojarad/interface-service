@@ -13,7 +13,7 @@ func (api API) WordNodesGroup(path string) {
 	router.POST("/all/sort", api.GetMovieWordsNodeOrderBy())
 }
 
-func (api API) GetMovieWordNodes() gin.HandlerFunc {
+func (api API) 	GetMovieWordNodes() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		var movieWordNodeSchema dto.MovieWordNode
 		if err := ctx.BindJSON(&movieWordNodeSchema); err != nil {

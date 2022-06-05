@@ -2046,6 +2046,7 @@ type UserMutation struct {
 	created_date             *time.Time
 	updated_date             *time.Time
 	is_admin                 *bool
+	image_url                *string
 	clearedFields            map[string]struct{}
 	favorite_movies          map[int]struct{}
 	removedfavorite_movies   map[int]struct{}
@@ -2427,6 +2428,55 @@ func (m *UserMutation) ResetIsAdmin() {
 	m.is_admin = nil
 }
 
+// SetImageURL sets the "image_url" field.
+func (m *UserMutation) SetImageURL(s string) {
+	m.image_url = &s
+}
+
+// ImageURL returns the value of the "image_url" field in the mutation.
+func (m *UserMutation) ImageURL() (r string, exists bool) {
+	v := m.image_url
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldImageURL returns the old "image_url" field's value of the User entity.
+// If the User object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UserMutation) OldImageURL(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldImageURL is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldImageURL requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldImageURL: %w", err)
+	}
+	return oldValue.ImageURL, nil
+}
+
+// ClearImageURL clears the value of the "image_url" field.
+func (m *UserMutation) ClearImageURL() {
+	m.image_url = nil
+	m.clearedFields[user.FieldImageURL] = struct{}{}
+}
+
+// ImageURLCleared returns if the "image_url" field was cleared in this mutation.
+func (m *UserMutation) ImageURLCleared() bool {
+	_, ok := m.clearedFields[user.FieldImageURL]
+	return ok
+}
+
+// ResetImageURL resets all changes to the "image_url" field.
+func (m *UserMutation) ResetImageURL() {
+	m.image_url = nil
+	delete(m.clearedFields, user.FieldImageURL)
+}
+
 // AddFavoriteMovieIDs adds the "favorite_movies" edge to the Movie entity by ids.
 func (m *UserMutation) AddFavoriteMovieIDs(ids ...int) {
 	if m.favorite_movies == nil {
@@ -2662,7 +2712,7 @@ func (m *UserMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 7)
+	fields := make([]string, 0, 8)
 	if m.username != nil {
 		fields = append(fields, user.FieldUsername)
 	}
@@ -2683,6 +2733,9 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.is_admin != nil {
 		fields = append(fields, user.FieldIsAdmin)
+	}
+	if m.image_url != nil {
+		fields = append(fields, user.FieldImageURL)
 	}
 	return fields
 }
@@ -2706,6 +2759,8 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.UpdatedDate()
 	case user.FieldIsAdmin:
 		return m.IsAdmin()
+	case user.FieldImageURL:
+		return m.ImageURL()
 	}
 	return nil, false
 }
@@ -2729,6 +2784,8 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldUpdatedDate(ctx)
 	case user.FieldIsAdmin:
 		return m.OldIsAdmin(ctx)
+	case user.FieldImageURL:
+		return m.OldImageURL(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -2787,6 +2844,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetIsAdmin(v)
 		return nil
+	case user.FieldImageURL:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetImageURL(v)
+		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
 }
@@ -2820,6 +2884,9 @@ func (m *UserMutation) ClearedFields() []string {
 	if m.FieldCleared(user.FieldFullName) {
 		fields = append(fields, user.FieldFullName)
 	}
+	if m.FieldCleared(user.FieldImageURL) {
+		fields = append(fields, user.FieldImageURL)
+	}
 	return fields
 }
 
@@ -2836,6 +2903,9 @@ func (m *UserMutation) ClearField(name string) error {
 	switch name {
 	case user.FieldFullName:
 		m.ClearFullName()
+		return nil
+	case user.FieldImageURL:
+		m.ClearImageURL()
 		return nil
 	}
 	return fmt.Errorf("unknown User nullable field %s", name)
@@ -2865,6 +2935,9 @@ func (m *UserMutation) ResetField(name string) error {
 		return nil
 	case user.FieldIsAdmin:
 		m.ResetIsAdmin()
+		return nil
+	case user.FieldImageURL:
+		m.ResetImageURL()
 		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)

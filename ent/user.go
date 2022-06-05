@@ -30,6 +30,8 @@ type User struct {
 	UpdatedDate time.Time `json:"updated_date,omitempty"`
 	// IsAdmin holds the value of the "is_admin" field.
 	IsAdmin bool `json:"is_admin,omitempty"`
+	// ImageURL holds the value of the "image_url" field.
+	ImageURL string `json:"image_url,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges UserEdges `json:"edges"`
@@ -95,7 +97,7 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullBool)
 		case user.FieldID:
 			values[i] = new(sql.NullInt64)
-		case user.FieldUsername, user.FieldEmail, user.FieldPassword, user.FieldFullName:
+		case user.FieldUsername, user.FieldEmail, user.FieldPassword, user.FieldFullName, user.FieldImageURL:
 			values[i] = new(sql.NullString)
 		case user.FieldCreatedDate, user.FieldUpdatedDate:
 			values[i] = new(sql.NullTime)
@@ -162,6 +164,12 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				u.IsAdmin = value.Bool
 			}
+		case user.FieldImageURL:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field image_url", values[i])
+			} else if value.Valid {
+				u.ImageURL = value.String
+			}
 		}
 	}
 	return nil
@@ -224,6 +232,8 @@ func (u *User) String() string {
 	builder.WriteString(u.UpdatedDate.Format(time.ANSIC))
 	builder.WriteString(", is_admin=")
 	builder.WriteString(fmt.Sprintf("%v", u.IsAdmin))
+	builder.WriteString(", image_url=")
+	builder.WriteString(u.ImageURL)
 	builder.WriteByte(')')
 	return builder.String()
 }

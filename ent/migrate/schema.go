@@ -91,6 +91,7 @@ var (
 		{Name: "created_date", Type: field.TypeTime},
 		{Name: "updated_date", Type: field.TypeTime},
 		{Name: "is_admin", Type: field.TypeBool, Default: false},
+		{Name: "image_url", Type: field.TypeString, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{

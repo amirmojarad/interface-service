@@ -15,17 +15,83 @@ func (api *API) userGroup(path string) {
 	userGroup := api.Engine.Group(path, middlewares.CheckAuth())
 	userGroup.DELETE("/", middlewares.IsSuperUser(), api.deleteUser())
 	userGroup.PATCH("/", api.changeUser())
-	userGroup.GET("/", middlewares.IsSuperUser(), api.getAllUsers())
+	// userGroup.GET("/", middlewares.IsSuperUser(), api.getAllUsers())
 	userGroup.POST("/favoriteMovies", api.addMoviesToFavorites())
 	userGroup.GET("/favoriteMovies", api.getFavoritesMovies())
 	userGroup.GET("/favoriteMovies/:id", api.getFavoriteMovie())
 	userGroup.DELETE("/favoriteMovies", api.deleteMovieFromFavorites())
 	userGroup.GET("/searchKeywords", api.getSearchKeywords())
 	userGroup.POST("/upload", api.sendSubtitleText())
+	userGroup.GET("/", api.getUserByID())
+	userGroup.POST("/", api.updateUser())
 	// userGroup.GET("/upload", func(ctx *gin.Context) {
 	// 	location := url.URL{Path: "/file"}
 	// 	ctx.Redirect(http.StatusFound, location.RequestURI())
 	// })
+}
+
+func (api API) updateUser() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		var user ent.User
+		ctx.BindJSON(&user)
+		log.Println(user)
+		if fetchedUser, err := api.Crud.GetUserByID(user.ID); err != nil {
+			ctx.IndentedJSON(http.StatusBadRequest, gin.H{
+				"message": "error",
+				"error":   err.Error(),
+				"user":    user,
+			})
+			return
+		} else {
+			email := fmt.Sprint(ctx.MustGet("email"))
+			if email == fetchedUser.Email {
+				if updatedUser, err := api.Crud.UpdateUser(user.ID, &user); err != nil {
+					ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
+						"message": "error while updating user",
+						"error":   err.Error(),
+					})
+
+				} else {
+					ctx.IndentedJSON(http.StatusOK, updatedUser)
+				}
+			} else {
+				ctx.IndentedJSON(http.StatusUnauthorized, gin.H{
+					"message": fmt.Sprintf("user with id %d does not accessible", user.ID),
+				})
+			}
+			return
+		}
+	}
+}
+
+func (api API) getUserByID() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		if id, err := strconv.Atoi(ctx.Request.URL.Query().Get("id")); err != nil {
+			ctx.IndentedJSON(http.StatusBadRequest, gin.H{
+				"message": "request does not contain any id in url",
+				"error":   err.Error(),
+			})
+		} else {
+			if fetchedUser, err := api.Crud.GetUserByID(id); err != nil {
+
+				ctx.IndentedJSON(http.StatusNotFound, gin.H{
+					"message": "cannot find user by given id",
+					"error":   err.Error(),
+				})
+			} else {
+				email := fmt.Sprint(ctx.MustGet("email"))
+				if fetchedUser.Email != email {
+					ctx.IndentedJSON(http.StatusUnauthorized, gin.H{
+						"message": "given token does not match to given id",
+					})
+					return
+				}
+				ctx.IndentedJSON(http.StatusOK, gin.H{
+					"user": fetchedUser,
+				})
+			}
+		}
+	}
 }
 
 func (api API) userIndex() gin.HandlerFunc {

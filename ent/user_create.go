@@ -98,6 +98,20 @@ func (uc *UserCreate) SetNillableIsAdmin(b *bool) *UserCreate {
 	return uc
 }
 
+// SetImageURL sets the "image_url" field.
+func (uc *UserCreate) SetImageURL(s string) *UserCreate {
+	uc.mutation.SetImageURL(s)
+	return uc
+}
+
+// SetNillableImageURL sets the "image_url" field if the given value is not nil.
+func (uc *UserCreate) SetNillableImageURL(s *string) *UserCreate {
+	if s != nil {
+		uc.SetImageURL(*s)
+	}
+	return uc
+}
+
 // AddFavoriteMovieIDs adds the "favorite_movies" edge to the Movie entity by IDs.
 func (uc *UserCreate) AddFavoriteMovieIDs(ids ...int) *UserCreate {
 	uc.mutation.AddFavoriteMovieIDs(ids...)
@@ -364,6 +378,14 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Column: user.FieldIsAdmin,
 		})
 		_node.IsAdmin = value
+	}
+	if value, ok := uc.mutation.ImageURL(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldImageURL,
+		})
+		_node.ImageURL = value
 	}
 	if nodes := uc.mutation.FavoriteMoviesIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{

@@ -112,6 +112,26 @@ func (uu *UserUpdate) SetNillableIsAdmin(b *bool) *UserUpdate {
 	return uu
 }
 
+// SetImageURL sets the "image_url" field.
+func (uu *UserUpdate) SetImageURL(s string) *UserUpdate {
+	uu.mutation.SetImageURL(s)
+	return uu
+}
+
+// SetNillableImageURL sets the "image_url" field if the given value is not nil.
+func (uu *UserUpdate) SetNillableImageURL(s *string) *UserUpdate {
+	if s != nil {
+		uu.SetImageURL(*s)
+	}
+	return uu
+}
+
+// ClearImageURL clears the value of the "image_url" field.
+func (uu *UserUpdate) ClearImageURL() *UserUpdate {
+	uu.mutation.ClearImageURL()
+	return uu
+}
+
 // AddFavoriteMovieIDs adds the "favorite_movies" edge to the Movie entity by IDs.
 func (uu *UserUpdate) AddFavoriteMovieIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddFavoriteMovieIDs(ids...)
@@ -412,6 +432,19 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeBool,
 			Value:  value,
 			Column: user.FieldIsAdmin,
+		})
+	}
+	if value, ok := uu.mutation.ImageURL(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldImageURL,
+		})
+	}
+	if uu.mutation.ImageURLCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldImageURL,
 		})
 	}
 	if uu.mutation.FavoriteMoviesCleared() {
@@ -726,6 +759,26 @@ func (uuo *UserUpdateOne) SetNillableIsAdmin(b *bool) *UserUpdateOne {
 	if b != nil {
 		uuo.SetIsAdmin(*b)
 	}
+	return uuo
+}
+
+// SetImageURL sets the "image_url" field.
+func (uuo *UserUpdateOne) SetImageURL(s string) *UserUpdateOne {
+	uuo.mutation.SetImageURL(s)
+	return uuo
+}
+
+// SetNillableImageURL sets the "image_url" field if the given value is not nil.
+func (uuo *UserUpdateOne) SetNillableImageURL(s *string) *UserUpdateOne {
+	if s != nil {
+		uuo.SetImageURL(*s)
+	}
+	return uuo
+}
+
+// ClearImageURL clears the value of the "image_url" field.
+func (uuo *UserUpdateOne) ClearImageURL() *UserUpdateOne {
+	uuo.mutation.ClearImageURL()
 	return uuo
 }
 
@@ -1053,6 +1106,19 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Type:   field.TypeBool,
 			Value:  value,
 			Column: user.FieldIsAdmin,
+		})
+	}
+	if value, ok := uuo.mutation.ImageURL(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: user.FieldImageURL,
+		})
+	}
+	if uuo.mutation.ImageURLCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Column: user.FieldImageURL,
 		})
 	}
 	if uuo.mutation.FavoriteMoviesCleared() {

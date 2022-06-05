@@ -173,3 +173,19 @@ func (crud Crud) AddFileToUser(user *ent.User, file *os.File, path string) (*ent
 		return createdFile, nil
 	}
 }
+
+func (crud Crud) ChangePassword(userID int, password string) (*ent.User, error) {
+	return nil, nil
+}
+
+func (crud Crud) UpdateUser(userID int, user *ent.User) (*ent.User, error) {
+	updatedUser, err := crud.Client.User.
+		UpdateOneID(userID).
+		SetNillableImageURL(&user.ImageURL).
+		SetNillableFullName(&user.FullName).
+		SetUpdatedDate(time.Now()).Save(*crud.Ctx)
+	if err != nil {
+		return nil, err
+	}
+	return updatedUser, nil
+}

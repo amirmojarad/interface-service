@@ -39,16 +39,17 @@ func (User) Fields() []ent.Field {
 		field.Bool("is_admin").Annotations(
 			entproto.Field(8),
 		).Default(false),
+		field.String("image_url").Optional().Annotations(entproto.Field(9)),
 	}
 }
 
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("favorite_movies", Movie.Type).Annotations(entproto.Field(9)),
-		edge.To("searched_keywords", SearchKeyword.Type).Annotations(entproto.Field(10)),
-		edge.To("favorite_words", Word.Type).Annotations(entproto.Field(11)),
-		edge.To("files",File.Type).Annotations(entproto.Field(12)),
+		edge.To("favorite_movies", Movie.Type).Annotations(entproto.Field(10)),
+		edge.To("searched_keywords", SearchKeyword.Type).Annotations(entproto.Field(11)),
+		edge.To("favorite_words", Word.Type).Annotations(entproto.Field(12)),
+		edge.To("files", File.Type).Annotations(entproto.Field(13)),
 	}
 }
 

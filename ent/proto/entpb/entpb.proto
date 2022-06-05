@@ -78,13 +78,15 @@ message User {
 
   bool is_admin = 8;
 
-  repeated Movie favorite_movies = 9;
+  google.protobuf.StringValue image_url = 9;
 
-  repeated SearchKeyword searched_keywords = 10;
+  repeated Movie favorite_movies = 10;
 
-  repeated Word favorite_words = 11;
+  repeated SearchKeyword searched_keywords = 11;
 
-  repeated File files = 12;
+  repeated Word favorite_words = 12;
+
+  repeated File files = 13;
 }
 
 message Word {
