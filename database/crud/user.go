@@ -189,3 +189,11 @@ func (crud Crud) UpdateUser(userID int, user *ent.User) (*ent.User, error) {
 	}
 	return updatedUser, nil
 }
+
+func (crud Crud) AddImageUrlToUser(user *ent.User, imageURL string) (*ent.User, error) {
+	if updatedUser, err := user.Update().SetImageURL(imageURL).Save(*crud.Ctx); err != nil {
+		return nil, err
+	} else {
+		return updatedUser, err
+	}
+}
