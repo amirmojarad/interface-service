@@ -13,22 +13,29 @@ import (
 
 func (api *API) userGroup(path string) {
 	userGroup := api.Engine.Group(path, middlewares.CheckAuth())
-	userGroup.DELETE("/", middlewares.IsSuperUser(), api.deleteUser())
-	userGroup.PATCH("/", api.changeUser())
-	// userGroup.GET("/", middlewares.IsSuperUser(), api.getAllUsers())
+	// Favorite Movies
 	userGroup.POST("/favoriteMovies", api.addMoviesToFavorites())
 	userGroup.GET("/favoriteMovies", api.getFavoritesMovies())
 	userGroup.GET("/favoriteMovies/:id", api.getFavoriteMovie())
 	userGroup.DELETE("/favoriteMovies", api.deleteMovieFromFavorites())
-	userGroup.GET("/searchKeywords", api.getSearchKeywords())
-	userGroup.POST("/upload", api.sendSubtitleText())
-	userGroup.GET("/", api.getUserByID())
+
+	// Crud user
+	userGroup.PATCH("/", api.changeUser())
 	userGroup.POST("/", api.updateUser())
+	userGroup.GET("/", api.getUserByID())
+
+	// Super User
+	userGroup.DELETE("/admin", middlewares.IsSuperUser(), api.deleteUser())
+	userGroup.GET("/admin", middlewares.IsSuperUser(), api.getAllUsers())
+	
+	// Keywords
+	userGroup.GET("/searchKeywords", api.getSearchKeywords())
+
+	// Upload subtitle
+	userGroup.POST("/upload", api.sendSubtitleText())
+
+	// Wordnodes
 	userGroup.GET("/wordnodes/all", api.getAllWordnodes())
-	// userGroup.GET("/upload", func(ctx *gin.Context) {
-	// 	location := url.URL{Path: "/file"}
-	// 	ctx.Redirect(http.StatusFound, location.RequestURI())
-	// })
 }
 
 func (api API) updateUser() gin.HandlerFunc {
@@ -92,12 +99,6 @@ func (api API) getUserByID() gin.HandlerFunc {
 				})
 			}
 		}
-	}
-}
-
-func (api API) userIndex() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		// ctx.HTML(http.StatusOK, )
 	}
 }
 
