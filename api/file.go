@@ -20,11 +20,35 @@ import (
 
 func (api *API) fileGroup(path string) {
 	fileGroup := api.Engine.Group(path)
-	fileGroup.GET("/", api.fileIndex())
+	fileGroup.GET("/", middlewares.CheckAuth(), api.getAllFiles())
 	fileGroup.POST("/upload", middlewares.CheckAuth(), api.uploadSubtitle())
 	fileGroup.POST("/upload_profile", middlewares.CheckAuth(), api.uploadImage())
 	fileGroup.DELETE("/", middlewares.CheckAuth(), api.deleteFile())
 	fileGroup.GET("/download", api.download())
+}
+
+func (api API) getAllFiles() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		email := fmt.Sprint(ctx.MustGet("email"))
+		user, err := api.Crud.GetUserByEmail(email)
+		if err != nil {
+			ctx.IndentedJSON(http.StatusUnauthorized, gin.H{
+				"message": "user not found in database",
+				"error":   err.Error(),
+			})
+			return
+		}
+		files, err := api.Crud.GetAllFiles(user)
+		if err != nil {
+			ctx.IndentedJSON(http.StatusUnauthorized, gin.H{
+				"message": "error occured while fetching files from databse",
+				"error":   err.Error(),
+			})
+			return
+		}
+		ctx.IndentedJSON(http.StatusOK, files)
+
+	}
 }
 
 func (api API) download() gin.HandlerFunc {
@@ -37,12 +61,6 @@ func (api API) download() gin.HandlerFunc {
 			log.Println(image_url)
 			ctx.File(image_url)
 		}
-	}
-}
-
-func (api API) fileIndex() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		c.HTML(http.StatusOK, "select_file.html", gin.H{})
 	}
 }
 
@@ -131,7 +149,7 @@ func (api API) uploadImage() gin.HandlerFunc {
 
 func (api API) deleteFile() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		idList := []int{}
+		var idList []int
 		ctx.BindJSON(&idList)
 		email := fmt.Sprint(ctx.MustGet("email"))
 		user, err := api.Crud.GetUserByEmail(email)
@@ -193,7 +211,7 @@ func (api API) uploadSubtitle() gin.HandlerFunc {
 			return
 		}
 		folderPath := "subs/" + email + "/"
-		filePath := "subs/" + email + "/" + fileName
+		filePath := folderPath + fileName
 		subs.MakeDir(folderPath)
 		//check file with its description exists in database or not
 		if api.Crud.CheckFileIsExists(email, filePath, fileName) {

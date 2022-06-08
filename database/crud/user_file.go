@@ -3,7 +3,6 @@ package crud
 import (
 	"interface_project/ent"
 	"interface_project/ent/fileentity"
-	"interface_project/ent/predicate"
 	"interface_project/ent/user"
 	"os"
 	"time"
@@ -43,9 +42,7 @@ func (crud Crud) GetAllFiles(userEntity *ent.User) ([]*ent.FileEntity, error) {
 }
 
 func (crud Crud) GetFiles(userEntity *ent.User, idList []int) ([]*ent.FileEntity, error) {
-	return userEntity.
-		QueryFiles().
-		Where(predicate.FileEntity(user.HasFilesWith(fileentity.IDIn(idList...)))).All(*crud.Ctx)
+	return userEntity.QueryFiles().Where(fileentity.IDIn(idList...)).All(*crud.Ctx)
 }
 
 func (crud Crud) DeleteFiles(user *ent.User, idList []int) error {
