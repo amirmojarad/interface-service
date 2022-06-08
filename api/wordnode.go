@@ -1,74 +1,53 @@
 package api
 
 import (
-	"interface_project/api/dto"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
-func (api API) WordNodesGroup(path string) {
-	router := api.Engine.Group(path)
-	router.POST("/all", api.GetMovieWordNodes())
-	router.POST("/all/sort", api.GetMovieWordsNodeOrderBy())
-}
-
-func (api API) 	GetMovieWordNodes() gin.HandlerFunc {
+func (api API) getAllWordnodes() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var movieWordNodeSchema dto.MovieWordNode
-		if err := ctx.BindJSON(&movieWordNodeSchema); err != nil {
-			ctx.IndentedJSON(http.StatusBadRequest, gin.H{
-				"error": "send valid json schema",
-			})
-			return
-		}
-		if wordNodes, err := api.Crud.GetMovieWordnodes(movieWordNodeSchema.MovieID); err != nil {
+		if wordnodes, err := api.Crud.GetAllWordNodes(); err != nil {
 			ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
-				"error": "error while fetching wordnodes from database",
+				"message": "error occured while fetching data from database",
+				"error":   err.Error(),
 			})
-
 		} else {
-			ctx.IndentedJSON(http.StatusBadRequest, wordNodes)
+			ctx.IndentedJSON(http.StatusOK, wordnodes)
 		}
 	}
 }
 
-func (api API) GetMovieWordsNodeOrderBy() gin.HandlerFunc {
+func (api API) WordNodesGroup(path string) {
+	router := api.Engine.Group(path)
+	router.POST("/all", api.getFileWordNodes())
+	// router.POST("/all/sort", api.GetMovieWordsNodeOrderBy()s)
+}
+
+func (api API) getFileWordNodes() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		var movieWordNodeOrder dto.MovieWordNodeOrderBy
-		if err := ctx.BindJSON(&movieWordNodeOrder); err != nil {
-			ctx.IndentedJSON(http.StatusBadRequest, gin.H{
-				"message": "send valid json schema",
-				"error":   err.Error(),
-			})
-		}
-		if movieWordNodeOrder.SortByID {
-			if wordNodes, err := api.Crud.SortByID(movieWordNodeOrder.MovieID); err != nil {
-				ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
-					"message": "error while fetching wordnodes from database in id sort",
+		if fileIDasString := ctx.Request.URL.Query().Get("file_id"); fileIDasString == "" {
+			return
+		} else {
+			fileID, err := strconv.Atoi(fileIDasString)
+			if err != nil {
+				ctx.IndentedJSON(http.StatusBadRequest, gin.H{
+					"message": "please send a valid file id",
 					"error":   err.Error(),
 				})
-			} else {
-				ctx.IndentedJSON(http.StatusOK, wordNodes)
+				return
 			}
-		} else if movieWordNodeOrder.SortByPreposition {
-			if wordNodes, err := api.Crud.SortByPreposition(movieWordNodeOrder.MovieID); err != nil {
-				ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
-					"message": "error while fetching wordnodes from database in preposition sort",
+			wordnodes, err := api.Crud.GetFileWordNodes(fileID)
+			if err != nil {
+				ctx.IndentedJSON(http.StatusNotFound, gin.H{
+					"message": "error while fetching file word nodes from database",
 					"error":   err.Error(),
 				})
-			} else {
-				ctx.IndentedJSON(http.StatusInternalServerError, wordNodes)
+				return
 			}
-		} else if movieWordNodeOrder.SortByOccurence {
-			if wordNodes, err := api.Crud.SortByPreposition(movieWordNodeOrder.MovieID); err != nil {
-				ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
-					"message": "error while fetching wordnodes from database in occurence sort",
-					"error":   err.Error(),
-				})
-			} else {
-				ctx.IndentedJSON(http.StatusInternalServerError, wordNodes)
-			}
+			ctx.IndentedJSON(http.StatusOK, wordnodes)
 		}
 	}
 }

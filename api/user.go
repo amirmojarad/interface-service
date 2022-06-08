@@ -24,6 +24,7 @@ func (api *API) userGroup(path string) {
 	userGroup.POST("/upload", api.sendSubtitleText())
 	userGroup.GET("/", api.getUserByID())
 	userGroup.POST("/", api.updateUser())
+	userGroup.GET("/wordnodes/all", api.getAllWordnodes())
 	// userGroup.GET("/upload", func(ctx *gin.Context) {
 	// 	location := url.URL{Path: "/file"}
 	// 	ctx.Redirect(http.StatusFound, location.RequestURI())

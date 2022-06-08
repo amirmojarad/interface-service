@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"interface_project/api/dto"
 	"interface_project/api/middlewares"
-	"interface_project/usecases/handlers/file_handler"
+
+	"interface_project/subs"
+
+	// "interface_project/ent"
 	"io"
 
 	"log"
@@ -97,12 +100,14 @@ func (api API) uploadImage() gin.HandlerFunc {
 			})
 			return
 		}
-		filePath := "images/" + fileName
+		folderPath := "images/" + email + "/"
+		filePath := "images/" + email + "/" + fileName
+		subs.MakeDir(folderPath)
 		out, err := os.Create(filePath)
 		if err != nil {
 			log.Fatal(err)
 		}
-		file_handler.Open(filePath)
+		subs.Open(filePath)
 		defer out.Close()
 		written, err := io.Copy(out, file)
 		log.Println(written)
@@ -120,6 +125,14 @@ func (api API) uploadImage() gin.HandlerFunc {
 			"message":   "file uploaded successfuly",
 			"image_url": updatedUser.ImageURL,
 		})
+	}
+}
+
+func (api API) deleteFile() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		idList := []int{}
+		ctx.BindJSON(&idList)
+
 	}
 }
 
@@ -142,12 +155,22 @@ func (api API) uploadSubtitle() gin.HandlerFunc {
 			log.Println("uploaded file is not an srt file.")
 			return
 		}
-		filePath := "subs/" + fileName
+		folderPath := "subs/" + email + "/"
+		filePath := "subs/" + email + "/" + fileName
+		subs.MakeDir(folderPath)
+		//check file with its description exists in database or not
+		if api.Crud.CheckFileIsExists(email, filePath, fileName) {
+			ctx.IndentedJSON(http.StatusConflict, gin.H{
+				"message": "file with name " + fileName + " and path " + filePath + " and user with email " + email + " already is exists",
+			})
+			log.Println("file with name " + fileName + " and path " + filePath + " and user with email " + email + " already is exists")
+			return
+		}
 		out, err := os.Create(filePath)
 		if err != nil {
 			log.Fatal(err)
 		}
-		openedFile, _ := file_handler.Open(filePath)
+		openedFile, _ := subs.Open(filePath)
 		defer out.Close()
 		written, err := io.Copy(out, file)
 		log.Println(written)
@@ -168,10 +191,12 @@ func (api API) uploadSubtitle() gin.HandlerFunc {
 					"error":   err,
 				})
 			}
+			// words.CreateWordnodes(openedFile, createdFile.ID, api.Crud, user)
 			ctx.IndentedJSON(http.StatusOK, gin.H{
 				"message": "file downloaded successfuly",
 				"file":    createdFile,
 			})
+
 		}
 	}
 }
