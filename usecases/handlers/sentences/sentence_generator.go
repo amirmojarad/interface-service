@@ -3,6 +3,8 @@ package sentences
 import (
 	"bufio"
 	"interface_project/ent"
+	"interface_project/usecases/handlers/word_node"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -37,15 +39,26 @@ func GetSentences(client *ent.Client, file *os.File, user *ent.User) []*ent.Word
 
 func makeWordsBulk(client *ent.Client, sentences []*sentence, user *ent.User) []*ent.WordCreate {
 	bulk := []*ent.WordCreate{}
+	wordsMap := make(map[string][]*ent.Word, 10)
+
 	for _, item := range sentences {
 		for _, token := range item.tokens {
 			times := strings.Split(item.timeRange, " ")
 
 			start, _ := time.Parse("12:12:12,123", times[0])
 			end, _ := time.Parse("12:12:12,123", times[2])
-
+			newWord := ent.Word{
+				Title:    token,
+				Meaning:  "",
+				Duration: item.timeRange,
+				Sentence: item.RawSentence,
+				Start:    start,
+				End:      end,
+			}
+			word_node.Add(&newWord, wordsMap)
 			bulk = append(bulk, client.Word.Create().SetDuration(item.timeRange).SetMeaning("").SetSentence(item.RawSentence).SetTitle(token).SetUser(user).SetEnd(end).SetStart(start))
 		}
+		log.Println(len(wordsMap))
 	}
 	return bulk
 }

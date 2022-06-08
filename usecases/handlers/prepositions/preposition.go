@@ -72,3 +72,12 @@ var PrepositionWords = []string{
 	"within",
 	"without",
 }
+
+func IsPreposition(wordTitle string) bool {
+	for _, preposition := range PrepositionWords {
+		if preposition == wordTitle {
+			return true
+		}
+	}
+	return false
+}
