@@ -48,6 +48,6 @@ func (crud Crud) GetFiles(userEntity *ent.User, idList []int) ([]*ent.FileEntity
 		Where(predicate.FileEntity(user.HasFilesWith(fileentity.IDIn(idList...)))).All(*crud.Ctx)
 }
 
-func (crud Crud) DeleteFile(user *ent.User, idList []int) error {
+func (crud Crud) DeleteFiles(user *ent.User, idList []int) error {
 	return crud.Client.User.UpdateOne(user).RemoveFileIDs(idList...).Exec(*crud.Ctx)
 }

@@ -23,6 +23,7 @@ func (api *API) fileGroup(path string) {
 	fileGroup.GET("/", api.fileIndex())
 	fileGroup.POST("/upload", middlewares.CheckAuth(), api.uploadSubtitle())
 	fileGroup.POST("/upload_profile", middlewares.CheckAuth(), api.uploadImage())
+	fileGroup.DELETE("/", middlewares.CheckAuth(), api.deleteFile())
 	fileGroup.GET("/download", api.download())
 }
 
@@ -132,7 +133,43 @@ func (api API) deleteFile() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		idList := []int{}
 		ctx.BindJSON(&idList)
-
+		email := fmt.Sprint(ctx.MustGet("email"))
+		user, err := api.Crud.GetUserByEmail(email)
+		if err != nil {
+			ctx.IndentedJSON(http.StatusUnauthorized, gin.H{
+				"message": "user not found in databse",
+				"error":   err.Error(),
+			})
+			return
+		}
+		files, err := api.Crud.GetFiles(user, idList)
+		if err != nil {
+			ctx.IndentedJSON(http.StatusNotFound, gin.H{
+				"message": "files not found in databse",
+				"error":   err.Error(),
+			})
+			return
+		}
+		if err := api.Crud.DeleteFiles(user, idList); err != nil {
+			ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
+				"message": "error while deleting file entity from user entity in databse",
+				"error":   err.Error(),
+			})
+			return
+		}
+		for _, file := range files {
+			if err := subs.DeleteFile(file.Path); err != nil {
+				ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
+					"message": fmt.Sprintf("error while deleting file with path %s from directory", file.Path),
+					"error":   err.Error(),
+				})
+				return
+			}
+		}
+		ctx.IndentedJSON(http.StatusOK, gin.H{
+			"message": "all files deleted successfully",
+			"files":   files,
+		})
 	}
 }
 
