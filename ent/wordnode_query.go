@@ -7,7 +7,7 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"interface_project/ent/movie"
+	"interface_project/ent/fileentity"
 	"interface_project/ent/predicate"
 	"interface_project/ent/word"
 	"interface_project/ent/wordnode"
@@ -28,8 +28,9 @@ type WordNodeQuery struct {
 	fields     []string
 	predicates []predicate.WordNode
 	// eager-loading edges.
-	withWords         *WordQuery
-	withMovieWordnode *MovieQuery
+	withWords *WordQuery
+	withFile  *FileEntityQuery
+	withFKs   bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -88,9 +89,9 @@ func (wnq *WordNodeQuery) QueryWords() *WordQuery {
 	return query
 }
 
-// QueryMovieWordnode chains the current query on the "movie_wordnode" edge.
-func (wnq *WordNodeQuery) QueryMovieWordnode() *MovieQuery {
-	query := &MovieQuery{config: wnq.config}
+// QueryFile chains the current query on the "file" edge.
+func (wnq *WordNodeQuery) QueryFile() *FileEntityQuery {
+	query := &FileEntityQuery{config: wnq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := wnq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -101,8 +102,8 @@ func (wnq *WordNodeQuery) QueryMovieWordnode() *MovieQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(wordnode.Table, wordnode.FieldID, selector),
-			sqlgraph.To(movie.Table, movie.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, wordnode.MovieWordnodeTable, wordnode.MovieWordnodeColumn),
+			sqlgraph.To(fileentity.Table, fileentity.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, wordnode.FileTable, wordnode.FileColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(wnq.driver.Dialect(), step)
 		return fromU, nil
@@ -286,13 +287,13 @@ func (wnq *WordNodeQuery) Clone() *WordNodeQuery {
 		return nil
 	}
 	return &WordNodeQuery{
-		config:            wnq.config,
-		limit:             wnq.limit,
-		offset:            wnq.offset,
-		order:             append([]OrderFunc{}, wnq.order...),
-		predicates:        append([]predicate.WordNode{}, wnq.predicates...),
-		withWords:         wnq.withWords.Clone(),
-		withMovieWordnode: wnq.withMovieWordnode.Clone(),
+		config:     wnq.config,
+		limit:      wnq.limit,
+		offset:     wnq.offset,
+		order:      append([]OrderFunc{}, wnq.order...),
+		predicates: append([]predicate.WordNode{}, wnq.predicates...),
+		withWords:  wnq.withWords.Clone(),
+		withFile:   wnq.withFile.Clone(),
 		// clone intermediate query.
 		sql:    wnq.sql.Clone(),
 		path:   wnq.path,
@@ -311,14 +312,14 @@ func (wnq *WordNodeQuery) WithWords(opts ...func(*WordQuery)) *WordNodeQuery {
 	return wnq
 }
 
-// WithMovieWordnode tells the query-builder to eager-load the nodes that are connected to
-// the "movie_wordnode" edge. The optional arguments are used to configure the query builder of the edge.
-func (wnq *WordNodeQuery) WithMovieWordnode(opts ...func(*MovieQuery)) *WordNodeQuery {
-	query := &MovieQuery{config: wnq.config}
+// WithFile tells the query-builder to eager-load the nodes that are connected to
+// the "file" edge. The optional arguments are used to configure the query builder of the edge.
+func (wnq *WordNodeQuery) WithFile(opts ...func(*FileEntityQuery)) *WordNodeQuery {
+	query := &FileEntityQuery{config: wnq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	wnq.withMovieWordnode = query
+	wnq.withFile = query
 	return wnq
 }
 
@@ -386,12 +387,19 @@ func (wnq *WordNodeQuery) prepareQuery(ctx context.Context) error {
 func (wnq *WordNodeQuery) sqlAll(ctx context.Context) ([]*WordNode, error) {
 	var (
 		nodes       = []*WordNode{}
+		withFKs     = wnq.withFKs
 		_spec       = wnq.querySpec()
 		loadedTypes = [2]bool{
 			wnq.withWords != nil,
-			wnq.withMovieWordnode != nil,
+			wnq.withFile != nil,
 		}
 	)
+	if wnq.withFile != nil {
+		withFKs = true
+	}
+	if withFKs {
+		_spec.Node.Columns = append(_spec.Node.Columns, wordnode.ForeignKeys...)
+	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &WordNode{config: wnq.config}
 		nodes = append(nodes, node)
@@ -441,31 +449,32 @@ func (wnq *WordNodeQuery) sqlAll(ctx context.Context) ([]*WordNode, error) {
 		}
 	}
 
-	if query := wnq.withMovieWordnode; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*WordNode)
+	if query := wnq.withFile; query != nil {
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*WordNode)
 		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
+			if nodes[i].file_entity_wordnodes == nil {
+				continue
+			}
+			fk := *nodes[i].file_entity_wordnodes
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
 		}
-		query.withFKs = true
-		query.Where(predicate.Movie(func(s *sql.Selector) {
-			s.Where(sql.InValues(wordnode.MovieWordnodeColumn, fks...))
-		}))
+		query.Where(fileentity.IDIn(ids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.word_node_movie_wordnode
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "word_node_movie_wordnode" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
+			nodes, ok := nodeids[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "word_node_movie_wordnode" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "file_entity_wordnodes" returned %v`, n.ID)
 			}
-			node.Edges.MovieWordnode = n
+			for i := range nodes {
+				nodes[i].Edges.File = n
+			}
 		}
 	}
 

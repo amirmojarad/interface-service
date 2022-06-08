@@ -8,15 +8,15 @@ import (
 	"interface_project/ent"
 )
 
-// The FileFunc type is an adapter to allow the use of ordinary
-// function as File mutator.
-type FileFunc func(context.Context, *ent.FileMutation) (ent.Value, error)
+// The FileEntityFunc type is an adapter to allow the use of ordinary
+// function as FileEntity mutator.
+type FileEntityFunc func(context.Context, *ent.FileEntityMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f FileFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.FileMutation)
+func (f FileEntityFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.FileEntityMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FileMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.FileEntityMutation", m)
 	}
 	return f(ctx, mv)
 }

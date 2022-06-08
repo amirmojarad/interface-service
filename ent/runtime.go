@@ -3,7 +3,7 @@
 package ent
 
 import (
-	"interface_project/ent/file"
+	"interface_project/ent/fileentity"
 	"interface_project/ent/movie"
 	"interface_project/ent/schema"
 	"interface_project/ent/searchkeyword"
@@ -17,16 +17,16 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
-	fileFields := schema.File{}.Fields()
-	_ = fileFields
-	// fileDescPath is the schema descriptor for path field.
-	fileDescPath := fileFields[0].Descriptor()
-	// file.PathValidator is a validator for the "path" field. It is called by the builders before save.
-	file.PathValidator = fileDescPath.Validators[0].(func(string) error)
-	// fileDescName is the schema descriptor for name field.
-	fileDescName := fileFields[1].Descriptor()
-	// file.NameValidator is a validator for the "name" field. It is called by the builders before save.
-	file.NameValidator = fileDescName.Validators[0].(func(string) error)
+	fileentityFields := schema.FileEntity{}.Fields()
+	_ = fileentityFields
+	// fileentityDescPath is the schema descriptor for path field.
+	fileentityDescPath := fileentityFields[0].Descriptor()
+	// fileentity.PathValidator is a validator for the "path" field. It is called by the builders before save.
+	fileentity.PathValidator = fileentityDescPath.Validators[0].(func(string) error)
+	// fileentityDescName is the schema descriptor for name field.
+	fileentityDescName := fileentityFields[1].Descriptor()
+	// fileentity.NameValidator is a validator for the "name" field. It is called by the builders before save.
+	fileentity.NameValidator = fileentityDescName.Validators[0].(func(string) error)
 	movieFields := schema.Movie{}.Fields()
 	_ = movieFields
 	// movieDescTitle is the schema descriptor for title field.

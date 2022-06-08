@@ -9,7 +9,7 @@ import "google/protobuf/wrappers.proto";
 
 option go_package = "interface_project/ent/proto/entpb";
 
-message File {
+message FileEntity {
   int32 id = 1;
 
   string path = 2;
@@ -23,6 +23,8 @@ message File {
   google.protobuf.Timestamp created_date = 6;
 
   User owner = 7;
+
+  repeated WordNode wordnodes = 8;
 }
 
 message Movie {
@@ -47,8 +49,6 @@ message Movie {
   string metacriticRating = 10;
 
   repeated User users = 11;
-
-  WordNode word_nodes = 12;
 }
 
 message SearchKeyword {
@@ -86,7 +86,7 @@ message User {
 
   repeated Word favorite_words = 12;
 
-  repeated File files = 13;
+  repeated FileEntity files = 13;
 }
 
 message Word {
@@ -120,5 +120,5 @@ message WordNode {
 
   repeated Word words = 5;
 
-  Movie movie_wordnode = 6;
+  FileEntity file = 6;
 }

@@ -8,8 +8,8 @@ import (
 )
 
 var (
-	// FilesColumns holds the columns for the "files" table.
-	FilesColumns = []*schema.Column{
+	// FileEntitiesColumns holds the columns for the "file_entities" table.
+	FileEntitiesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "path", Type: field.TypeString},
 		{Name: "name", Type: field.TypeString},
@@ -18,15 +18,15 @@ var (
 		{Name: "created_date", Type: field.TypeTime},
 		{Name: "user_files", Type: field.TypeInt, Nullable: true},
 	}
-	// FilesTable holds the schema information for the "files" table.
-	FilesTable = &schema.Table{
-		Name:       "files",
-		Columns:    FilesColumns,
-		PrimaryKey: []*schema.Column{FilesColumns[0]},
+	// FileEntitiesTable holds the schema information for the "file_entities" table.
+	FileEntitiesTable = &schema.Table{
+		Name:       "file_entities",
+		Columns:    FileEntitiesColumns,
+		PrimaryKey: []*schema.Column{FileEntitiesColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "files_users_files",
-				Columns:    []*schema.Column{FilesColumns[6]},
+				Symbol:     "file_entities_users_files",
+				Columns:    []*schema.Column{FileEntitiesColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
@@ -44,21 +44,12 @@ var (
 		{Name: "plot", Type: field.TypeString},
 		{Name: "stars", Type: field.TypeString},
 		{Name: "metacritic_rating", Type: field.TypeString},
-		{Name: "word_node_movie_wordnode", Type: field.TypeInt, Unique: true, Nullable: true},
 	}
 	// MoviesTable holds the schema information for the "movies" table.
 	MoviesTable = &schema.Table{
 		Name:       "movies",
 		Columns:    MoviesColumns,
 		PrimaryKey: []*schema.Column{MoviesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "movies_word_nodes_movie_wordnode",
-				Columns:    []*schema.Column{MoviesColumns[10]},
-				RefColumns: []*schema.Column{WordNodesColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
 	}
 	// SearchKeywordsColumns holds the columns for the "search_keywords" table.
 	SearchKeywordsColumns = []*schema.Column{
@@ -141,15 +132,24 @@ var (
 	// WordNodesColumns holds the columns for the "word_nodes" table.
 	WordNodesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "title", Type: field.TypeString},
+		{Name: "title", Type: field.TypeString, Unique: true},
 		{Name: "is_preposition", Type: field.TypeBool},
 		{Name: "occurence", Type: field.TypeInt, Nullable: true},
+		{Name: "file_entity_wordnodes", Type: field.TypeInt},
 	}
 	// WordNodesTable holds the schema information for the "word_nodes" table.
 	WordNodesTable = &schema.Table{
 		Name:       "word_nodes",
 		Columns:    WordNodesColumns,
 		PrimaryKey: []*schema.Column{WordNodesColumns[0]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "word_nodes_file_entities_wordnodes",
+				Columns:    []*schema.Column{WordNodesColumns[4]},
+				RefColumns: []*schema.Column{FileEntitiesColumns[0]},
+				OnDelete:   schema.NoAction,
+			},
+		},
 	}
 	// UserFavoriteMoviesColumns holds the columns for the "user_favorite_movies" table.
 	UserFavoriteMoviesColumns = []*schema.Column{
@@ -178,7 +178,7 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		FilesTable,
+		FileEntitiesTable,
 		MoviesTable,
 		SearchKeywordsTable,
 		UsersTable,
@@ -189,12 +189,12 @@ var (
 )
 
 func init() {
-	FilesTable.ForeignKeys[0].RefTable = UsersTable
-	MoviesTable.ForeignKeys[0].RefTable = WordNodesTable
+	FileEntitiesTable.ForeignKeys[0].RefTable = UsersTable
 	SearchKeywordsTable.ForeignKeys[0].RefTable = UsersTable
 	WordsTable.ForeignKeys[0].RefTable = UsersTable
 	WordsTable.ForeignKeys[1].RefTable = MoviesTable
 	WordsTable.ForeignKeys[2].RefTable = WordNodesTable
+	WordNodesTable.ForeignKeys[0].RefTable = FileEntitiesTable
 	UserFavoriteMoviesTable.ForeignKeys[0].RefTable = UsersTable
 	UserFavoriteMoviesTable.ForeignKeys[1].RefTable = MoviesTable
 }

@@ -4,7 +4,7 @@ package ent
 
 import (
 	"fmt"
-	"interface_project/ent/movie"
+	"interface_project/ent/fileentity"
 	"interface_project/ent/wordnode"
 	"strings"
 
@@ -24,15 +24,16 @@ type WordNode struct {
 	Occurence int `json:"occurence,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the WordNodeQuery when eager-loading is set.
-	Edges WordNodeEdges `json:"edges"`
+	Edges                 WordNodeEdges `json:"edges"`
+	file_entity_wordnodes *int
 }
 
 // WordNodeEdges holds the relations/edges for other nodes in the graph.
 type WordNodeEdges struct {
 	// Words holds the value of the words edge.
 	Words []*Word `json:"words,omitempty"`
-	// MovieWordnode holds the value of the movie_wordnode edge.
-	MovieWordnode *Movie `json:"movie_wordnode,omitempty"`
+	// File holds the value of the file edge.
+	File *FileEntity `json:"file,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -47,18 +48,18 @@ func (e WordNodeEdges) WordsOrErr() ([]*Word, error) {
 	return nil, &NotLoadedError{edge: "words"}
 }
 
-// MovieWordnodeOrErr returns the MovieWordnode value or an error if the edge
+// FileOrErr returns the File value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e WordNodeEdges) MovieWordnodeOrErr() (*Movie, error) {
+func (e WordNodeEdges) FileOrErr() (*FileEntity, error) {
 	if e.loadedTypes[1] {
-		if e.MovieWordnode == nil {
-			// The edge movie_wordnode was loaded in eager-loading,
+		if e.File == nil {
+			// The edge file was loaded in eager-loading,
 			// but was not found.
-			return nil, &NotFoundError{label: movie.Label}
+			return nil, &NotFoundError{label: fileentity.Label}
 		}
-		return e.MovieWordnode, nil
+		return e.File, nil
 	}
-	return nil, &NotLoadedError{edge: "movie_wordnode"}
+	return nil, &NotLoadedError{edge: "file"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -72,6 +73,8 @@ func (*WordNode) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullInt64)
 		case wordnode.FieldTitle:
 			values[i] = new(sql.NullString)
+		case wordnode.ForeignKeys[0]: // file_entity_wordnodes
+			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type WordNode", columns[i])
 		}
@@ -111,6 +114,13 @@ func (wn *WordNode) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				wn.Occurence = int(value.Int64)
 			}
+		case wordnode.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field file_entity_wordnodes", value)
+			} else if value.Valid {
+				wn.file_entity_wordnodes = new(int)
+				*wn.file_entity_wordnodes = int(value.Int64)
+			}
 		}
 	}
 	return nil
@@ -121,9 +131,9 @@ func (wn *WordNode) QueryWords() *WordQuery {
 	return (&WordNodeClient{config: wn.config}).QueryWords(wn)
 }
 
-// QueryMovieWordnode queries the "movie_wordnode" edge of the WordNode entity.
-func (wn *WordNode) QueryMovieWordnode() *MovieQuery {
-	return (&WordNodeClient{config: wn.config}).QueryMovieWordnode(wn)
+// QueryFile queries the "file" edge of the WordNode entity.
+func (wn *WordNode) QueryFile() *FileEntityQuery {
+	return (&WordNodeClient{config: wn.config}).QueryFile(wn)
 }
 
 // Update returns a builder for updating this WordNode.

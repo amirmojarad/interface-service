@@ -4,7 +4,7 @@ package ent
 
 import (
 	"fmt"
-	"interface_project/ent/file"
+	"interface_project/ent/fileentity"
 	"interface_project/ent/user"
 	"strings"
 	"time"
@@ -12,8 +12,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// File is the model entity for the File schema.
-type File struct {
+// FileEntity is the model entity for the FileEntity schema.
+type FileEntity struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
@@ -28,23 +28,25 @@ type File struct {
 	// CreatedDate holds the value of the "created_date" field.
 	CreatedDate time.Time `json:"created_date,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the FileQuery when eager-loading is set.
-	Edges      FileEdges `json:"edges"`
+	// The values are being populated by the FileEntityQuery when eager-loading is set.
+	Edges      FileEntityEdges `json:"edges"`
 	user_files *int
 }
 
-// FileEdges holds the relations/edges for other nodes in the graph.
-type FileEdges struct {
+// FileEntityEdges holds the relations/edges for other nodes in the graph.
+type FileEntityEdges struct {
 	// Owner holds the value of the owner edge.
 	Owner *User `json:"owner,omitempty"`
+	// Wordnodes holds the value of the wordnodes edge.
+	Wordnodes []*WordNode `json:"wordnodes,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [1]bool
+	loadedTypes [2]bool
 }
 
 // OwnerOrErr returns the Owner value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e FileEdges) OwnerOrErr() (*User, error) {
+func (e FileEntityEdges) OwnerOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.Owner == nil {
 			// The edge owner was loaded in eager-loading,
@@ -56,131 +58,145 @@ func (e FileEdges) OwnerOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "owner"}
 }
 
+// WordnodesOrErr returns the Wordnodes value or an error if the edge
+// was not loaded in eager-loading.
+func (e FileEntityEdges) WordnodesOrErr() ([]*WordNode, error) {
+	if e.loadedTypes[1] {
+		return e.Wordnodes, nil
+	}
+	return nil, &NotLoadedError{edge: "wordnodes"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
-func (*File) scanValues(columns []string) ([]interface{}, error) {
+func (*FileEntity) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case file.FieldDeleted:
+		case fileentity.FieldDeleted:
 			values[i] = new(sql.NullBool)
-		case file.FieldID, file.FieldSize:
+		case fileentity.FieldID, fileentity.FieldSize:
 			values[i] = new(sql.NullInt64)
-		case file.FieldPath, file.FieldName:
+		case fileentity.FieldPath, fileentity.FieldName:
 			values[i] = new(sql.NullString)
-		case file.FieldCreatedDate:
+		case fileentity.FieldCreatedDate:
 			values[i] = new(sql.NullTime)
-		case file.ForeignKeys[0]: // user_files
+		case fileentity.ForeignKeys[0]: // user_files
 			values[i] = new(sql.NullInt64)
 		default:
-			return nil, fmt.Errorf("unexpected column %q for type File", columns[i])
+			return nil, fmt.Errorf("unexpected column %q for type FileEntity", columns[i])
 		}
 	}
 	return values, nil
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the File fields.
-func (f *File) assignValues(columns []string, values []interface{}) error {
+// to the FileEntity fields.
+func (fe *FileEntity) assignValues(columns []string, values []interface{}) error {
 	if m, n := len(values), len(columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	for i := range columns {
 		switch columns[i] {
-		case file.FieldID:
+		case fileentity.FieldID:
 			value, ok := values[i].(*sql.NullInt64)
 			if !ok {
 				return fmt.Errorf("unexpected type %T for field id", value)
 			}
-			f.ID = int(value.Int64)
-		case file.FieldPath:
+			fe.ID = int(value.Int64)
+		case fileentity.FieldPath:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field path", values[i])
 			} else if value.Valid {
-				f.Path = value.String
+				fe.Path = value.String
 			}
-		case file.FieldName:
+		case fileentity.FieldName:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field name", values[i])
 			} else if value.Valid {
-				f.Name = value.String
+				fe.Name = value.String
 			}
-		case file.FieldSize:
+		case fileentity.FieldSize:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for field size", values[i])
 			} else if value.Valid {
-				f.Size = int16(value.Int64)
+				fe.Size = int16(value.Int64)
 			}
-		case file.FieldDeleted:
+		case fileentity.FieldDeleted:
 			if value, ok := values[i].(*sql.NullBool); !ok {
 				return fmt.Errorf("unexpected type %T for field deleted", values[i])
 			} else if value.Valid {
-				f.Deleted = value.Bool
+				fe.Deleted = value.Bool
 			}
-		case file.FieldCreatedDate:
+		case fileentity.FieldCreatedDate:
 			if value, ok := values[i].(*sql.NullTime); !ok {
 				return fmt.Errorf("unexpected type %T for field created_date", values[i])
 			} else if value.Valid {
-				f.CreatedDate = value.Time
+				fe.CreatedDate = value.Time
 			}
-		case file.ForeignKeys[0]:
+		case fileentity.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field user_files", value)
 			} else if value.Valid {
-				f.user_files = new(int)
-				*f.user_files = int(value.Int64)
+				fe.user_files = new(int)
+				*fe.user_files = int(value.Int64)
 			}
 		}
 	}
 	return nil
 }
 
-// QueryOwner queries the "owner" edge of the File entity.
-func (f *File) QueryOwner() *UserQuery {
-	return (&FileClient{config: f.config}).QueryOwner(f)
+// QueryOwner queries the "owner" edge of the FileEntity entity.
+func (fe *FileEntity) QueryOwner() *UserQuery {
+	return (&FileEntityClient{config: fe.config}).QueryOwner(fe)
 }
 
-// Update returns a builder for updating this File.
-// Note that you need to call File.Unwrap() before calling this method if this File
+// QueryWordnodes queries the "wordnodes" edge of the FileEntity entity.
+func (fe *FileEntity) QueryWordnodes() *WordNodeQuery {
+	return (&FileEntityClient{config: fe.config}).QueryWordnodes(fe)
+}
+
+// Update returns a builder for updating this FileEntity.
+// Note that you need to call FileEntity.Unwrap() before calling this method if this FileEntity
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (f *File) Update() *FileUpdateOne {
-	return (&FileClient{config: f.config}).UpdateOne(f)
+func (fe *FileEntity) Update() *FileEntityUpdateOne {
+	return (&FileEntityClient{config: fe.config}).UpdateOne(fe)
 }
 
-// Unwrap unwraps the File entity that was returned from a transaction after it was closed,
+// Unwrap unwraps the FileEntity entity that was returned from a transaction after it was closed,
 // so that all future queries will be executed through the driver which created the transaction.
-func (f *File) Unwrap() *File {
-	tx, ok := f.config.driver.(*txDriver)
+func (fe *FileEntity) Unwrap() *FileEntity {
+	tx, ok := fe.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: File is not a transactional entity")
+		panic("ent: FileEntity is not a transactional entity")
 	}
-	f.config.driver = tx.drv
-	return f
+	fe.config.driver = tx.drv
+	return fe
 }
 
 // String implements the fmt.Stringer.
-func (f *File) String() string {
+func (fe *FileEntity) String() string {
 	var builder strings.Builder
-	builder.WriteString("File(")
-	builder.WriteString(fmt.Sprintf("id=%v", f.ID))
+	builder.WriteString("FileEntity(")
+	builder.WriteString(fmt.Sprintf("id=%v", fe.ID))
 	builder.WriteString(", path=")
-	builder.WriteString(f.Path)
+	builder.WriteString(fe.Path)
 	builder.WriteString(", name=")
-	builder.WriteString(f.Name)
+	builder.WriteString(fe.Name)
 	builder.WriteString(", size=")
-	builder.WriteString(fmt.Sprintf("%v", f.Size))
+	builder.WriteString(fmt.Sprintf("%v", fe.Size))
 	builder.WriteString(", deleted=")
-	builder.WriteString(fmt.Sprintf("%v", f.Deleted))
+	builder.WriteString(fmt.Sprintf("%v", fe.Deleted))
 	builder.WriteString(", created_date=")
-	builder.WriteString(f.CreatedDate.Format(time.ANSIC))
+	builder.WriteString(fe.CreatedDate.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// Files is a parsable slice of File.
-type Files []*File
+// FileEntities is a parsable slice of FileEntity.
+type FileEntities []*FileEntity
 
-func (f Files) config(cfg config) {
-	for _i := range f {
-		f[_i].config = cfg
+func (fe FileEntities) config(cfg config) {
+	for _i := range fe {
+		fe[_i].config = cfg
 	}
 }

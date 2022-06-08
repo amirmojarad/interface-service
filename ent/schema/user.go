@@ -49,7 +49,7 @@ func (User) Edges() []ent.Edge {
 		edge.To("favorite_movies", Movie.Type).Annotations(entproto.Field(10)),
 		edge.To("searched_keywords", SearchKeyword.Type).Annotations(entproto.Field(11)),
 		edge.To("favorite_words", Word.Type).Annotations(entproto.Field(12)),
-		edge.To("files", File.Type).Annotations(entproto.Field(13)),
+		edge.To("files", FileEntity.Type).Annotations(entproto.Field(13)),
 	}
 }
 

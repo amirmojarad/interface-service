@@ -57,10 +57,10 @@ const (
 	// FavoriteWordsColumn is the table column denoting the favorite_words relation/edge.
 	FavoriteWordsColumn = "user_favorite_words"
 	// FilesTable is the table that holds the files relation/edge.
-	FilesTable = "files"
-	// FilesInverseTable is the table name for the File entity.
-	// It exists in this package in order to avoid circular dependency with the "file" package.
-	FilesInverseTable = "files"
+	FilesTable = "file_entities"
+	// FilesInverseTable is the table name for the FileEntity entity.
+	// It exists in this package in order to avoid circular dependency with the "fileentity" package.
+	FilesInverseTable = "file_entities"
 	// FilesColumn is the table column denoting the files relation/edge.
 	FilesColumn = "user_files"
 )

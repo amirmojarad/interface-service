@@ -10,7 +10,6 @@ import (
 	"interface_project/ent/movie"
 	"interface_project/ent/predicate"
 	"interface_project/ent/user"
-	"interface_project/ent/wordnode"
 	"math"
 
 	"entgo.io/ent/dialect/sql"
@@ -28,9 +27,7 @@ type MovieQuery struct {
 	fields     []string
 	predicates []predicate.Movie
 	// eager-loading edges.
-	withUsers     *UserQuery
-	withWordNodes *WordNodeQuery
-	withFKs       bool
+	withUsers *UserQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -82,28 +79,6 @@ func (mq *MovieQuery) QueryUsers() *UserQuery {
 			sqlgraph.From(movie.Table, movie.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, movie.UsersTable, movie.UsersPrimaryKey...),
-		)
-		fromU = sqlgraph.SetNeighbors(mq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryWordNodes chains the current query on the "word_nodes" edge.
-func (mq *MovieQuery) QueryWordNodes() *WordNodeQuery {
-	query := &WordNodeQuery{config: mq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := mq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := mq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(movie.Table, movie.FieldID, selector),
-			sqlgraph.To(wordnode.Table, wordnode.FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, true, movie.WordNodesTable, movie.WordNodesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(mq.driver.Dialect(), step)
 		return fromU, nil
@@ -287,13 +262,12 @@ func (mq *MovieQuery) Clone() *MovieQuery {
 		return nil
 	}
 	return &MovieQuery{
-		config:        mq.config,
-		limit:         mq.limit,
-		offset:        mq.offset,
-		order:         append([]OrderFunc{}, mq.order...),
-		predicates:    append([]predicate.Movie{}, mq.predicates...),
-		withUsers:     mq.withUsers.Clone(),
-		withWordNodes: mq.withWordNodes.Clone(),
+		config:     mq.config,
+		limit:      mq.limit,
+		offset:     mq.offset,
+		order:      append([]OrderFunc{}, mq.order...),
+		predicates: append([]predicate.Movie{}, mq.predicates...),
+		withUsers:  mq.withUsers.Clone(),
 		// clone intermediate query.
 		sql:    mq.sql.Clone(),
 		path:   mq.path,
@@ -309,17 +283,6 @@ func (mq *MovieQuery) WithUsers(opts ...func(*UserQuery)) *MovieQuery {
 		opt(query)
 	}
 	mq.withUsers = query
-	return mq
-}
-
-// WithWordNodes tells the query-builder to eager-load the nodes that are connected to
-// the "word_nodes" edge. The optional arguments are used to configure the query builder of the edge.
-func (mq *MovieQuery) WithWordNodes(opts ...func(*WordNodeQuery)) *MovieQuery {
-	query := &WordNodeQuery{config: mq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	mq.withWordNodes = query
 	return mq
 }
 
@@ -387,19 +350,11 @@ func (mq *MovieQuery) prepareQuery(ctx context.Context) error {
 func (mq *MovieQuery) sqlAll(ctx context.Context) ([]*Movie, error) {
 	var (
 		nodes       = []*Movie{}
-		withFKs     = mq.withFKs
 		_spec       = mq.querySpec()
-		loadedTypes = [2]bool{
+		loadedTypes = [1]bool{
 			mq.withUsers != nil,
-			mq.withWordNodes != nil,
 		}
 	)
-	if mq.withWordNodes != nil {
-		withFKs = true
-	}
-	if withFKs {
-		_spec.Node.Columns = append(_spec.Node.Columns, movie.ForeignKeys...)
-	}
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
 		node := &Movie{config: mq.config}
 		nodes = append(nodes, node)
@@ -481,35 +436,6 @@ func (mq *MovieQuery) sqlAll(ctx context.Context) ([]*Movie, error) {
 			}
 			for i := range nodes {
 				nodes[i].Edges.Users = append(nodes[i].Edges.Users, n)
-			}
-		}
-	}
-
-	if query := mq.withWordNodes; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Movie)
-		for i := range nodes {
-			if nodes[i].word_node_movie_wordnode == nil {
-				continue
-			}
-			fk := *nodes[i].word_node_movie_wordnode
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(wordnode.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "word_node_movie_wordnode" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.WordNodes = n
 			}
 		}
 	}

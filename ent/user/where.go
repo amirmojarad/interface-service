@@ -995,7 +995,7 @@ func HasFiles() predicate.User {
 }
 
 // HasFilesWith applies the HasEdge predicate on the "files" edge with a given conditions (other predicates).
-func HasFilesWith(preds ...predicate.File) predicate.User {
+func HasFilesWith(preds ...predicate.FileEntity) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),

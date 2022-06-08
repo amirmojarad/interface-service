@@ -15,8 +15,8 @@ const (
 	FieldOccurence = "occurence"
 	// EdgeWords holds the string denoting the words edge name in mutations.
 	EdgeWords = "words"
-	// EdgeMovieWordnode holds the string denoting the movie_wordnode edge name in mutations.
-	EdgeMovieWordnode = "movie_wordnode"
+	// EdgeFile holds the string denoting the file edge name in mutations.
+	EdgeFile = "file"
 	// Table holds the table name of the wordnode in the database.
 	Table = "word_nodes"
 	// WordsTable is the table that holds the words relation/edge.
@@ -26,13 +26,13 @@ const (
 	WordsInverseTable = "words"
 	// WordsColumn is the table column denoting the words relation/edge.
 	WordsColumn = "word_node_words"
-	// MovieWordnodeTable is the table that holds the movie_wordnode relation/edge.
-	MovieWordnodeTable = "movies"
-	// MovieWordnodeInverseTable is the table name for the Movie entity.
-	// It exists in this package in order to avoid circular dependency with the "movie" package.
-	MovieWordnodeInverseTable = "movies"
-	// MovieWordnodeColumn is the table column denoting the movie_wordnode relation/edge.
-	MovieWordnodeColumn = "word_node_movie_wordnode"
+	// FileTable is the table that holds the file relation/edge.
+	FileTable = "word_nodes"
+	// FileInverseTable is the table name for the FileEntity entity.
+	// It exists in this package in order to avoid circular dependency with the "fileentity" package.
+	FileInverseTable = "file_entities"
+	// FileColumn is the table column denoting the file relation/edge.
+	FileColumn = "file_entity_wordnodes"
 )
 
 // Columns holds all SQL columns for wordnode fields.
@@ -43,10 +43,21 @@ var Columns = []string{
 	FieldOccurence,
 }
 
+// ForeignKeys holds the SQL foreign-keys that are owned by the "word_nodes"
+// table and are not defined as standalone fields in the schema.
+var ForeignKeys = []string{
+	"file_entity_wordnodes",
+}
+
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
 	for i := range Columns {
 		if column == Columns[i] {
+			return true
+		}
+	}
+	for i := range ForeignKeys {
+		if column == ForeignKeys[i] {
 			return true
 		}
 	}

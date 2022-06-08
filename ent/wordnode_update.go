@@ -6,7 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"interface_project/ent/movie"
+	"interface_project/ent/fileentity"
 	"interface_project/ent/predicate"
 	"interface_project/ent/word"
 	"interface_project/ent/wordnode"
@@ -83,23 +83,15 @@ func (wnu *WordNodeUpdate) AddWords(w ...*Word) *WordNodeUpdate {
 	return wnu.AddWordIDs(ids...)
 }
 
-// SetMovieWordnodeID sets the "movie_wordnode" edge to the Movie entity by ID.
-func (wnu *WordNodeUpdate) SetMovieWordnodeID(id int) *WordNodeUpdate {
-	wnu.mutation.SetMovieWordnodeID(id)
+// SetFileID sets the "file" edge to the FileEntity entity by ID.
+func (wnu *WordNodeUpdate) SetFileID(id int) *WordNodeUpdate {
+	wnu.mutation.SetFileID(id)
 	return wnu
 }
 
-// SetNillableMovieWordnodeID sets the "movie_wordnode" edge to the Movie entity by ID if the given value is not nil.
-func (wnu *WordNodeUpdate) SetNillableMovieWordnodeID(id *int) *WordNodeUpdate {
-	if id != nil {
-		wnu = wnu.SetMovieWordnodeID(*id)
-	}
-	return wnu
-}
-
-// SetMovieWordnode sets the "movie_wordnode" edge to the Movie entity.
-func (wnu *WordNodeUpdate) SetMovieWordnode(m *Movie) *WordNodeUpdate {
-	return wnu.SetMovieWordnodeID(m.ID)
+// SetFile sets the "file" edge to the FileEntity entity.
+func (wnu *WordNodeUpdate) SetFile(f *FileEntity) *WordNodeUpdate {
+	return wnu.SetFileID(f.ID)
 }
 
 // Mutation returns the WordNodeMutation object of the builder.
@@ -128,9 +120,9 @@ func (wnu *WordNodeUpdate) RemoveWords(w ...*Word) *WordNodeUpdate {
 	return wnu.RemoveWordIDs(ids...)
 }
 
-// ClearMovieWordnode clears the "movie_wordnode" edge to the Movie entity.
-func (wnu *WordNodeUpdate) ClearMovieWordnode() *WordNodeUpdate {
-	wnu.mutation.ClearMovieWordnode()
+// ClearFile clears the "file" edge to the FileEntity entity.
+func (wnu *WordNodeUpdate) ClearFile() *WordNodeUpdate {
+	wnu.mutation.ClearFile()
 	return wnu
 }
 
@@ -200,6 +192,9 @@ func (wnu *WordNodeUpdate) check() error {
 		if err := wordnode.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "WordNode.title": %w`, err)}
 		}
+	}
+	if _, ok := wnu.mutation.FileID(); wnu.mutation.FileCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "WordNode.file"`)
 	}
 	return nil
 }
@@ -310,33 +305,33 @@ func (wnu *WordNodeUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if wnu.mutation.MovieWordnodeCleared() {
+	if wnu.mutation.FileCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   wordnode.MovieWordnodeTable,
-			Columns: []string{wordnode.MovieWordnodeColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   wordnode.FileTable,
+			Columns: []string{wordnode.FileColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: movie.FieldID,
+					Column: fileentity.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := wnu.mutation.MovieWordnodeIDs(); len(nodes) > 0 {
+	if nodes := wnu.mutation.FileIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   wordnode.MovieWordnodeTable,
-			Columns: []string{wordnode.MovieWordnodeColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   wordnode.FileTable,
+			Columns: []string{wordnode.FileColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: movie.FieldID,
+					Column: fileentity.FieldID,
 				},
 			},
 		}
@@ -418,23 +413,15 @@ func (wnuo *WordNodeUpdateOne) AddWords(w ...*Word) *WordNodeUpdateOne {
 	return wnuo.AddWordIDs(ids...)
 }
 
-// SetMovieWordnodeID sets the "movie_wordnode" edge to the Movie entity by ID.
-func (wnuo *WordNodeUpdateOne) SetMovieWordnodeID(id int) *WordNodeUpdateOne {
-	wnuo.mutation.SetMovieWordnodeID(id)
+// SetFileID sets the "file" edge to the FileEntity entity by ID.
+func (wnuo *WordNodeUpdateOne) SetFileID(id int) *WordNodeUpdateOne {
+	wnuo.mutation.SetFileID(id)
 	return wnuo
 }
 
-// SetNillableMovieWordnodeID sets the "movie_wordnode" edge to the Movie entity by ID if the given value is not nil.
-func (wnuo *WordNodeUpdateOne) SetNillableMovieWordnodeID(id *int) *WordNodeUpdateOne {
-	if id != nil {
-		wnuo = wnuo.SetMovieWordnodeID(*id)
-	}
-	return wnuo
-}
-
-// SetMovieWordnode sets the "movie_wordnode" edge to the Movie entity.
-func (wnuo *WordNodeUpdateOne) SetMovieWordnode(m *Movie) *WordNodeUpdateOne {
-	return wnuo.SetMovieWordnodeID(m.ID)
+// SetFile sets the "file" edge to the FileEntity entity.
+func (wnuo *WordNodeUpdateOne) SetFile(f *FileEntity) *WordNodeUpdateOne {
+	return wnuo.SetFileID(f.ID)
 }
 
 // Mutation returns the WordNodeMutation object of the builder.
@@ -463,9 +450,9 @@ func (wnuo *WordNodeUpdateOne) RemoveWords(w ...*Word) *WordNodeUpdateOne {
 	return wnuo.RemoveWordIDs(ids...)
 }
 
-// ClearMovieWordnode clears the "movie_wordnode" edge to the Movie entity.
-func (wnuo *WordNodeUpdateOne) ClearMovieWordnode() *WordNodeUpdateOne {
-	wnuo.mutation.ClearMovieWordnode()
+// ClearFile clears the "file" edge to the FileEntity entity.
+func (wnuo *WordNodeUpdateOne) ClearFile() *WordNodeUpdateOne {
+	wnuo.mutation.ClearFile()
 	return wnuo
 }
 
@@ -542,6 +529,9 @@ func (wnuo *WordNodeUpdateOne) check() error {
 		if err := wordnode.TitleValidator(v); err != nil {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "WordNode.title": %w`, err)}
 		}
+	}
+	if _, ok := wnuo.mutation.FileID(); wnuo.mutation.FileCleared() && !ok {
+		return errors.New(`ent: clearing a required unique edge "WordNode.file"`)
 	}
 	return nil
 }
@@ -669,33 +659,33 @@ func (wnuo *WordNodeUpdateOne) sqlSave(ctx context.Context) (_node *WordNode, er
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if wnuo.mutation.MovieWordnodeCleared() {
+	if wnuo.mutation.FileCleared() {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   wordnode.MovieWordnodeTable,
-			Columns: []string{wordnode.MovieWordnodeColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   wordnode.FileTable,
+			Columns: []string{wordnode.FileColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: movie.FieldID,
+					Column: fileentity.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := wnuo.mutation.MovieWordnodeIDs(); len(nodes) > 0 {
+	if nodes := wnuo.mutation.FileIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2O,
-			Inverse: false,
-			Table:   wordnode.MovieWordnodeTable,
-			Columns: []string{wordnode.MovieWordnodeColumn},
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   wordnode.FileTable,
+			Columns: []string{wordnode.FileColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: movie.FieldID,
+					Column: fileentity.FieldID,
 				},
 			},
 		}

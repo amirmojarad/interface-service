@@ -16,7 +16,7 @@ type WordNode struct {
 // Fields of the WordNode.
 func (WordNode) Fields() []ent.Field {
 	return []ent.Field{
-		field.String("title").NotEmpty().Annotations(entproto.Field(2)),
+		field.String("title").NotEmpty().Unique().Annotations(entproto.Field(2)),
 		field.Bool("is_preposition").Annotations(entproto.Field(3)),
 		field.Int("occurence").Optional().Annotations(entproto.Field(4)),
 	}
@@ -26,7 +26,7 @@ func (WordNode) Fields() []ent.Field {
 func (WordNode) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.To("words", Word.Type).Annotations(entproto.Field(5)),
-		edge.To("movie_wordnode", Movie.Type).Unique().Annotations(entproto.Field(6)),
+		edge.From("file", FileEntity.Type).Unique().Required().Ref("wordnodes").Annotations(entproto.Field(6)),
 	}
 }
 

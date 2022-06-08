@@ -6,7 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"interface_project/ent/file"
+	"interface_project/ent/fileentity"
 	"interface_project/ent/movie"
 	"interface_project/ent/searchkeyword"
 	"interface_project/ent/user"
@@ -157,14 +157,14 @@ func (uc *UserCreate) AddFavoriteWords(w ...*Word) *UserCreate {
 	return uc.AddFavoriteWordIDs(ids...)
 }
 
-// AddFileIDs adds the "files" edge to the File entity by IDs.
+// AddFileIDs adds the "files" edge to the FileEntity entity by IDs.
 func (uc *UserCreate) AddFileIDs(ids ...int) *UserCreate {
 	uc.mutation.AddFileIDs(ids...)
 	return uc
 }
 
-// AddFiles adds the "files" edges to the File entity.
-func (uc *UserCreate) AddFiles(f ...*File) *UserCreate {
+// AddFiles adds the "files" edges to the FileEntity entity.
+func (uc *UserCreate) AddFiles(f ...*FileEntity) *UserCreate {
 	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
@@ -454,7 +454,7 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: file.FieldID,
+					Column: fileentity.FieldID,
 				},
 			},
 		}

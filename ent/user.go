@@ -46,7 +46,7 @@ type UserEdges struct {
 	// FavoriteWords holds the value of the favorite_words edge.
 	FavoriteWords []*Word `json:"favorite_words,omitempty"`
 	// Files holds the value of the files edge.
-	Files []*File `json:"files,omitempty"`
+	Files []*FileEntity `json:"files,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [4]bool
@@ -81,7 +81,7 @@ func (e UserEdges) FavoriteWordsOrErr() ([]*Word, error) {
 
 // FilesOrErr returns the Files value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) FilesOrErr() ([]*File, error) {
+func (e UserEdges) FilesOrErr() ([]*FileEntity, error) {
 	if e.loadedTypes[3] {
 		return e.Files, nil
 	}
@@ -191,7 +191,7 @@ func (u *User) QueryFavoriteWords() *WordQuery {
 }
 
 // QueryFiles queries the "files" edge of the User entity.
-func (u *User) QueryFiles() *FileQuery {
+func (u *User) QueryFiles() *FileEntityQuery {
 	return (&UserClient{config: u.config}).QueryFiles(u)
 }
 

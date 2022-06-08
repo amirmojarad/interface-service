@@ -6,7 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"interface_project/ent/file"
+	"interface_project/ent/fileentity"
 	"interface_project/ent/movie"
 	"interface_project/ent/predicate"
 	"interface_project/ent/searchkeyword"
@@ -177,14 +177,14 @@ func (uu *UserUpdate) AddFavoriteWords(w ...*Word) *UserUpdate {
 	return uu.AddFavoriteWordIDs(ids...)
 }
 
-// AddFileIDs adds the "files" edge to the File entity by IDs.
+// AddFileIDs adds the "files" edge to the FileEntity entity by IDs.
 func (uu *UserUpdate) AddFileIDs(ids ...int) *UserUpdate {
 	uu.mutation.AddFileIDs(ids...)
 	return uu
 }
 
-// AddFiles adds the "files" edges to the File entity.
-func (uu *UserUpdate) AddFiles(f ...*File) *UserUpdate {
+// AddFiles adds the "files" edges to the FileEntity entity.
+func (uu *UserUpdate) AddFiles(f ...*FileEntity) *UserUpdate {
 	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
@@ -260,20 +260,20 @@ func (uu *UserUpdate) RemoveFavoriteWords(w ...*Word) *UserUpdate {
 	return uu.RemoveFavoriteWordIDs(ids...)
 }
 
-// ClearFiles clears all "files" edges to the File entity.
+// ClearFiles clears all "files" edges to the FileEntity entity.
 func (uu *UserUpdate) ClearFiles() *UserUpdate {
 	uu.mutation.ClearFiles()
 	return uu
 }
 
-// RemoveFileIDs removes the "files" edge to File entities by IDs.
+// RemoveFileIDs removes the "files" edge to FileEntity entities by IDs.
 func (uu *UserUpdate) RemoveFileIDs(ids ...int) *UserUpdate {
 	uu.mutation.RemoveFileIDs(ids...)
 	return uu
 }
 
-// RemoveFiles removes "files" edges to File entities.
-func (uu *UserUpdate) RemoveFiles(f ...*File) *UserUpdate {
+// RemoveFiles removes "files" edges to FileEntity entities.
+func (uu *UserUpdate) RemoveFiles(f ...*FileEntity) *UserUpdate {
 	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
@@ -619,7 +619,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: file.FieldID,
+					Column: fileentity.FieldID,
 				},
 			},
 		}
@@ -635,7 +635,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: file.FieldID,
+					Column: fileentity.FieldID,
 				},
 			},
 		}
@@ -654,7 +654,7 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: file.FieldID,
+					Column: fileentity.FieldID,
 				},
 			},
 		}
@@ -827,14 +827,14 @@ func (uuo *UserUpdateOne) AddFavoriteWords(w ...*Word) *UserUpdateOne {
 	return uuo.AddFavoriteWordIDs(ids...)
 }
 
-// AddFileIDs adds the "files" edge to the File entity by IDs.
+// AddFileIDs adds the "files" edge to the FileEntity entity by IDs.
 func (uuo *UserUpdateOne) AddFileIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.AddFileIDs(ids...)
 	return uuo
 }
 
-// AddFiles adds the "files" edges to the File entity.
-func (uuo *UserUpdateOne) AddFiles(f ...*File) *UserUpdateOne {
+// AddFiles adds the "files" edges to the FileEntity entity.
+func (uuo *UserUpdateOne) AddFiles(f ...*FileEntity) *UserUpdateOne {
 	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
@@ -910,20 +910,20 @@ func (uuo *UserUpdateOne) RemoveFavoriteWords(w ...*Word) *UserUpdateOne {
 	return uuo.RemoveFavoriteWordIDs(ids...)
 }
 
-// ClearFiles clears all "files" edges to the File entity.
+// ClearFiles clears all "files" edges to the FileEntity entity.
 func (uuo *UserUpdateOne) ClearFiles() *UserUpdateOne {
 	uuo.mutation.ClearFiles()
 	return uuo
 }
 
-// RemoveFileIDs removes the "files" edge to File entities by IDs.
+// RemoveFileIDs removes the "files" edge to FileEntity entities by IDs.
 func (uuo *UserUpdateOne) RemoveFileIDs(ids ...int) *UserUpdateOne {
 	uuo.mutation.RemoveFileIDs(ids...)
 	return uuo
 }
 
-// RemoveFiles removes "files" edges to File entities.
-func (uuo *UserUpdateOne) RemoveFiles(f ...*File) *UserUpdateOne {
+// RemoveFiles removes "files" edges to FileEntity entities.
+func (uuo *UserUpdateOne) RemoveFiles(f ...*FileEntity) *UserUpdateOne {
 	ids := make([]int, len(f))
 	for i := range f {
 		ids[i] = f[i].ID
@@ -1293,7 +1293,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: file.FieldID,
+					Column: fileentity.FieldID,
 				},
 			},
 		}
@@ -1309,7 +1309,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: file.FieldID,
+					Column: fileentity.FieldID,
 				},
 			},
 		}
@@ -1328,7 +1328,7 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: file.FieldID,
+					Column: fileentity.FieldID,
 				},
 			},
 		}

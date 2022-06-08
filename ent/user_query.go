@@ -7,7 +7,7 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"interface_project/ent/file"
+	"interface_project/ent/fileentity"
 	"interface_project/ent/movie"
 	"interface_project/ent/predicate"
 	"interface_project/ent/searchkeyword"
@@ -33,7 +33,7 @@ type UserQuery struct {
 	withFavoriteMovies   *MovieQuery
 	withSearchedKeywords *SearchKeywordQuery
 	withFavoriteWords    *WordQuery
-	withFiles            *FileQuery
+	withFiles            *FileEntityQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -137,8 +137,8 @@ func (uq *UserQuery) QueryFavoriteWords() *WordQuery {
 }
 
 // QueryFiles chains the current query on the "files" edge.
-func (uq *UserQuery) QueryFiles() *FileQuery {
-	query := &FileQuery{config: uq.config}
+func (uq *UserQuery) QueryFiles() *FileEntityQuery {
+	query := &FileEntityQuery{config: uq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -149,7 +149,7 @@ func (uq *UserQuery) QueryFiles() *FileQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(file.Table, file.FieldID),
+			sqlgraph.To(fileentity.Table, fileentity.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.FilesTable, user.FilesColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
@@ -385,8 +385,8 @@ func (uq *UserQuery) WithFavoriteWords(opts ...func(*WordQuery)) *UserQuery {
 
 // WithFiles tells the query-builder to eager-load the nodes that are connected to
 // the "files" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithFiles(opts ...func(*FileQuery)) *UserQuery {
-	query := &FileQuery{config: uq.config}
+func (uq *UserQuery) WithFiles(opts ...func(*FileEntityQuery)) *UserQuery {
+	query := &FileEntityQuery{config: uq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
@@ -615,10 +615,10 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Files = []*File{}
+			nodes[i].Edges.Files = []*FileEntity{}
 		}
 		query.withFKs = true
-		query.Where(predicate.File(func(s *sql.Selector) {
+		query.Where(predicate.FileEntity(func(s *sql.Selector) {
 			s.Where(sql.InValues(user.FilesColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)

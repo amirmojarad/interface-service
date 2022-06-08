@@ -9,12 +9,12 @@ import (
 )
 
 // File holds the schema definition for the File entity.
-type File struct {
+type FileEntity struct {
 	ent.Schema
 }
 
 // Fields of the File.
-func (File) Fields() []ent.Field {
+func (FileEntity) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("path").NotEmpty().Annotations(entproto.Field(2)),
 		field.String("name").NotEmpty().Annotations(entproto.Field(3)),
@@ -25,13 +25,14 @@ func (File) Fields() []ent.Field {
 }
 
 // Edges of the File.
-func (File) Edges() []ent.Edge {
+func (FileEntity) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("owner", User.Type).Ref("files").Unique().Annotations(entproto.Field(7)),
+		edge.To("wordnodes", WordNode.Type).Annotations(entproto.Field(8)),
 	}
 }
 
-func (File) Annotations() []schema.Annotation {
+func (FileEntity) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		entproto.Message(),
 	}

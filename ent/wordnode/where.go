@@ -356,25 +356,25 @@ func HasWordsWith(preds ...predicate.Word) predicate.WordNode {
 	})
 }
 
-// HasMovieWordnode applies the HasEdge predicate on the "movie_wordnode" edge.
-func HasMovieWordnode() predicate.WordNode {
+// HasFile applies the HasEdge predicate on the "file" edge.
+func HasFile() predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(MovieWordnodeTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, MovieWordnodeTable, MovieWordnodeColumn),
+			sqlgraph.To(FileTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, FileTable, FileColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasMovieWordnodeWith applies the HasEdge predicate on the "movie_wordnode" edge with a given conditions (other predicates).
-func HasMovieWordnodeWith(preds ...predicate.Movie) predicate.WordNode {
+// HasFileWith applies the HasEdge predicate on the "file" edge with a given conditions (other predicates).
+func HasFileWith(preds ...predicate.FileEntity) predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(MovieWordnodeInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2O, false, MovieWordnodeTable, MovieWordnodeColumn),
+			sqlgraph.To(FileInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, FileTable, FileColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
