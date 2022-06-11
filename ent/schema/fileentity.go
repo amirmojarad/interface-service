@@ -28,7 +28,7 @@ func (FileEntity) Fields() []ent.Field {
 func (FileEntity) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("owner", User.Type).Ref("files").Unique().Annotations(entproto.Field(7)),
-		edge.To("wordnodes", WordNode.Type).Annotations(entproto.Field(8)),
+		edge.To("words", Word.Type).Annotations(entproto.Field(8)),
 	}
 }
 

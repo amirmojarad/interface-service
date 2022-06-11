@@ -6,11 +6,10 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"interface_project/ent/movie"
+	"interface_project/ent/fileentity"
 	"interface_project/ent/predicate"
 	"interface_project/ent/user"
 	"interface_project/ent/word"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -42,17 +41,9 @@ func (wu *WordUpdate) SetMeaning(s string) *WordUpdate {
 	return wu
 }
 
-// SetNillableMeaning sets the "meaning" field if the given value is not nil.
-func (wu *WordUpdate) SetNillableMeaning(s *string) *WordUpdate {
-	if s != nil {
-		wu.SetMeaning(*s)
-	}
-	return wu
-}
-
-// ClearMeaning clears the value of the "meaning" field.
-func (wu *WordUpdate) ClearMeaning() *WordUpdate {
-	wu.mutation.ClearMeaning()
+// SetIsPreposition sets the "isPreposition" field.
+func (wu *WordUpdate) SetIsPreposition(b bool) *WordUpdate {
+	wu.mutation.SetIsPreposition(b)
 	return wu
 }
 
@@ -62,97 +53,10 @@ func (wu *WordUpdate) SetSentence(s string) *WordUpdate {
 	return wu
 }
 
-// SetNillableSentence sets the "sentence" field if the given value is not nil.
-func (wu *WordUpdate) SetNillableSentence(s *string) *WordUpdate {
-	if s != nil {
-		wu.SetSentence(*s)
-	}
-	return wu
-}
-
-// ClearSentence clears the value of the "sentence" field.
-func (wu *WordUpdate) ClearSentence() *WordUpdate {
-	wu.mutation.ClearSentence()
-	return wu
-}
-
 // SetDuration sets the "duration" field.
 func (wu *WordUpdate) SetDuration(s string) *WordUpdate {
 	wu.mutation.SetDuration(s)
 	return wu
-}
-
-// SetNillableDuration sets the "duration" field if the given value is not nil.
-func (wu *WordUpdate) SetNillableDuration(s *string) *WordUpdate {
-	if s != nil {
-		wu.SetDuration(*s)
-	}
-	return wu
-}
-
-// ClearDuration clears the value of the "duration" field.
-func (wu *WordUpdate) ClearDuration() *WordUpdate {
-	wu.mutation.ClearDuration()
-	return wu
-}
-
-// SetStart sets the "start" field.
-func (wu *WordUpdate) SetStart(t time.Time) *WordUpdate {
-	wu.mutation.SetStart(t)
-	return wu
-}
-
-// SetNillableStart sets the "start" field if the given value is not nil.
-func (wu *WordUpdate) SetNillableStart(t *time.Time) *WordUpdate {
-	if t != nil {
-		wu.SetStart(*t)
-	}
-	return wu
-}
-
-// ClearStart clears the value of the "start" field.
-func (wu *WordUpdate) ClearStart() *WordUpdate {
-	wu.mutation.ClearStart()
-	return wu
-}
-
-// SetEnd sets the "end" field.
-func (wu *WordUpdate) SetEnd(t time.Time) *WordUpdate {
-	wu.mutation.SetEnd(t)
-	return wu
-}
-
-// SetNillableEnd sets the "end" field if the given value is not nil.
-func (wu *WordUpdate) SetNillableEnd(t *time.Time) *WordUpdate {
-	if t != nil {
-		wu.SetEnd(*t)
-	}
-	return wu
-}
-
-// ClearEnd clears the value of the "end" field.
-func (wu *WordUpdate) ClearEnd() *WordUpdate {
-	wu.mutation.ClearEnd()
-	return wu
-}
-
-// SetMovieID sets the "movie" edge to the Movie entity by ID.
-func (wu *WordUpdate) SetMovieID(id int) *WordUpdate {
-	wu.mutation.SetMovieID(id)
-	return wu
-}
-
-// SetNillableMovieID sets the "movie" edge to the Movie entity by ID if the given value is not nil.
-func (wu *WordUpdate) SetNillableMovieID(id *int) *WordUpdate {
-	if id != nil {
-		wu = wu.SetMovieID(*id)
-	}
-	return wu
-}
-
-// SetMovie sets the "movie" edge to the Movie entity.
-func (wu *WordUpdate) SetMovie(m *Movie) *WordUpdate {
-	return wu.SetMovieID(m.ID)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
@@ -174,20 +78,39 @@ func (wu *WordUpdate) SetUser(u *User) *WordUpdate {
 	return wu.SetUserID(u.ID)
 }
 
+// SetFileID sets the "file" edge to the FileEntity entity by ID.
+func (wu *WordUpdate) SetFileID(id int) *WordUpdate {
+	wu.mutation.SetFileID(id)
+	return wu
+}
+
+// SetNillableFileID sets the "file" edge to the FileEntity entity by ID if the given value is not nil.
+func (wu *WordUpdate) SetNillableFileID(id *int) *WordUpdate {
+	if id != nil {
+		wu = wu.SetFileID(*id)
+	}
+	return wu
+}
+
+// SetFile sets the "file" edge to the FileEntity entity.
+func (wu *WordUpdate) SetFile(f *FileEntity) *WordUpdate {
+	return wu.SetFileID(f.ID)
+}
+
 // Mutation returns the WordMutation object of the builder.
 func (wu *WordUpdate) Mutation() *WordMutation {
 	return wu.mutation
 }
 
-// ClearMovie clears the "movie" edge to the Movie entity.
-func (wu *WordUpdate) ClearMovie() *WordUpdate {
-	wu.mutation.ClearMovie()
-	return wu
-}
-
 // ClearUser clears the "user" edge to the User entity.
 func (wu *WordUpdate) ClearUser() *WordUpdate {
 	wu.mutation.ClearUser()
+	return wu
+}
+
+// ClearFile clears the "file" edge to the FileEntity entity.
+func (wu *WordUpdate) ClearFile() *WordUpdate {
+	wu.mutation.ClearFile()
 	return wu
 }
 
@@ -258,6 +181,16 @@ func (wu *WordUpdate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Word.title": %w`, err)}
 		}
 	}
+	if v, ok := wu.mutation.Sentence(); ok {
+		if err := word.SentenceValidator(v); err != nil {
+			return &ValidationError{Name: "sentence", err: fmt.Errorf(`ent: validator failed for field "Word.sentence": %w`, err)}
+		}
+	}
+	if v, ok := wu.mutation.Duration(); ok {
+		if err := word.DurationValidator(v); err != nil {
+			return &ValidationError{Name: "duration", err: fmt.Errorf(`ent: validator failed for field "Word.duration": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -293,10 +226,11 @@ func (wu *WordUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: word.FieldMeaning,
 		})
 	}
-	if wu.mutation.MeaningCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: word.FieldMeaning,
+	if value, ok := wu.mutation.IsPreposition(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: word.FieldIsPreposition,
 		})
 	}
 	if value, ok := wu.mutation.Sentence(); ok {
@@ -306,85 +240,12 @@ func (wu *WordUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: word.FieldSentence,
 		})
 	}
-	if wu.mutation.SentenceCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: word.FieldSentence,
-		})
-	}
 	if value, ok := wu.mutation.Duration(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
 			Column: word.FieldDuration,
 		})
-	}
-	if wu.mutation.DurationCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: word.FieldDuration,
-		})
-	}
-	if value, ok := wu.mutation.Start(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: word.FieldStart,
-		})
-	}
-	if wu.mutation.StartCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: word.FieldStart,
-		})
-	}
-	if value, ok := wu.mutation.End(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: word.FieldEnd,
-		})
-	}
-	if wu.mutation.EndCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: word.FieldEnd,
-		})
-	}
-	if wu.mutation.MovieCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   word.MovieTable,
-			Columns: []string{word.MovieColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: movie.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := wu.mutation.MovieIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   word.MovieTable,
-			Columns: []string{word.MovieColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: movie.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if wu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -413,6 +274,41 @@ func (wu *WordUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if wu.mutation.FileCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   word.FileTable,
+			Columns: []string{word.FileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: fileentity.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wu.mutation.FileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   word.FileTable,
+			Columns: []string{word.FileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: fileentity.FieldID,
 				},
 			},
 		}
@@ -452,17 +348,9 @@ func (wuo *WordUpdateOne) SetMeaning(s string) *WordUpdateOne {
 	return wuo
 }
 
-// SetNillableMeaning sets the "meaning" field if the given value is not nil.
-func (wuo *WordUpdateOne) SetNillableMeaning(s *string) *WordUpdateOne {
-	if s != nil {
-		wuo.SetMeaning(*s)
-	}
-	return wuo
-}
-
-// ClearMeaning clears the value of the "meaning" field.
-func (wuo *WordUpdateOne) ClearMeaning() *WordUpdateOne {
-	wuo.mutation.ClearMeaning()
+// SetIsPreposition sets the "isPreposition" field.
+func (wuo *WordUpdateOne) SetIsPreposition(b bool) *WordUpdateOne {
+	wuo.mutation.SetIsPreposition(b)
 	return wuo
 }
 
@@ -472,97 +360,10 @@ func (wuo *WordUpdateOne) SetSentence(s string) *WordUpdateOne {
 	return wuo
 }
 
-// SetNillableSentence sets the "sentence" field if the given value is not nil.
-func (wuo *WordUpdateOne) SetNillableSentence(s *string) *WordUpdateOne {
-	if s != nil {
-		wuo.SetSentence(*s)
-	}
-	return wuo
-}
-
-// ClearSentence clears the value of the "sentence" field.
-func (wuo *WordUpdateOne) ClearSentence() *WordUpdateOne {
-	wuo.mutation.ClearSentence()
-	return wuo
-}
-
 // SetDuration sets the "duration" field.
 func (wuo *WordUpdateOne) SetDuration(s string) *WordUpdateOne {
 	wuo.mutation.SetDuration(s)
 	return wuo
-}
-
-// SetNillableDuration sets the "duration" field if the given value is not nil.
-func (wuo *WordUpdateOne) SetNillableDuration(s *string) *WordUpdateOne {
-	if s != nil {
-		wuo.SetDuration(*s)
-	}
-	return wuo
-}
-
-// ClearDuration clears the value of the "duration" field.
-func (wuo *WordUpdateOne) ClearDuration() *WordUpdateOne {
-	wuo.mutation.ClearDuration()
-	return wuo
-}
-
-// SetStart sets the "start" field.
-func (wuo *WordUpdateOne) SetStart(t time.Time) *WordUpdateOne {
-	wuo.mutation.SetStart(t)
-	return wuo
-}
-
-// SetNillableStart sets the "start" field if the given value is not nil.
-func (wuo *WordUpdateOne) SetNillableStart(t *time.Time) *WordUpdateOne {
-	if t != nil {
-		wuo.SetStart(*t)
-	}
-	return wuo
-}
-
-// ClearStart clears the value of the "start" field.
-func (wuo *WordUpdateOne) ClearStart() *WordUpdateOne {
-	wuo.mutation.ClearStart()
-	return wuo
-}
-
-// SetEnd sets the "end" field.
-func (wuo *WordUpdateOne) SetEnd(t time.Time) *WordUpdateOne {
-	wuo.mutation.SetEnd(t)
-	return wuo
-}
-
-// SetNillableEnd sets the "end" field if the given value is not nil.
-func (wuo *WordUpdateOne) SetNillableEnd(t *time.Time) *WordUpdateOne {
-	if t != nil {
-		wuo.SetEnd(*t)
-	}
-	return wuo
-}
-
-// ClearEnd clears the value of the "end" field.
-func (wuo *WordUpdateOne) ClearEnd() *WordUpdateOne {
-	wuo.mutation.ClearEnd()
-	return wuo
-}
-
-// SetMovieID sets the "movie" edge to the Movie entity by ID.
-func (wuo *WordUpdateOne) SetMovieID(id int) *WordUpdateOne {
-	wuo.mutation.SetMovieID(id)
-	return wuo
-}
-
-// SetNillableMovieID sets the "movie" edge to the Movie entity by ID if the given value is not nil.
-func (wuo *WordUpdateOne) SetNillableMovieID(id *int) *WordUpdateOne {
-	if id != nil {
-		wuo = wuo.SetMovieID(*id)
-	}
-	return wuo
-}
-
-// SetMovie sets the "movie" edge to the Movie entity.
-func (wuo *WordUpdateOne) SetMovie(m *Movie) *WordUpdateOne {
-	return wuo.SetMovieID(m.ID)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
@@ -584,20 +385,39 @@ func (wuo *WordUpdateOne) SetUser(u *User) *WordUpdateOne {
 	return wuo.SetUserID(u.ID)
 }
 
+// SetFileID sets the "file" edge to the FileEntity entity by ID.
+func (wuo *WordUpdateOne) SetFileID(id int) *WordUpdateOne {
+	wuo.mutation.SetFileID(id)
+	return wuo
+}
+
+// SetNillableFileID sets the "file" edge to the FileEntity entity by ID if the given value is not nil.
+func (wuo *WordUpdateOne) SetNillableFileID(id *int) *WordUpdateOne {
+	if id != nil {
+		wuo = wuo.SetFileID(*id)
+	}
+	return wuo
+}
+
+// SetFile sets the "file" edge to the FileEntity entity.
+func (wuo *WordUpdateOne) SetFile(f *FileEntity) *WordUpdateOne {
+	return wuo.SetFileID(f.ID)
+}
+
 // Mutation returns the WordMutation object of the builder.
 func (wuo *WordUpdateOne) Mutation() *WordMutation {
 	return wuo.mutation
 }
 
-// ClearMovie clears the "movie" edge to the Movie entity.
-func (wuo *WordUpdateOne) ClearMovie() *WordUpdateOne {
-	wuo.mutation.ClearMovie()
-	return wuo
-}
-
 // ClearUser clears the "user" edge to the User entity.
 func (wuo *WordUpdateOne) ClearUser() *WordUpdateOne {
 	wuo.mutation.ClearUser()
+	return wuo
+}
+
+// ClearFile clears the "file" edge to the FileEntity entity.
+func (wuo *WordUpdateOne) ClearFile() *WordUpdateOne {
+	wuo.mutation.ClearFile()
 	return wuo
 }
 
@@ -675,6 +495,16 @@ func (wuo *WordUpdateOne) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Word.title": %w`, err)}
 		}
 	}
+	if v, ok := wuo.mutation.Sentence(); ok {
+		if err := word.SentenceValidator(v); err != nil {
+			return &ValidationError{Name: "sentence", err: fmt.Errorf(`ent: validator failed for field "Word.sentence": %w`, err)}
+		}
+	}
+	if v, ok := wuo.mutation.Duration(); ok {
+		if err := word.DurationValidator(v); err != nil {
+			return &ValidationError{Name: "duration", err: fmt.Errorf(`ent: validator failed for field "Word.duration": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -727,10 +557,11 @@ func (wuo *WordUpdateOne) sqlSave(ctx context.Context) (_node *Word, err error) 
 			Column: word.FieldMeaning,
 		})
 	}
-	if wuo.mutation.MeaningCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: word.FieldMeaning,
+	if value, ok := wuo.mutation.IsPreposition(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: word.FieldIsPreposition,
 		})
 	}
 	if value, ok := wuo.mutation.Sentence(); ok {
@@ -740,85 +571,12 @@ func (wuo *WordUpdateOne) sqlSave(ctx context.Context) (_node *Word, err error) 
 			Column: word.FieldSentence,
 		})
 	}
-	if wuo.mutation.SentenceCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: word.FieldSentence,
-		})
-	}
 	if value, ok := wuo.mutation.Duration(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
 			Column: word.FieldDuration,
 		})
-	}
-	if wuo.mutation.DurationCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeString,
-			Column: word.FieldDuration,
-		})
-	}
-	if value, ok := wuo.mutation.Start(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: word.FieldStart,
-		})
-	}
-	if wuo.mutation.StartCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: word.FieldStart,
-		})
-	}
-	if value, ok := wuo.mutation.End(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: word.FieldEnd,
-		})
-	}
-	if wuo.mutation.EndCleared() {
-		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Column: word.FieldEnd,
-		})
-	}
-	if wuo.mutation.MovieCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   word.MovieTable,
-			Columns: []string{word.MovieColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: movie.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := wuo.mutation.MovieIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   word.MovieTable,
-			Columns: []string{word.MovieColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: movie.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
 	if wuo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
@@ -847,6 +605,41 @@ func (wuo *WordUpdateOne) sqlSave(ctx context.Context) (_node *Word, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if wuo.mutation.FileCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   word.FileTable,
+			Columns: []string{word.FileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: fileentity.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := wuo.mutation.FileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   word.FileTable,
+			Columns: []string{word.FileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: fileentity.FieldID,
 				},
 			},
 		}

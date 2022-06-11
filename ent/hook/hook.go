@@ -73,19 +73,6 @@ func (f WordFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error)
 	return f(ctx, mv)
 }
 
-// The WordNodeFunc type is an adapter to allow the use of ordinary
-// function as WordNode mutator.
-type WordNodeFunc func(context.Context, *ent.WordNodeMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f WordNodeFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.WordNodeMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WordNodeMutation", m)
-	}
-	return f(ctx, mv)
-}
-
 // Condition is a hook condition function.
 type Condition func(context.Context, ent.Mutation) bool
 

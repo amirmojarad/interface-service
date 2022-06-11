@@ -27,15 +27,13 @@ func (api *API) userGroup(path string) {
 	// Super User
 	userGroup.DELETE("/admin", middlewares.IsSuperUser(), api.deleteUser())
 	userGroup.GET("/admin", middlewares.IsSuperUser(), api.getAllUsers())
-	
+
 	// Keywords
 	userGroup.GET("/searchKeywords", api.getSearchKeywords())
 
 	// Upload subtitle
 	userGroup.POST("/upload", api.sendSubtitleText())
 
-	// Wordnodes
-	userGroup.GET("/wordnodes/all", api.getAllWordnodes())
 }
 
 func (api API) updateUser() gin.HandlerFunc {

@@ -20,6 +20,3 @@ type User func(*sql.Selector)
 
 // Word is the predicate function for word builders.
 type Word func(*sql.Selector)
-
-// WordNode is the predicate function for wordnode builders.
-type WordNode func(*sql.Selector)

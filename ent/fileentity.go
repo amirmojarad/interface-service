@@ -37,8 +37,8 @@ type FileEntity struct {
 type FileEntityEdges struct {
 	// Owner holds the value of the owner edge.
 	Owner *User `json:"owner,omitempty"`
-	// Wordnodes holds the value of the wordnodes edge.
-	Wordnodes []*WordNode `json:"wordnodes,omitempty"`
+	// Words holds the value of the words edge.
+	Words []*Word `json:"words,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
@@ -58,13 +58,13 @@ func (e FileEntityEdges) OwnerOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "owner"}
 }
 
-// WordnodesOrErr returns the Wordnodes value or an error if the edge
+// WordsOrErr returns the Words value or an error if the edge
 // was not loaded in eager-loading.
-func (e FileEntityEdges) WordnodesOrErr() ([]*WordNode, error) {
+func (e FileEntityEdges) WordsOrErr() ([]*Word, error) {
 	if e.loadedTypes[1] {
-		return e.Wordnodes, nil
+		return e.Words, nil
 	}
-	return nil, &NotLoadedError{edge: "wordnodes"}
+	return nil, &NotLoadedError{edge: "words"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -150,9 +150,9 @@ func (fe *FileEntity) QueryOwner() *UserQuery {
 	return (&FileEntityClient{config: fe.config}).QueryOwner(fe)
 }
 
-// QueryWordnodes queries the "wordnodes" edge of the FileEntity entity.
-func (fe *FileEntity) QueryWordnodes() *WordNodeQuery {
-	return (&FileEntityClient{config: fe.config}).QueryWordnodes(fe)
+// QueryWords queries the "words" edge of the FileEntity entity.
+func (fe *FileEntity) QueryWords() *WordQuery {
+	return (&FileEntityClient{config: fe.config}).QueryWords(fe)
 }
 
 // Update returns a builder for updating this FileEntity.

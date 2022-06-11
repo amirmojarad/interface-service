@@ -40,6 +40,7 @@ func (api *API) groups() {
 	api.userGroup("/users")
 	api.movieGroup("/movies")
 	api.fileGroup("/file")
+	api.wordGroup("/words")
 	api.authGroup("/")
 }
 

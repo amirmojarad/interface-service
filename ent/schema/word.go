@@ -17,19 +17,18 @@ type Word struct {
 func (Word) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("title").NotEmpty().Annotations(entproto.Field(2)),
-		field.String("meaning").Optional().Annotations(entproto.Field(3)),
-		field.String("sentence").Optional().Annotations(entproto.Field(4)),
-		field.String("duration").Optional().Annotations(entproto.Field(5)),
-		field.Time("start").Optional().Annotations(entproto.Field(6)),
-		field.Time("end").Optional().Annotations(entproto.Field(7)),
+		field.String("meaning").Annotations(entproto.Field(3)),
+		field.Bool("isPreposition").Annotations(entproto.Field(4)),
+		field.String("sentence").NotEmpty().Annotations(entproto.Field(5)),
+		field.String("duration").NotEmpty().Annotations(entproto.Field(6)),
 	}
 }
 
 // Edges of the Word.
 func (Word) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("movie", Movie.Type).Unique().Annotations(entproto.Field(8)),
-		edge.From("user", User.Type).Ref("favorite_words").Unique().Annotations(entproto.Field(9)),
+		edge.From("user", User.Type).Ref("favorite_words").Unique().Annotations(entproto.Field(7)),
+		edge.From("file", FileEntity.Type).Ref("words").Unique().Annotations(entproto.Field(8)),
 	}
 }
 

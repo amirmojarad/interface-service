@@ -12,7 +12,6 @@ import (
 	"interface_project/ent/searchkeyword"
 	"interface_project/ent/user"
 	"interface_project/ent/word"
-	"interface_project/ent/wordnode"
 	"sync"
 	"time"
 
@@ -33,30 +32,29 @@ const (
 	TypeSearchKeyword = "SearchKeyword"
 	TypeUser          = "User"
 	TypeWord          = "Word"
-	TypeWordNode      = "WordNode"
 )
 
 // FileEntityMutation represents an operation that mutates the FileEntity nodes in the graph.
 type FileEntityMutation struct {
 	config
-	op               Op
-	typ              string
-	id               *int
-	_path            *string
-	name             *string
-	size             *int16
-	addsize          *int16
-	deleted          *bool
-	created_date     *time.Time
-	clearedFields    map[string]struct{}
-	owner            *int
-	clearedowner     bool
-	wordnodes        map[int]struct{}
-	removedwordnodes map[int]struct{}
-	clearedwordnodes bool
-	done             bool
-	oldValue         func(context.Context) (*FileEntity, error)
-	predicates       []predicate.FileEntity
+	op            Op
+	typ           string
+	id            *int
+	_path         *string
+	name          *string
+	size          *int16
+	addsize       *int16
+	deleted       *bool
+	created_date  *time.Time
+	clearedFields map[string]struct{}
+	owner         *int
+	clearedowner  bool
+	words         map[int]struct{}
+	removedwords  map[int]struct{}
+	clearedwords  bool
+	done          bool
+	oldValue      func(context.Context) (*FileEntity, error)
+	predicates    []predicate.FileEntity
 }
 
 var _ ent.Mutation = (*FileEntityMutation)(nil)
@@ -396,58 +394,58 @@ func (m *FileEntityMutation) ResetOwner() {
 	m.clearedowner = false
 }
 
-// AddWordnodeIDs adds the "wordnodes" edge to the WordNode entity by ids.
-func (m *FileEntityMutation) AddWordnodeIDs(ids ...int) {
-	if m.wordnodes == nil {
-		m.wordnodes = make(map[int]struct{})
+// AddWordIDs adds the "words" edge to the Word entity by ids.
+func (m *FileEntityMutation) AddWordIDs(ids ...int) {
+	if m.words == nil {
+		m.words = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.wordnodes[ids[i]] = struct{}{}
+		m.words[ids[i]] = struct{}{}
 	}
 }
 
-// ClearWordnodes clears the "wordnodes" edge to the WordNode entity.
-func (m *FileEntityMutation) ClearWordnodes() {
-	m.clearedwordnodes = true
+// ClearWords clears the "words" edge to the Word entity.
+func (m *FileEntityMutation) ClearWords() {
+	m.clearedwords = true
 }
 
-// WordnodesCleared reports if the "wordnodes" edge to the WordNode entity was cleared.
-func (m *FileEntityMutation) WordnodesCleared() bool {
-	return m.clearedwordnodes
+// WordsCleared reports if the "words" edge to the Word entity was cleared.
+func (m *FileEntityMutation) WordsCleared() bool {
+	return m.clearedwords
 }
 
-// RemoveWordnodeIDs removes the "wordnodes" edge to the WordNode entity by IDs.
-func (m *FileEntityMutation) RemoveWordnodeIDs(ids ...int) {
-	if m.removedwordnodes == nil {
-		m.removedwordnodes = make(map[int]struct{})
+// RemoveWordIDs removes the "words" edge to the Word entity by IDs.
+func (m *FileEntityMutation) RemoveWordIDs(ids ...int) {
+	if m.removedwords == nil {
+		m.removedwords = make(map[int]struct{})
 	}
 	for i := range ids {
-		delete(m.wordnodes, ids[i])
-		m.removedwordnodes[ids[i]] = struct{}{}
+		delete(m.words, ids[i])
+		m.removedwords[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedWordnodes returns the removed IDs of the "wordnodes" edge to the WordNode entity.
-func (m *FileEntityMutation) RemovedWordnodesIDs() (ids []int) {
-	for id := range m.removedwordnodes {
+// RemovedWords returns the removed IDs of the "words" edge to the Word entity.
+func (m *FileEntityMutation) RemovedWordsIDs() (ids []int) {
+	for id := range m.removedwords {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// WordnodesIDs returns the "wordnodes" edge IDs in the mutation.
-func (m *FileEntityMutation) WordnodesIDs() (ids []int) {
-	for id := range m.wordnodes {
+// WordsIDs returns the "words" edge IDs in the mutation.
+func (m *FileEntityMutation) WordsIDs() (ids []int) {
+	for id := range m.words {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetWordnodes resets all changes to the "wordnodes" edge.
-func (m *FileEntityMutation) ResetWordnodes() {
-	m.wordnodes = nil
-	m.clearedwordnodes = false
-	m.removedwordnodes = nil
+// ResetWords resets all changes to the "words" edge.
+func (m *FileEntityMutation) ResetWords() {
+	m.words = nil
+	m.clearedwords = false
+	m.removedwords = nil
 }
 
 // Where appends a list predicates to the FileEntityMutation builder.
@@ -655,8 +653,8 @@ func (m *FileEntityMutation) AddedEdges() []string {
 	if m.owner != nil {
 		edges = append(edges, fileentity.EdgeOwner)
 	}
-	if m.wordnodes != nil {
-		edges = append(edges, fileentity.EdgeWordnodes)
+	if m.words != nil {
+		edges = append(edges, fileentity.EdgeWords)
 	}
 	return edges
 }
@@ -669,9 +667,9 @@ func (m *FileEntityMutation) AddedIDs(name string) []ent.Value {
 		if id := m.owner; id != nil {
 			return []ent.Value{*id}
 		}
-	case fileentity.EdgeWordnodes:
-		ids := make([]ent.Value, 0, len(m.wordnodes))
-		for id := range m.wordnodes {
+	case fileentity.EdgeWords:
+		ids := make([]ent.Value, 0, len(m.words))
+		for id := range m.words {
 			ids = append(ids, id)
 		}
 		return ids
@@ -682,8 +680,8 @@ func (m *FileEntityMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *FileEntityMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.removedwordnodes != nil {
-		edges = append(edges, fileentity.EdgeWordnodes)
+	if m.removedwords != nil {
+		edges = append(edges, fileentity.EdgeWords)
 	}
 	return edges
 }
@@ -692,9 +690,9 @@ func (m *FileEntityMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *FileEntityMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case fileentity.EdgeWordnodes:
-		ids := make([]ent.Value, 0, len(m.removedwordnodes))
-		for id := range m.removedwordnodes {
+	case fileentity.EdgeWords:
+		ids := make([]ent.Value, 0, len(m.removedwords))
+		for id := range m.removedwords {
 			ids = append(ids, id)
 		}
 		return ids
@@ -708,8 +706,8 @@ func (m *FileEntityMutation) ClearedEdges() []string {
 	if m.clearedowner {
 		edges = append(edges, fileentity.EdgeOwner)
 	}
-	if m.clearedwordnodes {
-		edges = append(edges, fileentity.EdgeWordnodes)
+	if m.clearedwords {
+		edges = append(edges, fileentity.EdgeWords)
 	}
 	return edges
 }
@@ -720,8 +718,8 @@ func (m *FileEntityMutation) EdgeCleared(name string) bool {
 	switch name {
 	case fileentity.EdgeOwner:
 		return m.clearedowner
-	case fileentity.EdgeWordnodes:
-		return m.clearedwordnodes
+	case fileentity.EdgeWords:
+		return m.clearedwords
 	}
 	return false
 }
@@ -744,8 +742,8 @@ func (m *FileEntityMutation) ResetEdge(name string) error {
 	case fileentity.EdgeOwner:
 		m.ResetOwner()
 		return nil
-	case fileentity.EdgeWordnodes:
-		m.ResetWordnodes()
+	case fileentity.EdgeWords:
+		m.ResetWords()
 		return nil
 	}
 	return fmt.Errorf("unknown FileEntity edge %s", name)
@@ -3137,15 +3135,14 @@ type WordMutation struct {
 	id            *int
 	title         *string
 	meaning       *string
+	isPreposition *bool
 	sentence      *string
 	duration      *string
-	start         *time.Time
-	end           *time.Time
 	clearedFields map[string]struct{}
-	movie         *int
-	clearedmovie  bool
 	user          *int
 	cleareduser   bool
+	file          *int
+	clearedfile   bool
 	done          bool
 	oldValue      func(context.Context) (*Word, error)
 	predicates    []predicate.Word
@@ -3316,22 +3313,45 @@ func (m *WordMutation) OldMeaning(ctx context.Context) (v string, err error) {
 	return oldValue.Meaning, nil
 }
 
-// ClearMeaning clears the value of the "meaning" field.
-func (m *WordMutation) ClearMeaning() {
-	m.meaning = nil
-	m.clearedFields[word.FieldMeaning] = struct{}{}
-}
-
-// MeaningCleared returns if the "meaning" field was cleared in this mutation.
-func (m *WordMutation) MeaningCleared() bool {
-	_, ok := m.clearedFields[word.FieldMeaning]
-	return ok
-}
-
 // ResetMeaning resets all changes to the "meaning" field.
 func (m *WordMutation) ResetMeaning() {
 	m.meaning = nil
-	delete(m.clearedFields, word.FieldMeaning)
+}
+
+// SetIsPreposition sets the "isPreposition" field.
+func (m *WordMutation) SetIsPreposition(b bool) {
+	m.isPreposition = &b
+}
+
+// IsPreposition returns the value of the "isPreposition" field in the mutation.
+func (m *WordMutation) IsPreposition() (r bool, exists bool) {
+	v := m.isPreposition
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldIsPreposition returns the old "isPreposition" field's value of the Word entity.
+// If the Word object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WordMutation) OldIsPreposition(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldIsPreposition is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldIsPreposition requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldIsPreposition: %w", err)
+	}
+	return oldValue.IsPreposition, nil
+}
+
+// ResetIsPreposition resets all changes to the "isPreposition" field.
+func (m *WordMutation) ResetIsPreposition() {
+	m.isPreposition = nil
 }
 
 // SetSentence sets the "sentence" field.
@@ -3365,22 +3385,9 @@ func (m *WordMutation) OldSentence(ctx context.Context) (v string, err error) {
 	return oldValue.Sentence, nil
 }
 
-// ClearSentence clears the value of the "sentence" field.
-func (m *WordMutation) ClearSentence() {
-	m.sentence = nil
-	m.clearedFields[word.FieldSentence] = struct{}{}
-}
-
-// SentenceCleared returns if the "sentence" field was cleared in this mutation.
-func (m *WordMutation) SentenceCleared() bool {
-	_, ok := m.clearedFields[word.FieldSentence]
-	return ok
-}
-
 // ResetSentence resets all changes to the "sentence" field.
 func (m *WordMutation) ResetSentence() {
 	m.sentence = nil
-	delete(m.clearedFields, word.FieldSentence)
 }
 
 // SetDuration sets the "duration" field.
@@ -3414,159 +3421,9 @@ func (m *WordMutation) OldDuration(ctx context.Context) (v string, err error) {
 	return oldValue.Duration, nil
 }
 
-// ClearDuration clears the value of the "duration" field.
-func (m *WordMutation) ClearDuration() {
-	m.duration = nil
-	m.clearedFields[word.FieldDuration] = struct{}{}
-}
-
-// DurationCleared returns if the "duration" field was cleared in this mutation.
-func (m *WordMutation) DurationCleared() bool {
-	_, ok := m.clearedFields[word.FieldDuration]
-	return ok
-}
-
 // ResetDuration resets all changes to the "duration" field.
 func (m *WordMutation) ResetDuration() {
 	m.duration = nil
-	delete(m.clearedFields, word.FieldDuration)
-}
-
-// SetStart sets the "start" field.
-func (m *WordMutation) SetStart(t time.Time) {
-	m.start = &t
-}
-
-// Start returns the value of the "start" field in the mutation.
-func (m *WordMutation) Start() (r time.Time, exists bool) {
-	v := m.start
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldStart returns the old "start" field's value of the Word entity.
-// If the Word object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *WordMutation) OldStart(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldStart is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldStart requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldStart: %w", err)
-	}
-	return oldValue.Start, nil
-}
-
-// ClearStart clears the value of the "start" field.
-func (m *WordMutation) ClearStart() {
-	m.start = nil
-	m.clearedFields[word.FieldStart] = struct{}{}
-}
-
-// StartCleared returns if the "start" field was cleared in this mutation.
-func (m *WordMutation) StartCleared() bool {
-	_, ok := m.clearedFields[word.FieldStart]
-	return ok
-}
-
-// ResetStart resets all changes to the "start" field.
-func (m *WordMutation) ResetStart() {
-	m.start = nil
-	delete(m.clearedFields, word.FieldStart)
-}
-
-// SetEnd sets the "end" field.
-func (m *WordMutation) SetEnd(t time.Time) {
-	m.end = &t
-}
-
-// End returns the value of the "end" field in the mutation.
-func (m *WordMutation) End() (r time.Time, exists bool) {
-	v := m.end
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldEnd returns the old "end" field's value of the Word entity.
-// If the Word object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *WordMutation) OldEnd(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldEnd is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldEnd requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldEnd: %w", err)
-	}
-	return oldValue.End, nil
-}
-
-// ClearEnd clears the value of the "end" field.
-func (m *WordMutation) ClearEnd() {
-	m.end = nil
-	m.clearedFields[word.FieldEnd] = struct{}{}
-}
-
-// EndCleared returns if the "end" field was cleared in this mutation.
-func (m *WordMutation) EndCleared() bool {
-	_, ok := m.clearedFields[word.FieldEnd]
-	return ok
-}
-
-// ResetEnd resets all changes to the "end" field.
-func (m *WordMutation) ResetEnd() {
-	m.end = nil
-	delete(m.clearedFields, word.FieldEnd)
-}
-
-// SetMovieID sets the "movie" edge to the Movie entity by id.
-func (m *WordMutation) SetMovieID(id int) {
-	m.movie = &id
-}
-
-// ClearMovie clears the "movie" edge to the Movie entity.
-func (m *WordMutation) ClearMovie() {
-	m.clearedmovie = true
-}
-
-// MovieCleared reports if the "movie" edge to the Movie entity was cleared.
-func (m *WordMutation) MovieCleared() bool {
-	return m.clearedmovie
-}
-
-// MovieID returns the "movie" edge ID in the mutation.
-func (m *WordMutation) MovieID() (id int, exists bool) {
-	if m.movie != nil {
-		return *m.movie, true
-	}
-	return
-}
-
-// MovieIDs returns the "movie" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// MovieID instead. It exists only for internal usage by the builders.
-func (m *WordMutation) MovieIDs() (ids []int) {
-	if id := m.movie; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetMovie resets all changes to the "movie" edge.
-func (m *WordMutation) ResetMovie() {
-	m.movie = nil
-	m.clearedmovie = false
 }
 
 // SetUserID sets the "user" edge to the User entity by id.
@@ -3608,6 +3465,45 @@ func (m *WordMutation) ResetUser() {
 	m.cleareduser = false
 }
 
+// SetFileID sets the "file" edge to the FileEntity entity by id.
+func (m *WordMutation) SetFileID(id int) {
+	m.file = &id
+}
+
+// ClearFile clears the "file" edge to the FileEntity entity.
+func (m *WordMutation) ClearFile() {
+	m.clearedfile = true
+}
+
+// FileCleared reports if the "file" edge to the FileEntity entity was cleared.
+func (m *WordMutation) FileCleared() bool {
+	return m.clearedfile
+}
+
+// FileID returns the "file" edge ID in the mutation.
+func (m *WordMutation) FileID() (id int, exists bool) {
+	if m.file != nil {
+		return *m.file, true
+	}
+	return
+}
+
+// FileIDs returns the "file" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// FileID instead. It exists only for internal usage by the builders.
+func (m *WordMutation) FileIDs() (ids []int) {
+	if id := m.file; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetFile resets all changes to the "file" edge.
+func (m *WordMutation) ResetFile() {
+	m.file = nil
+	m.clearedfile = false
+}
+
 // Where appends a list predicates to the WordMutation builder.
 func (m *WordMutation) Where(ps ...predicate.Word) {
 	m.predicates = append(m.predicates, ps...)
@@ -3627,24 +3523,21 @@ func (m *WordMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *WordMutation) Fields() []string {
-	fields := make([]string, 0, 6)
+	fields := make([]string, 0, 5)
 	if m.title != nil {
 		fields = append(fields, word.FieldTitle)
 	}
 	if m.meaning != nil {
 		fields = append(fields, word.FieldMeaning)
 	}
+	if m.isPreposition != nil {
+		fields = append(fields, word.FieldIsPreposition)
+	}
 	if m.sentence != nil {
 		fields = append(fields, word.FieldSentence)
 	}
 	if m.duration != nil {
 		fields = append(fields, word.FieldDuration)
-	}
-	if m.start != nil {
-		fields = append(fields, word.FieldStart)
-	}
-	if m.end != nil {
-		fields = append(fields, word.FieldEnd)
 	}
 	return fields
 }
@@ -3658,14 +3551,12 @@ func (m *WordMutation) Field(name string) (ent.Value, bool) {
 		return m.Title()
 	case word.FieldMeaning:
 		return m.Meaning()
+	case word.FieldIsPreposition:
+		return m.IsPreposition()
 	case word.FieldSentence:
 		return m.Sentence()
 	case word.FieldDuration:
 		return m.Duration()
-	case word.FieldStart:
-		return m.Start()
-	case word.FieldEnd:
-		return m.End()
 	}
 	return nil, false
 }
@@ -3679,14 +3570,12 @@ func (m *WordMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldTitle(ctx)
 	case word.FieldMeaning:
 		return m.OldMeaning(ctx)
+	case word.FieldIsPreposition:
+		return m.OldIsPreposition(ctx)
 	case word.FieldSentence:
 		return m.OldSentence(ctx)
 	case word.FieldDuration:
 		return m.OldDuration(ctx)
-	case word.FieldStart:
-		return m.OldStart(ctx)
-	case word.FieldEnd:
-		return m.OldEnd(ctx)
 	}
 	return nil, fmt.Errorf("unknown Word field %s", name)
 }
@@ -3710,6 +3599,13 @@ func (m *WordMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetMeaning(v)
 		return nil
+	case word.FieldIsPreposition:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetIsPreposition(v)
+		return nil
 	case word.FieldSentence:
 		v, ok := value.(string)
 		if !ok {
@@ -3723,20 +3619,6 @@ func (m *WordMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDuration(v)
-		return nil
-	case word.FieldStart:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetStart(v)
-		return nil
-	case word.FieldEnd:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetEnd(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Word field %s", name)
@@ -3767,23 +3649,7 @@ func (m *WordMutation) AddField(name string, value ent.Value) error {
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
 func (m *WordMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(word.FieldMeaning) {
-		fields = append(fields, word.FieldMeaning)
-	}
-	if m.FieldCleared(word.FieldSentence) {
-		fields = append(fields, word.FieldSentence)
-	}
-	if m.FieldCleared(word.FieldDuration) {
-		fields = append(fields, word.FieldDuration)
-	}
-	if m.FieldCleared(word.FieldStart) {
-		fields = append(fields, word.FieldStart)
-	}
-	if m.FieldCleared(word.FieldEnd) {
-		fields = append(fields, word.FieldEnd)
-	}
-	return fields
+	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
@@ -3796,23 +3662,6 @@ func (m *WordMutation) FieldCleared(name string) bool {
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
 func (m *WordMutation) ClearField(name string) error {
-	switch name {
-	case word.FieldMeaning:
-		m.ClearMeaning()
-		return nil
-	case word.FieldSentence:
-		m.ClearSentence()
-		return nil
-	case word.FieldDuration:
-		m.ClearDuration()
-		return nil
-	case word.FieldStart:
-		m.ClearStart()
-		return nil
-	case word.FieldEnd:
-		m.ClearEnd()
-		return nil
-	}
 	return fmt.Errorf("unknown Word nullable field %s", name)
 }
 
@@ -3826,17 +3675,14 @@ func (m *WordMutation) ResetField(name string) error {
 	case word.FieldMeaning:
 		m.ResetMeaning()
 		return nil
+	case word.FieldIsPreposition:
+		m.ResetIsPreposition()
+		return nil
 	case word.FieldSentence:
 		m.ResetSentence()
 		return nil
 	case word.FieldDuration:
 		m.ResetDuration()
-		return nil
-	case word.FieldStart:
-		m.ResetStart()
-		return nil
-	case word.FieldEnd:
-		m.ResetEnd()
 		return nil
 	}
 	return fmt.Errorf("unknown Word field %s", name)
@@ -3845,11 +3691,11 @@ func (m *WordMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *WordMutation) AddedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.movie != nil {
-		edges = append(edges, word.EdgeMovie)
-	}
 	if m.user != nil {
 		edges = append(edges, word.EdgeUser)
+	}
+	if m.file != nil {
+		edges = append(edges, word.EdgeFile)
 	}
 	return edges
 }
@@ -3858,12 +3704,12 @@ func (m *WordMutation) AddedEdges() []string {
 // name in this mutation.
 func (m *WordMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case word.EdgeMovie:
-		if id := m.movie; id != nil {
-			return []ent.Value{*id}
-		}
 	case word.EdgeUser:
 		if id := m.user; id != nil {
+			return []ent.Value{*id}
+		}
+	case word.EdgeFile:
+		if id := m.file; id != nil {
 			return []ent.Value{*id}
 		}
 	}
@@ -3887,11 +3733,11 @@ func (m *WordMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *WordMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 2)
-	if m.clearedmovie {
-		edges = append(edges, word.EdgeMovie)
-	}
 	if m.cleareduser {
 		edges = append(edges, word.EdgeUser)
+	}
+	if m.clearedfile {
+		edges = append(edges, word.EdgeFile)
 	}
 	return edges
 }
@@ -3900,10 +3746,10 @@ func (m *WordMutation) ClearedEdges() []string {
 // was cleared in this mutation.
 func (m *WordMutation) EdgeCleared(name string) bool {
 	switch name {
-	case word.EdgeMovie:
-		return m.clearedmovie
 	case word.EdgeUser:
 		return m.cleareduser
+	case word.EdgeFile:
+		return m.clearedfile
 	}
 	return false
 }
@@ -3912,11 +3758,11 @@ func (m *WordMutation) EdgeCleared(name string) bool {
 // if that edge is not defined in the schema.
 func (m *WordMutation) ClearEdge(name string) error {
 	switch name {
-	case word.EdgeMovie:
-		m.ClearMovie()
-		return nil
 	case word.EdgeUser:
 		m.ClearUser()
+		return nil
+	case word.EdgeFile:
+		m.ClearFile()
 		return nil
 	}
 	return fmt.Errorf("unknown Word unique edge %s", name)
@@ -3926,642 +3772,12 @@ func (m *WordMutation) ClearEdge(name string) error {
 // It returns an error if the edge is not defined in the schema.
 func (m *WordMutation) ResetEdge(name string) error {
 	switch name {
-	case word.EdgeMovie:
-		m.ResetMovie()
-		return nil
 	case word.EdgeUser:
 		m.ResetUser()
 		return nil
-	}
-	return fmt.Errorf("unknown Word edge %s", name)
-}
-
-// WordNodeMutation represents an operation that mutates the WordNode nodes in the graph.
-type WordNodeMutation struct {
-	config
-	op             Op
-	typ            string
-	id             *int
-	title          *string
-	is_preposition *bool
-	occurence      *int
-	addoccurence   *int
-	clearedFields  map[string]struct{}
-	words          map[int]struct{}
-	removedwords   map[int]struct{}
-	clearedwords   bool
-	file           *int
-	clearedfile    bool
-	done           bool
-	oldValue       func(context.Context) (*WordNode, error)
-	predicates     []predicate.WordNode
-}
-
-var _ ent.Mutation = (*WordNodeMutation)(nil)
-
-// wordnodeOption allows management of the mutation configuration using functional options.
-type wordnodeOption func(*WordNodeMutation)
-
-// newWordNodeMutation creates new mutation for the WordNode entity.
-func newWordNodeMutation(c config, op Op, opts ...wordnodeOption) *WordNodeMutation {
-	m := &WordNodeMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeWordNode,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withWordNodeID sets the ID field of the mutation.
-func withWordNodeID(id int) wordnodeOption {
-	return func(m *WordNodeMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *WordNode
-		)
-		m.oldValue = func(ctx context.Context) (*WordNode, error) {
-			once.Do(func() {
-				if m.done {
-					err = errors.New("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().WordNode.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withWordNode sets the old WordNode of the mutation.
-func withWordNode(node *WordNode) wordnodeOption {
-	return func(m *WordNodeMutation) {
-		m.oldValue = func(context.Context) (*WordNode, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m WordNodeMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m WordNodeMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, errors.New("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the ID value in the mutation. Note that the ID is only available
-// if it was provided to the builder or after it was returned from the database.
-func (m *WordNodeMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// IDs queries the database and returns the entity ids that match the mutation's predicate.
-// That means, if the mutation is applied within a transaction with an isolation level such
-// as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
-// or updated by the mutation.
-func (m *WordNodeMutation) IDs(ctx context.Context) ([]int, error) {
-	switch {
-	case m.op.Is(OpUpdateOne | OpDeleteOne):
-		id, exists := m.ID()
-		if exists {
-			return []int{id}, nil
-		}
-		fallthrough
-	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().WordNode.Query().Where(m.predicates...).IDs(ctx)
-	default:
-		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
-	}
-}
-
-// SetTitle sets the "title" field.
-func (m *WordNodeMutation) SetTitle(s string) {
-	m.title = &s
-}
-
-// Title returns the value of the "title" field in the mutation.
-func (m *WordNodeMutation) Title() (r string, exists bool) {
-	v := m.title
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldTitle returns the old "title" field's value of the WordNode entity.
-// If the WordNode object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *WordNodeMutation) OldTitle(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldTitle requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldTitle: %w", err)
-	}
-	return oldValue.Title, nil
-}
-
-// ResetTitle resets all changes to the "title" field.
-func (m *WordNodeMutation) ResetTitle() {
-	m.title = nil
-}
-
-// SetIsPreposition sets the "is_preposition" field.
-func (m *WordNodeMutation) SetIsPreposition(b bool) {
-	m.is_preposition = &b
-}
-
-// IsPreposition returns the value of the "is_preposition" field in the mutation.
-func (m *WordNodeMutation) IsPreposition() (r bool, exists bool) {
-	v := m.is_preposition
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldIsPreposition returns the old "is_preposition" field's value of the WordNode entity.
-// If the WordNode object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *WordNodeMutation) OldIsPreposition(ctx context.Context) (v bool, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldIsPreposition is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldIsPreposition requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldIsPreposition: %w", err)
-	}
-	return oldValue.IsPreposition, nil
-}
-
-// ResetIsPreposition resets all changes to the "is_preposition" field.
-func (m *WordNodeMutation) ResetIsPreposition() {
-	m.is_preposition = nil
-}
-
-// SetOccurence sets the "occurence" field.
-func (m *WordNodeMutation) SetOccurence(i int) {
-	m.occurence = &i
-	m.addoccurence = nil
-}
-
-// Occurence returns the value of the "occurence" field in the mutation.
-func (m *WordNodeMutation) Occurence() (r int, exists bool) {
-	v := m.occurence
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldOccurence returns the old "occurence" field's value of the WordNode entity.
-// If the WordNode object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *WordNodeMutation) OldOccurence(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, errors.New("OldOccurence is only allowed on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, errors.New("OldOccurence requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldOccurence: %w", err)
-	}
-	return oldValue.Occurence, nil
-}
-
-// AddOccurence adds i to the "occurence" field.
-func (m *WordNodeMutation) AddOccurence(i int) {
-	if m.addoccurence != nil {
-		*m.addoccurence += i
-	} else {
-		m.addoccurence = &i
-	}
-}
-
-// AddedOccurence returns the value that was added to the "occurence" field in this mutation.
-func (m *WordNodeMutation) AddedOccurence() (r int, exists bool) {
-	v := m.addoccurence
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ClearOccurence clears the value of the "occurence" field.
-func (m *WordNodeMutation) ClearOccurence() {
-	m.occurence = nil
-	m.addoccurence = nil
-	m.clearedFields[wordnode.FieldOccurence] = struct{}{}
-}
-
-// OccurenceCleared returns if the "occurence" field was cleared in this mutation.
-func (m *WordNodeMutation) OccurenceCleared() bool {
-	_, ok := m.clearedFields[wordnode.FieldOccurence]
-	return ok
-}
-
-// ResetOccurence resets all changes to the "occurence" field.
-func (m *WordNodeMutation) ResetOccurence() {
-	m.occurence = nil
-	m.addoccurence = nil
-	delete(m.clearedFields, wordnode.FieldOccurence)
-}
-
-// AddWordIDs adds the "words" edge to the Word entity by ids.
-func (m *WordNodeMutation) AddWordIDs(ids ...int) {
-	if m.words == nil {
-		m.words = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.words[ids[i]] = struct{}{}
-	}
-}
-
-// ClearWords clears the "words" edge to the Word entity.
-func (m *WordNodeMutation) ClearWords() {
-	m.clearedwords = true
-}
-
-// WordsCleared reports if the "words" edge to the Word entity was cleared.
-func (m *WordNodeMutation) WordsCleared() bool {
-	return m.clearedwords
-}
-
-// RemoveWordIDs removes the "words" edge to the Word entity by IDs.
-func (m *WordNodeMutation) RemoveWordIDs(ids ...int) {
-	if m.removedwords == nil {
-		m.removedwords = make(map[int]struct{})
-	}
-	for i := range ids {
-		delete(m.words, ids[i])
-		m.removedwords[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedWords returns the removed IDs of the "words" edge to the Word entity.
-func (m *WordNodeMutation) RemovedWordsIDs() (ids []int) {
-	for id := range m.removedwords {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// WordsIDs returns the "words" edge IDs in the mutation.
-func (m *WordNodeMutation) WordsIDs() (ids []int) {
-	for id := range m.words {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetWords resets all changes to the "words" edge.
-func (m *WordNodeMutation) ResetWords() {
-	m.words = nil
-	m.clearedwords = false
-	m.removedwords = nil
-}
-
-// SetFileID sets the "file" edge to the FileEntity entity by id.
-func (m *WordNodeMutation) SetFileID(id int) {
-	m.file = &id
-}
-
-// ClearFile clears the "file" edge to the FileEntity entity.
-func (m *WordNodeMutation) ClearFile() {
-	m.clearedfile = true
-}
-
-// FileCleared reports if the "file" edge to the FileEntity entity was cleared.
-func (m *WordNodeMutation) FileCleared() bool {
-	return m.clearedfile
-}
-
-// FileID returns the "file" edge ID in the mutation.
-func (m *WordNodeMutation) FileID() (id int, exists bool) {
-	if m.file != nil {
-		return *m.file, true
-	}
-	return
-}
-
-// FileIDs returns the "file" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// FileID instead. It exists only for internal usage by the builders.
-func (m *WordNodeMutation) FileIDs() (ids []int) {
-	if id := m.file; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetFile resets all changes to the "file" edge.
-func (m *WordNodeMutation) ResetFile() {
-	m.file = nil
-	m.clearedfile = false
-}
-
-// Where appends a list predicates to the WordNodeMutation builder.
-func (m *WordNodeMutation) Where(ps ...predicate.WordNode) {
-	m.predicates = append(m.predicates, ps...)
-}
-
-// Op returns the operation name.
-func (m *WordNodeMutation) Op() Op {
-	return m.op
-}
-
-// Type returns the node type of this mutation (WordNode).
-func (m *WordNodeMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
-func (m *WordNodeMutation) Fields() []string {
-	fields := make([]string, 0, 3)
-	if m.title != nil {
-		fields = append(fields, wordnode.FieldTitle)
-	}
-	if m.is_preposition != nil {
-		fields = append(fields, wordnode.FieldIsPreposition)
-	}
-	if m.occurence != nil {
-		fields = append(fields, wordnode.FieldOccurence)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
-func (m *WordNodeMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case wordnode.FieldTitle:
-		return m.Title()
-	case wordnode.FieldIsPreposition:
-		return m.IsPreposition()
-	case wordnode.FieldOccurence:
-		return m.Occurence()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
-func (m *WordNodeMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case wordnode.FieldTitle:
-		return m.OldTitle(ctx)
-	case wordnode.FieldIsPreposition:
-		return m.OldIsPreposition(ctx)
-	case wordnode.FieldOccurence:
-		return m.OldOccurence(ctx)
-	}
-	return nil, fmt.Errorf("unknown WordNode field %s", name)
-}
-
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *WordNodeMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case wordnode.FieldTitle:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetTitle(v)
-		return nil
-	case wordnode.FieldIsPreposition:
-		v, ok := value.(bool)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetIsPreposition(v)
-		return nil
-	case wordnode.FieldOccurence:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetOccurence(v)
-		return nil
-	}
-	return fmt.Errorf("unknown WordNode field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented/decremented during
-// this mutation.
-func (m *WordNodeMutation) AddedFields() []string {
-	var fields []string
-	if m.addoccurence != nil {
-		fields = append(fields, wordnode.FieldOccurence)
-	}
-	return fields
-}
-
-// AddedField returns the numeric value that was incremented/decremented on a field
-// with the given name. The second boolean return value indicates that this field
-// was not set, or was not defined in the schema.
-func (m *WordNodeMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case wordnode.FieldOccurence:
-		return m.AddedOccurence()
-	}
-	return nil, false
-}
-
-// AddField adds the value to the field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
-func (m *WordNodeMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	case wordnode.FieldOccurence:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddOccurence(v)
-		return nil
-	}
-	return fmt.Errorf("unknown WordNode numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared during this
-// mutation.
-func (m *WordNodeMutation) ClearedFields() []string {
-	var fields []string
-	if m.FieldCleared(wordnode.FieldOccurence) {
-		fields = append(fields, wordnode.FieldOccurence)
-	}
-	return fields
-}
-
-// FieldCleared returns a boolean indicating if a field with the given name was
-// cleared in this mutation.
-func (m *WordNodeMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value of the field with the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *WordNodeMutation) ClearField(name string) error {
-	switch name {
-	case wordnode.FieldOccurence:
-		m.ClearOccurence()
-		return nil
-	}
-	return fmt.Errorf("unknown WordNode nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation for the field with the given name.
-// It returns an error if the field is not defined in the schema.
-func (m *WordNodeMutation) ResetField(name string) error {
-	switch name {
-	case wordnode.FieldTitle:
-		m.ResetTitle()
-		return nil
-	case wordnode.FieldIsPreposition:
-		m.ResetIsPreposition()
-		return nil
-	case wordnode.FieldOccurence:
-		m.ResetOccurence()
-		return nil
-	}
-	return fmt.Errorf("unknown WordNode field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this mutation.
-func (m *WordNodeMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.words != nil {
-		edges = append(edges, wordnode.EdgeWords)
-	}
-	if m.file != nil {
-		edges = append(edges, wordnode.EdgeFile)
-	}
-	return edges
-}
-
-// AddedIDs returns all IDs (to other nodes) that were added for the given edge
-// name in this mutation.
-func (m *WordNodeMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case wordnode.EdgeWords:
-		ids := make([]ent.Value, 0, len(m.words))
-		for id := range m.words {
-			ids = append(ids, id)
-		}
-		return ids
-	case wordnode.EdgeFile:
-		if id := m.file; id != nil {
-			return []ent.Value{*id}
-		}
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this mutation.
-func (m *WordNodeMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.removedwords != nil {
-		edges = append(edges, wordnode.EdgeWords)
-	}
-	return edges
-}
-
-// RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
-// the given name in this mutation.
-func (m *WordNodeMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case wordnode.EdgeWords:
-		ids := make([]ent.Value, 0, len(m.removedwords))
-		for id := range m.removedwords {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *WordNodeMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedwords {
-		edges = append(edges, wordnode.EdgeWords)
-	}
-	if m.clearedfile {
-		edges = append(edges, wordnode.EdgeFile)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean which indicates if the edge with the given name
-// was cleared in this mutation.
-func (m *WordNodeMutation) EdgeCleared(name string) bool {
-	switch name {
-	case wordnode.EdgeWords:
-		return m.clearedwords
-	case wordnode.EdgeFile:
-		return m.clearedfile
-	}
-	return false
-}
-
-// ClearEdge clears the value of the edge with the given name. It returns an error
-// if that edge is not defined in the schema.
-func (m *WordNodeMutation) ClearEdge(name string) error {
-	switch name {
-	case wordnode.EdgeFile:
-		m.ClearFile()
-		return nil
-	}
-	return fmt.Errorf("unknown WordNode unique edge %s", name)
-}
-
-// ResetEdge resets all changes to the edge with the given name in this mutation.
-// It returns an error if the edge is not defined in the schema.
-func (m *WordNodeMutation) ResetEdge(name string) error {
-	switch name {
-	case wordnode.EdgeWords:
-		m.ResetWords()
-		return nil
-	case wordnode.EdgeFile:
+	case word.EdgeFile:
 		m.ResetFile()
 		return nil
 	}
-	return fmt.Errorf("unknown WordNode edge %s", name)
+	return fmt.Errorf("unknown Word edge %s", name)
 }

@@ -544,25 +544,25 @@ func HasOwnerWith(preds ...predicate.User) predicate.FileEntity {
 	})
 }
 
-// HasWordnodes applies the HasEdge predicate on the "wordnodes" edge.
-func HasWordnodes() predicate.FileEntity {
+// HasWords applies the HasEdge predicate on the "words" edge.
+func HasWords() predicate.FileEntity {
 	return predicate.FileEntity(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(WordnodesTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, WordnodesTable, WordnodesColumn),
+			sqlgraph.To(WordsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, WordsTable, WordsColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasWordnodesWith applies the HasEdge predicate on the "wordnodes" edge with a given conditions (other predicates).
-func HasWordnodesWith(preds ...predicate.WordNode) predicate.FileEntity {
+// HasWordsWith applies the HasEdge predicate on the "words" edge with a given conditions (other predicates).
+func HasWordsWith(preds ...predicate.Word) predicate.FileEntity {
 	return predicate.FileEntity(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(WordnodesInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, WordnodesTable, WordnodesColumn),
+			sqlgraph.To(WordsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, WordsTable, WordsColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

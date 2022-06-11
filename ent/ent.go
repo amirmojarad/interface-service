@@ -10,7 +10,6 @@ import (
 	"interface_project/ent/searchkeyword"
 	"interface_project/ent/user"
 	"interface_project/ent/word"
-	"interface_project/ent/wordnode"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -39,7 +38,6 @@ func columnChecker(table string) func(string) error {
 		searchkeyword.Table: searchkeyword.ValidColumn,
 		user.Table:          user.ValidColumn,
 		word.Table:          word.ValidColumn,
-		wordnode.Table:      wordnode.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {

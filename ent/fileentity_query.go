@@ -10,7 +10,7 @@ import (
 	"interface_project/ent/fileentity"
 	"interface_project/ent/predicate"
 	"interface_project/ent/user"
-	"interface_project/ent/wordnode"
+	"interface_project/ent/word"
 	"math"
 
 	"entgo.io/ent/dialect/sql"
@@ -28,9 +28,9 @@ type FileEntityQuery struct {
 	fields     []string
 	predicates []predicate.FileEntity
 	// eager-loading edges.
-	withOwner     *UserQuery
-	withWordnodes *WordNodeQuery
-	withFKs       bool
+	withOwner *UserQuery
+	withWords *WordQuery
+	withFKs   bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -89,9 +89,9 @@ func (feq *FileEntityQuery) QueryOwner() *UserQuery {
 	return query
 }
 
-// QueryWordnodes chains the current query on the "wordnodes" edge.
-func (feq *FileEntityQuery) QueryWordnodes() *WordNodeQuery {
-	query := &WordNodeQuery{config: feq.config}
+// QueryWords chains the current query on the "words" edge.
+func (feq *FileEntityQuery) QueryWords() *WordQuery {
+	query := &WordQuery{config: feq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := feq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -102,8 +102,8 @@ func (feq *FileEntityQuery) QueryWordnodes() *WordNodeQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(fileentity.Table, fileentity.FieldID, selector),
-			sqlgraph.To(wordnode.Table, wordnode.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, fileentity.WordnodesTable, fileentity.WordnodesColumn),
+			sqlgraph.To(word.Table, word.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, fileentity.WordsTable, fileentity.WordsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(feq.driver.Dialect(), step)
 		return fromU, nil
@@ -287,13 +287,13 @@ func (feq *FileEntityQuery) Clone() *FileEntityQuery {
 		return nil
 	}
 	return &FileEntityQuery{
-		config:        feq.config,
-		limit:         feq.limit,
-		offset:        feq.offset,
-		order:         append([]OrderFunc{}, feq.order...),
-		predicates:    append([]predicate.FileEntity{}, feq.predicates...),
-		withOwner:     feq.withOwner.Clone(),
-		withWordnodes: feq.withWordnodes.Clone(),
+		config:     feq.config,
+		limit:      feq.limit,
+		offset:     feq.offset,
+		order:      append([]OrderFunc{}, feq.order...),
+		predicates: append([]predicate.FileEntity{}, feq.predicates...),
+		withOwner:  feq.withOwner.Clone(),
+		withWords:  feq.withWords.Clone(),
 		// clone intermediate query.
 		sql:    feq.sql.Clone(),
 		path:   feq.path,
@@ -312,14 +312,14 @@ func (feq *FileEntityQuery) WithOwner(opts ...func(*UserQuery)) *FileEntityQuery
 	return feq
 }
 
-// WithWordnodes tells the query-builder to eager-load the nodes that are connected to
-// the "wordnodes" edge. The optional arguments are used to configure the query builder of the edge.
-func (feq *FileEntityQuery) WithWordnodes(opts ...func(*WordNodeQuery)) *FileEntityQuery {
-	query := &WordNodeQuery{config: feq.config}
+// WithWords tells the query-builder to eager-load the nodes that are connected to
+// the "words" edge. The optional arguments are used to configure the query builder of the edge.
+func (feq *FileEntityQuery) WithWords(opts ...func(*WordQuery)) *FileEntityQuery {
+	query := &WordQuery{config: feq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	feq.withWordnodes = query
+	feq.withWords = query
 	return feq
 }
 
@@ -391,7 +391,7 @@ func (feq *FileEntityQuery) sqlAll(ctx context.Context) ([]*FileEntity, error) {
 		_spec       = feq.querySpec()
 		loadedTypes = [2]bool{
 			feq.withOwner != nil,
-			feq.withWordnodes != nil,
+			feq.withWords != nil,
 		}
 	)
 	if feq.withOwner != nil {
@@ -449,32 +449,32 @@ func (feq *FileEntityQuery) sqlAll(ctx context.Context) ([]*FileEntity, error) {
 		}
 	}
 
-	if query := feq.withWordnodes; query != nil {
+	if query := feq.withWords; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		nodeids := make(map[int]*FileEntity)
 		for i := range nodes {
 			fks = append(fks, nodes[i].ID)
 			nodeids[nodes[i].ID] = nodes[i]
-			nodes[i].Edges.Wordnodes = []*WordNode{}
+			nodes[i].Edges.Words = []*Word{}
 		}
 		query.withFKs = true
-		query.Where(predicate.WordNode(func(s *sql.Selector) {
-			s.Where(sql.InValues(fileentity.WordnodesColumn, fks...))
+		query.Where(predicate.Word(func(s *sql.Selector) {
+			s.Where(sql.InValues(fileentity.WordsColumn, fks...))
 		}))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
 		}
 		for _, n := range neighbors {
-			fk := n.file_entity_wordnodes
+			fk := n.file_entity_words
 			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "file_entity_wordnodes" is nil for node %v`, n.ID)
+				return nil, fmt.Errorf(`foreign-key "file_entity_words" is nil for node %v`, n.ID)
 			}
 			node, ok := nodeids[*fk]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "file_entity_wordnodes" returned %v for node %v`, *fk, n.ID)
+				return nil, fmt.Errorf(`unexpected foreign-key "file_entity_words" returned %v for node %v`, *fk, n.ID)
 			}
-			node.Edges.Wordnodes = append(node.Edges.Wordnodes, n)
+			node.Edges.Words = append(node.Edges.Words, n)
 		}
 	}
 

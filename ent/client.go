@@ -14,7 +14,6 @@ import (
 	"interface_project/ent/searchkeyword"
 	"interface_project/ent/user"
 	"interface_project/ent/word"
-	"interface_project/ent/wordnode"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
@@ -36,8 +35,6 @@ type Client struct {
 	User *UserClient
 	// Word is the client for interacting with the Word builders.
 	Word *WordClient
-	// WordNode is the client for interacting with the WordNode builders.
-	WordNode *WordNodeClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -56,7 +53,6 @@ func (c *Client) init() {
 	c.SearchKeyword = NewSearchKeywordClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.Word = NewWordClient(c.config)
-	c.WordNode = NewWordNodeClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -95,7 +91,6 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 		SearchKeyword: NewSearchKeywordClient(cfg),
 		User:          NewUserClient(cfg),
 		Word:          NewWordClient(cfg),
-		WordNode:      NewWordNodeClient(cfg),
 	}, nil
 }
 
@@ -120,7 +115,6 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 		SearchKeyword: NewSearchKeywordClient(cfg),
 		User:          NewUserClient(cfg),
 		Word:          NewWordClient(cfg),
-		WordNode:      NewWordNodeClient(cfg),
 	}, nil
 }
 
@@ -155,7 +149,6 @@ func (c *Client) Use(hooks ...Hook) {
 	c.SearchKeyword.Use(hooks...)
 	c.User.Use(hooks...)
 	c.Word.Use(hooks...)
-	c.WordNode.Use(hooks...)
 }
 
 // FileEntityClient is a client for the FileEntity schema.
@@ -259,15 +252,15 @@ func (c *FileEntityClient) QueryOwner(fe *FileEntity) *UserQuery {
 	return query
 }
 
-// QueryWordnodes queries the wordnodes edge of a FileEntity.
-func (c *FileEntityClient) QueryWordnodes(fe *FileEntity) *WordNodeQuery {
-	query := &WordNodeQuery{config: c.config}
+// QueryWords queries the words edge of a FileEntity.
+func (c *FileEntityClient) QueryWords(fe *FileEntity) *WordQuery {
+	query := &WordQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := fe.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(fileentity.Table, fileentity.FieldID, id),
-			sqlgraph.To(wordnode.Table, wordnode.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, fileentity.WordnodesTable, fileentity.WordnodesColumn),
+			sqlgraph.To(word.Table, word.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, fileentity.WordsTable, fileentity.WordsColumn),
 		)
 		fromV = sqlgraph.Neighbors(fe.driver.Dialect(), step)
 		return fromV, nil
@@ -731,22 +724,6 @@ func (c *WordClient) GetX(ctx context.Context, id int) *Word {
 	return obj
 }
 
-// QueryMovie queries the movie edge of a Word.
-func (c *WordClient) QueryMovie(w *Word) *MovieQuery {
-	query := &MovieQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := w.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(word.Table, word.FieldID, id),
-			sqlgraph.To(movie.Table, movie.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, word.MovieTable, word.MovieColumn),
-		)
-		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QueryUser queries the user edge of a Word.
 func (c *WordClient) QueryUser(w *Word) *UserQuery {
 	query := &UserQuery{config: c.config}
@@ -763,129 +740,23 @@ func (c *WordClient) QueryUser(w *Word) *UserQuery {
 	return query
 }
 
+// QueryFile queries the file edge of a Word.
+func (c *WordClient) QueryFile(w *Word) *FileEntityQuery {
+	query := &FileEntityQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := w.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(word.Table, word.FieldID, id),
+			sqlgraph.To(fileentity.Table, fileentity.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, word.FileTable, word.FileColumn),
+		)
+		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
 // Hooks returns the client hooks.
 func (c *WordClient) Hooks() []Hook {
 	return c.hooks.Word
-}
-
-// WordNodeClient is a client for the WordNode schema.
-type WordNodeClient struct {
-	config
-}
-
-// NewWordNodeClient returns a client for the WordNode from the given config.
-func NewWordNodeClient(c config) *WordNodeClient {
-	return &WordNodeClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `wordnode.Hooks(f(g(h())))`.
-func (c *WordNodeClient) Use(hooks ...Hook) {
-	c.hooks.WordNode = append(c.hooks.WordNode, hooks...)
-}
-
-// Create returns a create builder for WordNode.
-func (c *WordNodeClient) Create() *WordNodeCreate {
-	mutation := newWordNodeMutation(c.config, OpCreate)
-	return &WordNodeCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// CreateBulk returns a builder for creating a bulk of WordNode entities.
-func (c *WordNodeClient) CreateBulk(builders ...*WordNodeCreate) *WordNodeCreateBulk {
-	return &WordNodeCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for WordNode.
-func (c *WordNodeClient) Update() *WordNodeUpdate {
-	mutation := newWordNodeMutation(c.config, OpUpdate)
-	return &WordNodeUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *WordNodeClient) UpdateOne(wn *WordNode) *WordNodeUpdateOne {
-	mutation := newWordNodeMutation(c.config, OpUpdateOne, withWordNode(wn))
-	return &WordNodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *WordNodeClient) UpdateOneID(id int) *WordNodeUpdateOne {
-	mutation := newWordNodeMutation(c.config, OpUpdateOne, withWordNodeID(id))
-	return &WordNodeUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for WordNode.
-func (c *WordNodeClient) Delete() *WordNodeDelete {
-	mutation := newWordNodeMutation(c.config, OpDelete)
-	return &WordNodeDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a delete builder for the given entity.
-func (c *WordNodeClient) DeleteOne(wn *WordNode) *WordNodeDeleteOne {
-	return c.DeleteOneID(wn.ID)
-}
-
-// DeleteOneID returns a delete builder for the given id.
-func (c *WordNodeClient) DeleteOneID(id int) *WordNodeDeleteOne {
-	builder := c.Delete().Where(wordnode.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &WordNodeDeleteOne{builder}
-}
-
-// Query returns a query builder for WordNode.
-func (c *WordNodeClient) Query() *WordNodeQuery {
-	return &WordNodeQuery{
-		config: c.config,
-	}
-}
-
-// Get returns a WordNode entity by its id.
-func (c *WordNodeClient) Get(ctx context.Context, id int) (*WordNode, error) {
-	return c.Query().Where(wordnode.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *WordNodeClient) GetX(ctx context.Context, id int) *WordNode {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryWords queries the words edge of a WordNode.
-func (c *WordNodeClient) QueryWords(wn *WordNode) *WordQuery {
-	query := &WordQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := wn.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(wordnode.Table, wordnode.FieldID, id),
-			sqlgraph.To(word.Table, word.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, wordnode.WordsTable, wordnode.WordsColumn),
-		)
-		fromV = sqlgraph.Neighbors(wn.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryFile queries the file edge of a WordNode.
-func (c *WordNodeClient) QueryFile(wn *WordNode) *FileEntityQuery {
-	query := &FileEntityQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := wn.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(wordnode.Table, wordnode.FieldID, id),
-			sqlgraph.To(fileentity.Table, fileentity.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, wordnode.FileTable, wordnode.FileColumn),
-		)
-		fromV = sqlgraph.Neighbors(wn.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *WordNodeClient) Hooks() []Hook {
-	return c.hooks.WordNode
 }

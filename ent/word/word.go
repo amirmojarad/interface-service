@@ -11,27 +11,18 @@ const (
 	FieldTitle = "title"
 	// FieldMeaning holds the string denoting the meaning field in the database.
 	FieldMeaning = "meaning"
+	// FieldIsPreposition holds the string denoting the ispreposition field in the database.
+	FieldIsPreposition = "is_preposition"
 	// FieldSentence holds the string denoting the sentence field in the database.
 	FieldSentence = "sentence"
 	// FieldDuration holds the string denoting the duration field in the database.
 	FieldDuration = "duration"
-	// FieldStart holds the string denoting the start field in the database.
-	FieldStart = "start"
-	// FieldEnd holds the string denoting the end field in the database.
-	FieldEnd = "end"
-	// EdgeMovie holds the string denoting the movie edge name in mutations.
-	EdgeMovie = "movie"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
+	// EdgeFile holds the string denoting the file edge name in mutations.
+	EdgeFile = "file"
 	// Table holds the table name of the word in the database.
 	Table = "words"
-	// MovieTable is the table that holds the movie relation/edge.
-	MovieTable = "words"
-	// MovieInverseTable is the table name for the Movie entity.
-	// It exists in this package in order to avoid circular dependency with the "movie" package.
-	MovieInverseTable = "movies"
-	// MovieColumn is the table column denoting the movie relation/edge.
-	MovieColumn = "word_movie"
 	// UserTable is the table that holds the user relation/edge.
 	UserTable = "words"
 	// UserInverseTable is the table name for the User entity.
@@ -39,6 +30,13 @@ const (
 	UserInverseTable = "users"
 	// UserColumn is the table column denoting the user relation/edge.
 	UserColumn = "user_favorite_words"
+	// FileTable is the table that holds the file relation/edge.
+	FileTable = "words"
+	// FileInverseTable is the table name for the FileEntity entity.
+	// It exists in this package in order to avoid circular dependency with the "fileentity" package.
+	FileInverseTable = "file_entities"
+	// FileColumn is the table column denoting the file relation/edge.
+	FileColumn = "file_entity_words"
 )
 
 // Columns holds all SQL columns for word fields.
@@ -46,18 +44,16 @@ var Columns = []string{
 	FieldID,
 	FieldTitle,
 	FieldMeaning,
+	FieldIsPreposition,
 	FieldSentence,
 	FieldDuration,
-	FieldStart,
-	FieldEnd,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "words"
 // table and are not defined as standalone fields in the schema.
 var ForeignKeys = []string{
+	"file_entity_words",
 	"user_favorite_words",
-	"word_movie",
-	"word_node_words",
 }
 
 // ValidColumn reports if the column name is valid (part of the table columns).
@@ -78,4 +74,8 @@ func ValidColumn(column string) bool {
 var (
 	// TitleValidator is a validator for the "title" field. It is called by the builders before save.
 	TitleValidator func(string) error
+	// SentenceValidator is a validator for the "sentence" field. It is called by the builders before save.
+	SentenceValidator func(string) error
+	// DurationValidator is a validator for the "duration" field. It is called by the builders before save.
+	DurationValidator func(string) error
 )

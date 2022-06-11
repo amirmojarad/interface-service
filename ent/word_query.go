@@ -6,7 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"interface_project/ent/movie"
+	"interface_project/ent/fileentity"
 	"interface_project/ent/predicate"
 	"interface_project/ent/user"
 	"interface_project/ent/word"
@@ -27,9 +27,9 @@ type WordQuery struct {
 	fields     []string
 	predicates []predicate.Word
 	// eager-loading edges.
-	withMovie *MovieQuery
-	withUser  *UserQuery
-	withFKs   bool
+	withUser *UserQuery
+	withFile *FileEntityQuery
+	withFKs  bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -66,28 +66,6 @@ func (wq *WordQuery) Order(o ...OrderFunc) *WordQuery {
 	return wq
 }
 
-// QueryMovie chains the current query on the "movie" edge.
-func (wq *WordQuery) QueryMovie() *MovieQuery {
-	query := &MovieQuery{config: wq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := wq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := wq.sqlQuery(ctx)
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(word.Table, word.FieldID, selector),
-			sqlgraph.To(movie.Table, movie.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, false, word.MovieTable, word.MovieColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(wq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
 // QueryUser chains the current query on the "user" edge.
 func (wq *WordQuery) QueryUser() *UserQuery {
 	query := &UserQuery{config: wq.config}
@@ -103,6 +81,28 @@ func (wq *WordQuery) QueryUser() *UserQuery {
 			sqlgraph.From(word.Table, word.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
 			sqlgraph.Edge(sqlgraph.M2O, true, word.UserTable, word.UserColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(wq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryFile chains the current query on the "file" edge.
+func (wq *WordQuery) QueryFile() *FileEntityQuery {
+	query := &FileEntityQuery{config: wq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := wq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := wq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(word.Table, word.FieldID, selector),
+			sqlgraph.To(fileentity.Table, fileentity.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, word.FileTable, word.FileColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(wq.driver.Dialect(), step)
 		return fromU, nil
@@ -291,24 +291,13 @@ func (wq *WordQuery) Clone() *WordQuery {
 		offset:     wq.offset,
 		order:      append([]OrderFunc{}, wq.order...),
 		predicates: append([]predicate.Word{}, wq.predicates...),
-		withMovie:  wq.withMovie.Clone(),
 		withUser:   wq.withUser.Clone(),
+		withFile:   wq.withFile.Clone(),
 		// clone intermediate query.
 		sql:    wq.sql.Clone(),
 		path:   wq.path,
 		unique: wq.unique,
 	}
-}
-
-// WithMovie tells the query-builder to eager-load the nodes that are connected to
-// the "movie" edge. The optional arguments are used to configure the query builder of the edge.
-func (wq *WordQuery) WithMovie(opts ...func(*MovieQuery)) *WordQuery {
-	query := &MovieQuery{config: wq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	wq.withMovie = query
-	return wq
 }
 
 // WithUser tells the query-builder to eager-load the nodes that are connected to
@@ -319,6 +308,17 @@ func (wq *WordQuery) WithUser(opts ...func(*UserQuery)) *WordQuery {
 		opt(query)
 	}
 	wq.withUser = query
+	return wq
+}
+
+// WithFile tells the query-builder to eager-load the nodes that are connected to
+// the "file" edge. The optional arguments are used to configure the query builder of the edge.
+func (wq *WordQuery) WithFile(opts ...func(*FileEntityQuery)) *WordQuery {
+	query := &FileEntityQuery{config: wq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	wq.withFile = query
 	return wq
 }
 
@@ -389,11 +389,11 @@ func (wq *WordQuery) sqlAll(ctx context.Context) ([]*Word, error) {
 		withFKs     = wq.withFKs
 		_spec       = wq.querySpec()
 		loadedTypes = [2]bool{
-			wq.withMovie != nil,
 			wq.withUser != nil,
+			wq.withFile != nil,
 		}
 	)
-	if wq.withMovie != nil || wq.withUser != nil {
+	if wq.withUser != nil || wq.withFile != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -417,35 +417,6 @@ func (wq *WordQuery) sqlAll(ctx context.Context) ([]*Word, error) {
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
-	}
-
-	if query := wq.withMovie; query != nil {
-		ids := make([]int, 0, len(nodes))
-		nodeids := make(map[int][]*Word)
-		for i := range nodes {
-			if nodes[i].word_movie == nil {
-				continue
-			}
-			fk := *nodes[i].word_movie
-			if _, ok := nodeids[fk]; !ok {
-				ids = append(ids, fk)
-			}
-			nodeids[fk] = append(nodeids[fk], nodes[i])
-		}
-		query.Where(movie.IDIn(ids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := nodeids[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "word_movie" returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Movie = n
-			}
-		}
 	}
 
 	if query := wq.withUser; query != nil {
@@ -473,6 +444,35 @@ func (wq *WordQuery) sqlAll(ctx context.Context) ([]*Word, error) {
 			}
 			for i := range nodes {
 				nodes[i].Edges.User = n
+			}
+		}
+	}
+
+	if query := wq.withFile; query != nil {
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*Word)
+		for i := range nodes {
+			if nodes[i].file_entity_words == nil {
+				continue
+			}
+			fk := *nodes[i].file_entity_words
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(fileentity.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "file_entity_words" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.File = n
 			}
 		}
 	}

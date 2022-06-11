@@ -6,10 +6,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"interface_project/ent/movie"
+	"interface_project/ent/fileentity"
 	"interface_project/ent/user"
 	"interface_project/ent/word"
-	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
@@ -34,11 +33,9 @@ func (wc *WordCreate) SetMeaning(s string) *WordCreate {
 	return wc
 }
 
-// SetNillableMeaning sets the "meaning" field if the given value is not nil.
-func (wc *WordCreate) SetNillableMeaning(s *string) *WordCreate {
-	if s != nil {
-		wc.SetMeaning(*s)
-	}
+// SetIsPreposition sets the "isPreposition" field.
+func (wc *WordCreate) SetIsPreposition(b bool) *WordCreate {
+	wc.mutation.SetIsPreposition(b)
 	return wc
 }
 
@@ -48,73 +45,10 @@ func (wc *WordCreate) SetSentence(s string) *WordCreate {
 	return wc
 }
 
-// SetNillableSentence sets the "sentence" field if the given value is not nil.
-func (wc *WordCreate) SetNillableSentence(s *string) *WordCreate {
-	if s != nil {
-		wc.SetSentence(*s)
-	}
-	return wc
-}
-
 // SetDuration sets the "duration" field.
 func (wc *WordCreate) SetDuration(s string) *WordCreate {
 	wc.mutation.SetDuration(s)
 	return wc
-}
-
-// SetNillableDuration sets the "duration" field if the given value is not nil.
-func (wc *WordCreate) SetNillableDuration(s *string) *WordCreate {
-	if s != nil {
-		wc.SetDuration(*s)
-	}
-	return wc
-}
-
-// SetStart sets the "start" field.
-func (wc *WordCreate) SetStart(t time.Time) *WordCreate {
-	wc.mutation.SetStart(t)
-	return wc
-}
-
-// SetNillableStart sets the "start" field if the given value is not nil.
-func (wc *WordCreate) SetNillableStart(t *time.Time) *WordCreate {
-	if t != nil {
-		wc.SetStart(*t)
-	}
-	return wc
-}
-
-// SetEnd sets the "end" field.
-func (wc *WordCreate) SetEnd(t time.Time) *WordCreate {
-	wc.mutation.SetEnd(t)
-	return wc
-}
-
-// SetNillableEnd sets the "end" field if the given value is not nil.
-func (wc *WordCreate) SetNillableEnd(t *time.Time) *WordCreate {
-	if t != nil {
-		wc.SetEnd(*t)
-	}
-	return wc
-}
-
-// SetMovieID sets the "movie" edge to the Movie entity by ID.
-func (wc *WordCreate) SetMovieID(id int) *WordCreate {
-	wc.mutation.SetMovieID(id)
-	return wc
-}
-
-// SetNillableMovieID sets the "movie" edge to the Movie entity by ID if the given value is not nil.
-func (wc *WordCreate) SetNillableMovieID(id *int) *WordCreate {
-	if id != nil {
-		wc = wc.SetMovieID(*id)
-	}
-	return wc
-}
-
-// SetMovie sets the "movie" edge to the Movie entity.
-func (wc *WordCreate) SetMovie(m *Movie) *WordCreate {
-	return wc.SetMovieID(m.ID)
 }
 
 // SetUserID sets the "user" edge to the User entity by ID.
@@ -134,6 +68,25 @@ func (wc *WordCreate) SetNillableUserID(id *int) *WordCreate {
 // SetUser sets the "user" edge to the User entity.
 func (wc *WordCreate) SetUser(u *User) *WordCreate {
 	return wc.SetUserID(u.ID)
+}
+
+// SetFileID sets the "file" edge to the FileEntity entity by ID.
+func (wc *WordCreate) SetFileID(id int) *WordCreate {
+	wc.mutation.SetFileID(id)
+	return wc
+}
+
+// SetNillableFileID sets the "file" edge to the FileEntity entity by ID if the given value is not nil.
+func (wc *WordCreate) SetNillableFileID(id *int) *WordCreate {
+	if id != nil {
+		wc = wc.SetFileID(*id)
+	}
+	return wc
+}
+
+// SetFile sets the "file" edge to the FileEntity entity.
+func (wc *WordCreate) SetFile(f *FileEntity) *WordCreate {
+	return wc.SetFileID(f.ID)
 }
 
 // Mutation returns the WordMutation object of the builder.
@@ -214,6 +167,28 @@ func (wc *WordCreate) check() error {
 			return &ValidationError{Name: "title", err: fmt.Errorf(`ent: validator failed for field "Word.title": %w`, err)}
 		}
 	}
+	if _, ok := wc.mutation.Meaning(); !ok {
+		return &ValidationError{Name: "meaning", err: errors.New(`ent: missing required field "Word.meaning"`)}
+	}
+	if _, ok := wc.mutation.IsPreposition(); !ok {
+		return &ValidationError{Name: "isPreposition", err: errors.New(`ent: missing required field "Word.isPreposition"`)}
+	}
+	if _, ok := wc.mutation.Sentence(); !ok {
+		return &ValidationError{Name: "sentence", err: errors.New(`ent: missing required field "Word.sentence"`)}
+	}
+	if v, ok := wc.mutation.Sentence(); ok {
+		if err := word.SentenceValidator(v); err != nil {
+			return &ValidationError{Name: "sentence", err: fmt.Errorf(`ent: validator failed for field "Word.sentence": %w`, err)}
+		}
+	}
+	if _, ok := wc.mutation.Duration(); !ok {
+		return &ValidationError{Name: "duration", err: errors.New(`ent: missing required field "Word.duration"`)}
+	}
+	if v, ok := wc.mutation.Duration(); ok {
+		if err := word.DurationValidator(v); err != nil {
+			return &ValidationError{Name: "duration", err: fmt.Errorf(`ent: validator failed for field "Word.duration": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -257,6 +232,14 @@ func (wc *WordCreate) createSpec() (*Word, *sqlgraph.CreateSpec) {
 		})
 		_node.Meaning = value
 	}
+	if value, ok := wc.mutation.IsPreposition(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: word.FieldIsPreposition,
+		})
+		_node.IsPreposition = value
+	}
 	if value, ok := wc.mutation.Sentence(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
@@ -272,42 +255,6 @@ func (wc *WordCreate) createSpec() (*Word, *sqlgraph.CreateSpec) {
 			Column: word.FieldDuration,
 		})
 		_node.Duration = value
-	}
-	if value, ok := wc.mutation.Start(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: word.FieldStart,
-		})
-		_node.Start = value
-	}
-	if value, ok := wc.mutation.End(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeTime,
-			Value:  value,
-			Column: word.FieldEnd,
-		})
-		_node.End = value
-	}
-	if nodes := wc.mutation.MovieIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2O,
-			Inverse: false,
-			Table:   word.MovieTable,
-			Columns: []string{word.MovieColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: movie.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_node.word_movie = &nodes[0]
-		_spec.Edges = append(_spec.Edges, edge)
 	}
 	if nodes := wc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
@@ -327,6 +274,26 @@ func (wc *WordCreate) createSpec() (*Word, *sqlgraph.CreateSpec) {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
 		_node.user_favorite_words = &nodes[0]
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := wc.mutation.FileIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   word.FileTable,
+			Columns: []string{word.FileColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: fileentity.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.file_entity_words = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

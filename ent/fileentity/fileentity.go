@@ -19,8 +19,8 @@ const (
 	FieldCreatedDate = "created_date"
 	// EdgeOwner holds the string denoting the owner edge name in mutations.
 	EdgeOwner = "owner"
-	// EdgeWordnodes holds the string denoting the wordnodes edge name in mutations.
-	EdgeWordnodes = "wordnodes"
+	// EdgeWords holds the string denoting the words edge name in mutations.
+	EdgeWords = "words"
 	// Table holds the table name of the fileentity in the database.
 	Table = "file_entities"
 	// OwnerTable is the table that holds the owner relation/edge.
@@ -30,13 +30,13 @@ const (
 	OwnerInverseTable = "users"
 	// OwnerColumn is the table column denoting the owner relation/edge.
 	OwnerColumn = "user_files"
-	// WordnodesTable is the table that holds the wordnodes relation/edge.
-	WordnodesTable = "word_nodes"
-	// WordnodesInverseTable is the table name for the WordNode entity.
-	// It exists in this package in order to avoid circular dependency with the "wordnode" package.
-	WordnodesInverseTable = "word_nodes"
-	// WordnodesColumn is the table column denoting the wordnodes relation/edge.
-	WordnodesColumn = "file_entity_wordnodes"
+	// WordsTable is the table that holds the words relation/edge.
+	WordsTable = "words"
+	// WordsInverseTable is the table name for the Word entity.
+	// It exists in this package in order to avoid circular dependency with the "word" package.
+	WordsInverseTable = "words"
+	// WordsColumn is the table column denoting the words relation/edge.
+	WordsColumn = "file_entity_words"
 )
 
 // Columns holds all SQL columns for fileentity fields.

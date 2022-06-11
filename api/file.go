@@ -4,10 +4,9 @@ import (
 	"fmt"
 	"interface_project/api/dto"
 	"interface_project/api/middlewares"
-
 	"interface_project/subs"
 
-	// "interface_project/ent"
+	"interface_project/usecases/handlers/sentences"
 	"io"
 
 	"log"
@@ -212,7 +211,10 @@ func (api API) uploadSubtitle() gin.HandlerFunc {
 		}
 		folderPath := "subs/" + email + "/"
 		filePath := folderPath + fileName
-		subs.MakeDir(folderPath)
+		err = subs.MakeDir(folderPath)
+		if err != nil {
+			return
+		}
 		//check file with its description exists in database or not
 		if api.Crud.CheckFileIsExists(email, filePath, fileName) {
 			ctx.IndentedJSON(http.StatusConflict, gin.H{
@@ -246,12 +248,27 @@ func (api API) uploadSubtitle() gin.HandlerFunc {
 					"error":   err,
 				})
 			}
-			// words.CreateWordnodes(openedFile, createdFile.ID, api.Crud, user)
+			wordCreateBulk := sentences.GetSentences(api.Crud.Client, openedFile, user, createdFile)
+			_, err = api.Crud.CreateAllWords(wordCreateBulk)
+			if err != nil {
+				ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
+					"error":   err.Error(),
+					"message": "error while creating words to database",
+				})
+				return
+			}
+			if err != nil {
+				ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
+					"error":   err.Error(),
+					"message": "error while creating sentences to database",
+				})
+				return
+			}
 			ctx.IndentedJSON(http.StatusOK, gin.H{
-				"message": "file downloaded successfuly",
+				"message": "file downloaded successfully",
 				"file":    createdFile,
 			})
-
 		}
 	}
+
 }

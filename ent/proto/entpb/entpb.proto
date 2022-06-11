@@ -24,7 +24,7 @@ message FileEntity {
 
   User owner = 7;
 
-  repeated WordNode wordnodes = 8;
+  repeated Word words = 8;
 }
 
 message Movie {
@@ -94,31 +94,15 @@ message Word {
 
   string title = 2;
 
-  google.protobuf.StringValue meaning = 3;
+  string meaning = 3;
 
-  google.protobuf.StringValue sentence = 4;
+  bool isPreposition = 4;
 
-  google.protobuf.StringValue duration = 5;
+  string sentence = 5;
 
-  google.protobuf.Timestamp start = 6;
+  string duration = 6;
 
-  google.protobuf.Timestamp end = 7;
+  User user = 7;
 
-  Movie movie = 8;
-
-  User user = 9;
-}
-
-message WordNode {
-  int32 id = 1;
-
-  string title = 2;
-
-  bool is_preposition = 3;
-
-  google.protobuf.Int32Value occurence = 4;
-
-  repeated Word words = 5;
-
-  FileEntity file = 6;
+  FileEntity file = 8;
 }

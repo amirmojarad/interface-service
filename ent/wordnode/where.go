@@ -4,6 +4,7 @@ package wordnode
 
 import (
 	"interface_project/ent/predicate"
+	"time"
 
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -92,43 +93,43 @@ func IDLTE(id int) predicate.WordNode {
 	})
 }
 
-// Title applies equality check predicate on the "title" field. It's identical to TitleEQ.
-func Title(v string) predicate.WordNode {
+// Duration applies equality check predicate on the "duration" field. It's identical to DurationEQ.
+func Duration(v string) predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldTitle), v))
+		s.Where(sql.EQ(s.C(FieldDuration), v))
 	})
 }
 
-// IsPreposition applies equality check predicate on the "is_preposition" field. It's identical to IsPrepositionEQ.
-func IsPreposition(v bool) predicate.WordNode {
+// Start applies equality check predicate on the "start" field. It's identical to StartEQ.
+func Start(v time.Time) predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIsPreposition), v))
+		s.Where(sql.EQ(s.C(FieldStart), v))
 	})
 }
 
-// Occurence applies equality check predicate on the "occurence" field. It's identical to OccurenceEQ.
-func Occurence(v int) predicate.WordNode {
+// End applies equality check predicate on the "end" field. It's identical to EndEQ.
+func End(v time.Time) predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldOccurence), v))
+		s.Where(sql.EQ(s.C(FieldEnd), v))
 	})
 }
 
-// TitleEQ applies the EQ predicate on the "title" field.
-func TitleEQ(v string) predicate.WordNode {
+// DurationEQ applies the EQ predicate on the "duration" field.
+func DurationEQ(v string) predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldTitle), v))
+		s.Where(sql.EQ(s.C(FieldDuration), v))
 	})
 }
 
-// TitleNEQ applies the NEQ predicate on the "title" field.
-func TitleNEQ(v string) predicate.WordNode {
+// DurationNEQ applies the NEQ predicate on the "duration" field.
+func DurationNEQ(v string) predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldTitle), v))
+		s.Where(sql.NEQ(s.C(FieldDuration), v))
 	})
 }
 
-// TitleIn applies the In predicate on the "title" field.
-func TitleIn(vs ...string) predicate.WordNode {
+// DurationIn applies the In predicate on the "duration" field.
+func DurationIn(vs ...string) predicate.WordNode {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -140,12 +141,12 @@ func TitleIn(vs ...string) predicate.WordNode {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldTitle), v...))
+		s.Where(sql.In(s.C(FieldDuration), v...))
 	})
 }
 
-// TitleNotIn applies the NotIn predicate on the "title" field.
-func TitleNotIn(vs ...string) predicate.WordNode {
+// DurationNotIn applies the NotIn predicate on the "duration" field.
+func DurationNotIn(vs ...string) predicate.WordNode {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -157,103 +158,89 @@ func TitleNotIn(vs ...string) predicate.WordNode {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldTitle), v...))
+		s.Where(sql.NotIn(s.C(FieldDuration), v...))
 	})
 }
 
-// TitleGT applies the GT predicate on the "title" field.
-func TitleGT(v string) predicate.WordNode {
+// DurationGT applies the GT predicate on the "duration" field.
+func DurationGT(v string) predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldTitle), v))
+		s.Where(sql.GT(s.C(FieldDuration), v))
 	})
 }
 
-// TitleGTE applies the GTE predicate on the "title" field.
-func TitleGTE(v string) predicate.WordNode {
+// DurationGTE applies the GTE predicate on the "duration" field.
+func DurationGTE(v string) predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldTitle), v))
+		s.Where(sql.GTE(s.C(FieldDuration), v))
 	})
 }
 
-// TitleLT applies the LT predicate on the "title" field.
-func TitleLT(v string) predicate.WordNode {
+// DurationLT applies the LT predicate on the "duration" field.
+func DurationLT(v string) predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldTitle), v))
+		s.Where(sql.LT(s.C(FieldDuration), v))
 	})
 }
 
-// TitleLTE applies the LTE predicate on the "title" field.
-func TitleLTE(v string) predicate.WordNode {
+// DurationLTE applies the LTE predicate on the "duration" field.
+func DurationLTE(v string) predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldTitle), v))
+		s.Where(sql.LTE(s.C(FieldDuration), v))
 	})
 }
 
-// TitleContains applies the Contains predicate on the "title" field.
-func TitleContains(v string) predicate.WordNode {
+// DurationContains applies the Contains predicate on the "duration" field.
+func DurationContains(v string) predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
-		s.Where(sql.Contains(s.C(FieldTitle), v))
+		s.Where(sql.Contains(s.C(FieldDuration), v))
 	})
 }
 
-// TitleHasPrefix applies the HasPrefix predicate on the "title" field.
-func TitleHasPrefix(v string) predicate.WordNode {
+// DurationHasPrefix applies the HasPrefix predicate on the "duration" field.
+func DurationHasPrefix(v string) predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
-		s.Where(sql.HasPrefix(s.C(FieldTitle), v))
+		s.Where(sql.HasPrefix(s.C(FieldDuration), v))
 	})
 }
 
-// TitleHasSuffix applies the HasSuffix predicate on the "title" field.
-func TitleHasSuffix(v string) predicate.WordNode {
+// DurationHasSuffix applies the HasSuffix predicate on the "duration" field.
+func DurationHasSuffix(v string) predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
-		s.Where(sql.HasSuffix(s.C(FieldTitle), v))
+		s.Where(sql.HasSuffix(s.C(FieldDuration), v))
 	})
 }
 
-// TitleEqualFold applies the EqualFold predicate on the "title" field.
-func TitleEqualFold(v string) predicate.WordNode {
+// DurationEqualFold applies the EqualFold predicate on the "duration" field.
+func DurationEqualFold(v string) predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
-		s.Where(sql.EqualFold(s.C(FieldTitle), v))
+		s.Where(sql.EqualFold(s.C(FieldDuration), v))
 	})
 }
 
-// TitleContainsFold applies the ContainsFold predicate on the "title" field.
-func TitleContainsFold(v string) predicate.WordNode {
+// DurationContainsFold applies the ContainsFold predicate on the "duration" field.
+func DurationContainsFold(v string) predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
-		s.Where(sql.ContainsFold(s.C(FieldTitle), v))
+		s.Where(sql.ContainsFold(s.C(FieldDuration), v))
 	})
 }
 
-// IsPrepositionEQ applies the EQ predicate on the "is_preposition" field.
-func IsPrepositionEQ(v bool) predicate.WordNode {
+// StartEQ applies the EQ predicate on the "start" field.
+func StartEQ(v time.Time) predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldIsPreposition), v))
+		s.Where(sql.EQ(s.C(FieldStart), v))
 	})
 }
 
-// IsPrepositionNEQ applies the NEQ predicate on the "is_preposition" field.
-func IsPrepositionNEQ(v bool) predicate.WordNode {
+// StartNEQ applies the NEQ predicate on the "start" field.
+func StartNEQ(v time.Time) predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldIsPreposition), v))
+		s.Where(sql.NEQ(s.C(FieldStart), v))
 	})
 }
 
-// OccurenceEQ applies the EQ predicate on the "occurence" field.
-func OccurenceEQ(v int) predicate.WordNode {
-	return predicate.WordNode(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldOccurence), v))
-	})
-}
-
-// OccurenceNEQ applies the NEQ predicate on the "occurence" field.
-func OccurenceNEQ(v int) predicate.WordNode {
-	return predicate.WordNode(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldOccurence), v))
-	})
-}
-
-// OccurenceIn applies the In predicate on the "occurence" field.
-func OccurenceIn(vs ...int) predicate.WordNode {
+// StartIn applies the In predicate on the "start" field.
+func StartIn(vs ...time.Time) predicate.WordNode {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -265,12 +252,12 @@ func OccurenceIn(vs ...int) predicate.WordNode {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.In(s.C(FieldOccurence), v...))
+		s.Where(sql.In(s.C(FieldStart), v...))
 	})
 }
 
-// OccurenceNotIn applies the NotIn predicate on the "occurence" field.
-func OccurenceNotIn(vs ...int) predicate.WordNode {
+// StartNotIn applies the NotIn predicate on the "start" field.
+func StartNotIn(vs ...time.Time) predicate.WordNode {
 	v := make([]interface{}, len(vs))
 	for i := range v {
 		v[i] = vs[i]
@@ -282,71 +269,161 @@ func OccurenceNotIn(vs ...int) predicate.WordNode {
 			s.Where(sql.False())
 			return
 		}
-		s.Where(sql.NotIn(s.C(FieldOccurence), v...))
+		s.Where(sql.NotIn(s.C(FieldStart), v...))
 	})
 }
 
-// OccurenceGT applies the GT predicate on the "occurence" field.
-func OccurenceGT(v int) predicate.WordNode {
+// StartGT applies the GT predicate on the "start" field.
+func StartGT(v time.Time) predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldOccurence), v))
+		s.Where(sql.GT(s.C(FieldStart), v))
 	})
 }
 
-// OccurenceGTE applies the GTE predicate on the "occurence" field.
-func OccurenceGTE(v int) predicate.WordNode {
+// StartGTE applies the GTE predicate on the "start" field.
+func StartGTE(v time.Time) predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldOccurence), v))
+		s.Where(sql.GTE(s.C(FieldStart), v))
 	})
 }
 
-// OccurenceLT applies the LT predicate on the "occurence" field.
-func OccurenceLT(v int) predicate.WordNode {
+// StartLT applies the LT predicate on the "start" field.
+func StartLT(v time.Time) predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldOccurence), v))
+		s.Where(sql.LT(s.C(FieldStart), v))
 	})
 }
 
-// OccurenceLTE applies the LTE predicate on the "occurence" field.
-func OccurenceLTE(v int) predicate.WordNode {
+// StartLTE applies the LTE predicate on the "start" field.
+func StartLTE(v time.Time) predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldOccurence), v))
+		s.Where(sql.LTE(s.C(FieldStart), v))
 	})
 }
 
-// OccurenceIsNil applies the IsNil predicate on the "occurence" field.
-func OccurenceIsNil() predicate.WordNode {
+// StartIsNil applies the IsNil predicate on the "start" field.
+func StartIsNil() predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
-		s.Where(sql.IsNull(s.C(FieldOccurence)))
+		s.Where(sql.IsNull(s.C(FieldStart)))
 	})
 }
 
-// OccurenceNotNil applies the NotNil predicate on the "occurence" field.
-func OccurenceNotNil() predicate.WordNode {
+// StartNotNil applies the NotNil predicate on the "start" field.
+func StartNotNil() predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
-		s.Where(sql.NotNull(s.C(FieldOccurence)))
+		s.Where(sql.NotNull(s.C(FieldStart)))
 	})
 }
 
-// HasWords applies the HasEdge predicate on the "words" edge.
-func HasWords() predicate.WordNode {
+// EndEQ applies the EQ predicate on the "end" field.
+func EndEQ(v time.Time) predicate.WordNode {
+	return predicate.WordNode(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldEnd), v))
+	})
+}
+
+// EndNEQ applies the NEQ predicate on the "end" field.
+func EndNEQ(v time.Time) predicate.WordNode {
+	return predicate.WordNode(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldEnd), v))
+	})
+}
+
+// EndIn applies the In predicate on the "end" field.
+func EndIn(vs ...time.Time) predicate.WordNode {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.WordNode(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldEnd), v...))
+	})
+}
+
+// EndNotIn applies the NotIn predicate on the "end" field.
+func EndNotIn(vs ...time.Time) predicate.WordNode {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.WordNode(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldEnd), v...))
+	})
+}
+
+// EndGT applies the GT predicate on the "end" field.
+func EndGT(v time.Time) predicate.WordNode {
+	return predicate.WordNode(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldEnd), v))
+	})
+}
+
+// EndGTE applies the GTE predicate on the "end" field.
+func EndGTE(v time.Time) predicate.WordNode {
+	return predicate.WordNode(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldEnd), v))
+	})
+}
+
+// EndLT applies the LT predicate on the "end" field.
+func EndLT(v time.Time) predicate.WordNode {
+	return predicate.WordNode(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldEnd), v))
+	})
+}
+
+// EndLTE applies the LTE predicate on the "end" field.
+func EndLTE(v time.Time) predicate.WordNode {
+	return predicate.WordNode(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldEnd), v))
+	})
+}
+
+// EndIsNil applies the IsNil predicate on the "end" field.
+func EndIsNil() predicate.WordNode {
+	return predicate.WordNode(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldEnd)))
+	})
+}
+
+// EndNotNil applies the NotNil predicate on the "end" field.
+func EndNotNil() predicate.WordNode {
+	return predicate.WordNode(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldEnd)))
+	})
+}
+
+// HasWord applies the HasEdge predicate on the "word" edge.
+func HasWord() predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(WordsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, WordsTable, WordsColumn),
+			sqlgraph.To(WordTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, WordTable, WordColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasWordsWith applies the HasEdge predicate on the "words" edge with a given conditions (other predicates).
-func HasWordsWith(preds ...predicate.Word) predicate.WordNode {
+// HasWordWith applies the HasEdge predicate on the "word" edge with a given conditions (other predicates).
+func HasWordWith(preds ...predicate.Word) predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(WordsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, WordsTable, WordsColumn),
+			sqlgraph.To(WordInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, WordTable, WordColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {
@@ -356,25 +433,25 @@ func HasWordsWith(preds ...predicate.Word) predicate.WordNode {
 	})
 }
 
-// HasFile applies the HasEdge predicate on the "file" edge.
-func HasFile() predicate.WordNode {
+// HasSentence applies the HasEdge predicate on the "sentence" edge.
+func HasSentence() predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(FileTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, FileTable, FileColumn),
+			sqlgraph.To(SentenceTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, SentenceTable, SentenceColumn),
 		)
 		sqlgraph.HasNeighbors(s, step)
 	})
 }
 
-// HasFileWith applies the HasEdge predicate on the "file" edge with a given conditions (other predicates).
-func HasFileWith(preds ...predicate.FileEntity) predicate.WordNode {
+// HasSentenceWith applies the HasEdge predicate on the "sentence" edge with a given conditions (other predicates).
+func HasSentenceWith(preds ...predicate.Sentence) predicate.WordNode {
 	return predicate.WordNode(func(s *sql.Selector) {
 		step := sqlgraph.NewStep(
 			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(FileInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, FileTable, FileColumn),
+			sqlgraph.To(SentenceInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, SentenceTable, SentenceColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

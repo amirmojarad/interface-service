@@ -8,7 +8,7 @@ import (
 	"fmt"
 	"interface_project/ent/fileentity"
 	"interface_project/ent/user"
-	"interface_project/ent/wordnode"
+	"interface_project/ent/word"
 	"time"
 
 	"entgo.io/ent/dialect/sql/sqlgraph"
@@ -71,19 +71,19 @@ func (fec *FileEntityCreate) SetOwner(u *User) *FileEntityCreate {
 	return fec.SetOwnerID(u.ID)
 }
 
-// AddWordnodeIDs adds the "wordnodes" edge to the WordNode entity by IDs.
-func (fec *FileEntityCreate) AddWordnodeIDs(ids ...int) *FileEntityCreate {
-	fec.mutation.AddWordnodeIDs(ids...)
+// AddWordIDs adds the "words" edge to the Word entity by IDs.
+func (fec *FileEntityCreate) AddWordIDs(ids ...int) *FileEntityCreate {
+	fec.mutation.AddWordIDs(ids...)
 	return fec
 }
 
-// AddWordnodes adds the "wordnodes" edges to the WordNode entity.
-func (fec *FileEntityCreate) AddWordnodes(w ...*WordNode) *FileEntityCreate {
+// AddWords adds the "words" edges to the Word entity.
+func (fec *FileEntityCreate) AddWords(w ...*Word) *FileEntityCreate {
 	ids := make([]int, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
-	return fec.AddWordnodeIDs(ids...)
+	return fec.AddWordIDs(ids...)
 }
 
 // Mutation returns the FileEntityMutation object of the builder.
@@ -268,17 +268,17 @@ func (fec *FileEntityCreate) createSpec() (*FileEntity, *sqlgraph.CreateSpec) {
 		_node.user_files = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := fec.mutation.WordnodesIDs(); len(nodes) > 0 {
+	if nodes := fec.mutation.WordsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   fileentity.WordnodesTable,
-			Columns: []string{fileentity.WordnodesColumn},
+			Table:   fileentity.WordsTable,
+			Columns: []string{fileentity.WordsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: wordnode.FieldID,
+					Column: word.FieldID,
 				},
 			},
 		}

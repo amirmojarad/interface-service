@@ -94,14 +94,12 @@ var (
 	WordsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "title", Type: field.TypeString},
-		{Name: "meaning", Type: field.TypeString, Nullable: true},
-		{Name: "sentence", Type: field.TypeString, Nullable: true},
-		{Name: "duration", Type: field.TypeString, Nullable: true},
-		{Name: "start", Type: field.TypeTime, Nullable: true},
-		{Name: "end", Type: field.TypeTime, Nullable: true},
+		{Name: "meaning", Type: field.TypeString},
+		{Name: "is_preposition", Type: field.TypeBool},
+		{Name: "sentence", Type: field.TypeString},
+		{Name: "duration", Type: field.TypeString},
+		{Name: "file_entity_words", Type: field.TypeInt, Nullable: true},
 		{Name: "user_favorite_words", Type: field.TypeInt, Nullable: true},
-		{Name: "word_movie", Type: field.TypeInt, Nullable: true},
-		{Name: "word_node_words", Type: field.TypeInt, Nullable: true},
 	}
 	// WordsTable holds the schema information for the "words" table.
 	WordsTable = &schema.Table{
@@ -110,44 +108,16 @@ var (
 		PrimaryKey: []*schema.Column{WordsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
+				Symbol:     "words_file_entities_words",
+				Columns:    []*schema.Column{WordsColumns[6]},
+				RefColumns: []*schema.Column{FileEntitiesColumns[0]},
+				OnDelete:   schema.SetNull,
+			},
+			{
 				Symbol:     "words_users_favorite_words",
 				Columns:    []*schema.Column{WordsColumns[7]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "words_movies_movie",
-				Columns:    []*schema.Column{WordsColumns[8]},
-				RefColumns: []*schema.Column{MoviesColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-			{
-				Symbol:     "words_word_nodes_words",
-				Columns:    []*schema.Column{WordsColumns[9]},
-				RefColumns: []*schema.Column{WordNodesColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
-	// WordNodesColumns holds the columns for the "word_nodes" table.
-	WordNodesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "title", Type: field.TypeString, Unique: true},
-		{Name: "is_preposition", Type: field.TypeBool},
-		{Name: "occurence", Type: field.TypeInt, Nullable: true},
-		{Name: "file_entity_wordnodes", Type: field.TypeInt},
-	}
-	// WordNodesTable holds the schema information for the "word_nodes" table.
-	WordNodesTable = &schema.Table{
-		Name:       "word_nodes",
-		Columns:    WordNodesColumns,
-		PrimaryKey: []*schema.Column{WordNodesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "word_nodes_file_entities_wordnodes",
-				Columns:    []*schema.Column{WordNodesColumns[4]},
-				RefColumns: []*schema.Column{FileEntitiesColumns[0]},
-				OnDelete:   schema.NoAction,
 			},
 		},
 	}
@@ -183,7 +153,6 @@ var (
 		SearchKeywordsTable,
 		UsersTable,
 		WordsTable,
-		WordNodesTable,
 		UserFavoriteMoviesTable,
 	}
 )
@@ -191,10 +160,8 @@ var (
 func init() {
 	FileEntitiesTable.ForeignKeys[0].RefTable = UsersTable
 	SearchKeywordsTable.ForeignKeys[0].RefTable = UsersTable
-	WordsTable.ForeignKeys[0].RefTable = UsersTable
-	WordsTable.ForeignKeys[1].RefTable = MoviesTable
-	WordsTable.ForeignKeys[2].RefTable = WordNodesTable
-	WordNodesTable.ForeignKeys[0].RefTable = FileEntitiesTable
+	WordsTable.ForeignKeys[0].RefTable = FileEntitiesTable
+	WordsTable.ForeignKeys[1].RefTable = UsersTable
 	UserFavoriteMoviesTable.ForeignKeys[0].RefTable = UsersTable
 	UserFavoriteMoviesTable.ForeignKeys[1].RefTable = MoviesTable
 }

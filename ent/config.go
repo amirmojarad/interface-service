@@ -29,7 +29,6 @@ type hooks struct {
 	SearchKeyword []ent.Hook
 	User          []ent.Hook
 	Word          []ent.Hook
-	WordNode      []ent.Hook
 }
 
 // Options applies the options on the config object.

@@ -4,11 +4,10 @@ package ent
 
 import (
 	"fmt"
-	"interface_project/ent/movie"
+	"interface_project/ent/fileentity"
 	"interface_project/ent/user"
 	"interface_project/ent/word"
 	"strings"
-	"time"
 
 	"entgo.io/ent/dialect/sql"
 )
@@ -22,51 +21,34 @@ type Word struct {
 	Title string `json:"title,omitempty"`
 	// Meaning holds the value of the "meaning" field.
 	Meaning string `json:"meaning,omitempty"`
+	// IsPreposition holds the value of the "isPreposition" field.
+	IsPreposition bool `json:"isPreposition,omitempty"`
 	// Sentence holds the value of the "sentence" field.
 	Sentence string `json:"sentence,omitempty"`
 	// Duration holds the value of the "duration" field.
 	Duration string `json:"duration,omitempty"`
-	// Start holds the value of the "start" field.
-	Start time.Time `json:"start,omitempty"`
-	// End holds the value of the "end" field.
-	End time.Time `json:"end,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the WordQuery when eager-loading is set.
 	Edges               WordEdges `json:"edges"`
+	file_entity_words   *int
 	user_favorite_words *int
-	word_movie          *int
-	word_node_words     *int
 }
 
 // WordEdges holds the relations/edges for other nodes in the graph.
 type WordEdges struct {
-	// Movie holds the value of the movie edge.
-	Movie *Movie `json:"movie,omitempty"`
 	// User holds the value of the user edge.
 	User *User `json:"user,omitempty"`
+	// File holds the value of the file edge.
+	File *FileEntity `json:"file,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [2]bool
 }
 
-// MovieOrErr returns the Movie value or an error if the edge
-// was not loaded in eager-loading, or loaded but was not found.
-func (e WordEdges) MovieOrErr() (*Movie, error) {
-	if e.loadedTypes[0] {
-		if e.Movie == nil {
-			// The edge movie was loaded in eager-loading,
-			// but was not found.
-			return nil, &NotFoundError{label: movie.Label}
-		}
-		return e.Movie, nil
-	}
-	return nil, &NotLoadedError{edge: "movie"}
-}
-
 // UserOrErr returns the User value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e WordEdges) UserOrErr() (*User, error) {
-	if e.loadedTypes[1] {
+	if e.loadedTypes[0] {
 		if e.User == nil {
 			// The edge user was loaded in eager-loading,
 			// but was not found.
@@ -77,22 +59,34 @@ func (e WordEdges) UserOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "user"}
 }
 
+// FileOrErr returns the File value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e WordEdges) FileOrErr() (*FileEntity, error) {
+	if e.loadedTypes[1] {
+		if e.File == nil {
+			// The edge file was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: fileentity.Label}
+		}
+		return e.File, nil
+	}
+	return nil, &NotLoadedError{edge: "file"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Word) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case word.FieldIsPreposition:
+			values[i] = new(sql.NullBool)
 		case word.FieldID:
 			values[i] = new(sql.NullInt64)
 		case word.FieldTitle, word.FieldMeaning, word.FieldSentence, word.FieldDuration:
 			values[i] = new(sql.NullString)
-		case word.FieldStart, word.FieldEnd:
-			values[i] = new(sql.NullTime)
-		case word.ForeignKeys[0]: // user_favorite_words
+		case word.ForeignKeys[0]: // file_entity_words
 			values[i] = new(sql.NullInt64)
-		case word.ForeignKeys[1]: // word_movie
-			values[i] = new(sql.NullInt64)
-		case word.ForeignKeys[2]: // word_node_words
+		case word.ForeignKeys[1]: // user_favorite_words
 			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Word", columns[i])
@@ -127,6 +121,12 @@ func (w *Word) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				w.Meaning = value.String
 			}
+		case word.FieldIsPreposition:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field isPreposition", values[i])
+			} else if value.Valid {
+				w.IsPreposition = value.Bool
+			}
 		case word.FieldSentence:
 			if value, ok := values[i].(*sql.NullString); !ok {
 				return fmt.Errorf("unexpected type %T for field sentence", values[i])
@@ -139,52 +139,33 @@ func (w *Word) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				w.Duration = value.String
 			}
-		case word.FieldStart:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field start", values[i])
-			} else if value.Valid {
-				w.Start = value.Time
-			}
-		case word.FieldEnd:
-			if value, ok := values[i].(*sql.NullTime); !ok {
-				return fmt.Errorf("unexpected type %T for field end", values[i])
-			} else if value.Valid {
-				w.End = value.Time
-			}
 		case word.ForeignKeys[0]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field file_entity_words", value)
+			} else if value.Valid {
+				w.file_entity_words = new(int)
+				*w.file_entity_words = int(value.Int64)
+			}
+		case word.ForeignKeys[1]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
 				return fmt.Errorf("unexpected type %T for edge-field user_favorite_words", value)
 			} else if value.Valid {
 				w.user_favorite_words = new(int)
 				*w.user_favorite_words = int(value.Int64)
 			}
-		case word.ForeignKeys[1]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field word_movie", value)
-			} else if value.Valid {
-				w.word_movie = new(int)
-				*w.word_movie = int(value.Int64)
-			}
-		case word.ForeignKeys[2]:
-			if value, ok := values[i].(*sql.NullInt64); !ok {
-				return fmt.Errorf("unexpected type %T for edge-field word_node_words", value)
-			} else if value.Valid {
-				w.word_node_words = new(int)
-				*w.word_node_words = int(value.Int64)
-			}
 		}
 	}
 	return nil
 }
 
-// QueryMovie queries the "movie" edge of the Word entity.
-func (w *Word) QueryMovie() *MovieQuery {
-	return (&WordClient{config: w.config}).QueryMovie(w)
-}
-
 // QueryUser queries the "user" edge of the Word entity.
 func (w *Word) QueryUser() *UserQuery {
 	return (&WordClient{config: w.config}).QueryUser(w)
+}
+
+// QueryFile queries the "file" edge of the Word entity.
+func (w *Word) QueryFile() *FileEntityQuery {
+	return (&WordClient{config: w.config}).QueryFile(w)
 }
 
 // Update returns a builder for updating this Word.
@@ -214,14 +195,12 @@ func (w *Word) String() string {
 	builder.WriteString(w.Title)
 	builder.WriteString(", meaning=")
 	builder.WriteString(w.Meaning)
+	builder.WriteString(", isPreposition=")
+	builder.WriteString(fmt.Sprintf("%v", w.IsPreposition))
 	builder.WriteString(", sentence=")
 	builder.WriteString(w.Sentence)
 	builder.WriteString(", duration=")
 	builder.WriteString(w.Duration)
-	builder.WriteString(", start=")
-	builder.WriteString(w.Start.Format(time.ANSIC))
-	builder.WriteString(", end=")
-	builder.WriteString(w.End.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

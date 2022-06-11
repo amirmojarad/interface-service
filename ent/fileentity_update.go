@@ -9,7 +9,7 @@ import (
 	"interface_project/ent/fileentity"
 	"interface_project/ent/predicate"
 	"interface_project/ent/user"
-	"interface_project/ent/wordnode"
+	"interface_project/ent/word"
 	"time"
 
 	"entgo.io/ent/dialect/sql"
@@ -86,19 +86,19 @@ func (feu *FileEntityUpdate) SetOwner(u *User) *FileEntityUpdate {
 	return feu.SetOwnerID(u.ID)
 }
 
-// AddWordnodeIDs adds the "wordnodes" edge to the WordNode entity by IDs.
-func (feu *FileEntityUpdate) AddWordnodeIDs(ids ...int) *FileEntityUpdate {
-	feu.mutation.AddWordnodeIDs(ids...)
+// AddWordIDs adds the "words" edge to the Word entity by IDs.
+func (feu *FileEntityUpdate) AddWordIDs(ids ...int) *FileEntityUpdate {
+	feu.mutation.AddWordIDs(ids...)
 	return feu
 }
 
-// AddWordnodes adds the "wordnodes" edges to the WordNode entity.
-func (feu *FileEntityUpdate) AddWordnodes(w ...*WordNode) *FileEntityUpdate {
+// AddWords adds the "words" edges to the Word entity.
+func (feu *FileEntityUpdate) AddWords(w ...*Word) *FileEntityUpdate {
 	ids := make([]int, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
-	return feu.AddWordnodeIDs(ids...)
+	return feu.AddWordIDs(ids...)
 }
 
 // Mutation returns the FileEntityMutation object of the builder.
@@ -112,25 +112,25 @@ func (feu *FileEntityUpdate) ClearOwner() *FileEntityUpdate {
 	return feu
 }
 
-// ClearWordnodes clears all "wordnodes" edges to the WordNode entity.
-func (feu *FileEntityUpdate) ClearWordnodes() *FileEntityUpdate {
-	feu.mutation.ClearWordnodes()
+// ClearWords clears all "words" edges to the Word entity.
+func (feu *FileEntityUpdate) ClearWords() *FileEntityUpdate {
+	feu.mutation.ClearWords()
 	return feu
 }
 
-// RemoveWordnodeIDs removes the "wordnodes" edge to WordNode entities by IDs.
-func (feu *FileEntityUpdate) RemoveWordnodeIDs(ids ...int) *FileEntityUpdate {
-	feu.mutation.RemoveWordnodeIDs(ids...)
+// RemoveWordIDs removes the "words" edge to Word entities by IDs.
+func (feu *FileEntityUpdate) RemoveWordIDs(ids ...int) *FileEntityUpdate {
+	feu.mutation.RemoveWordIDs(ids...)
 	return feu
 }
 
-// RemoveWordnodes removes "wordnodes" edges to WordNode entities.
-func (feu *FileEntityUpdate) RemoveWordnodes(w ...*WordNode) *FileEntityUpdate {
+// RemoveWords removes "words" edges to Word entities.
+func (feu *FileEntityUpdate) RemoveWords(w ...*Word) *FileEntityUpdate {
 	ids := make([]int, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
-	return feu.RemoveWordnodeIDs(ids...)
+	return feu.RemoveWordIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -303,33 +303,33 @@ func (feu *FileEntityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if feu.mutation.WordnodesCleared() {
+	if feu.mutation.WordsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   fileentity.WordnodesTable,
-			Columns: []string{fileentity.WordnodesColumn},
+			Table:   fileentity.WordsTable,
+			Columns: []string{fileentity.WordsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: wordnode.FieldID,
+					Column: word.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := feu.mutation.RemovedWordnodesIDs(); len(nodes) > 0 && !feu.mutation.WordnodesCleared() {
+	if nodes := feu.mutation.RemovedWordsIDs(); len(nodes) > 0 && !feu.mutation.WordsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   fileentity.WordnodesTable,
-			Columns: []string{fileentity.WordnodesColumn},
+			Table:   fileentity.WordsTable,
+			Columns: []string{fileentity.WordsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: wordnode.FieldID,
+					Column: word.FieldID,
 				},
 			},
 		}
@@ -338,17 +338,17 @@ func (feu *FileEntityUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := feu.mutation.WordnodesIDs(); len(nodes) > 0 {
+	if nodes := feu.mutation.WordsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   fileentity.WordnodesTable,
-			Columns: []string{fileentity.WordnodesColumn},
+			Table:   fileentity.WordsTable,
+			Columns: []string{fileentity.WordsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: wordnode.FieldID,
+					Column: word.FieldID,
 				},
 			},
 		}
@@ -432,19 +432,19 @@ func (feuo *FileEntityUpdateOne) SetOwner(u *User) *FileEntityUpdateOne {
 	return feuo.SetOwnerID(u.ID)
 }
 
-// AddWordnodeIDs adds the "wordnodes" edge to the WordNode entity by IDs.
-func (feuo *FileEntityUpdateOne) AddWordnodeIDs(ids ...int) *FileEntityUpdateOne {
-	feuo.mutation.AddWordnodeIDs(ids...)
+// AddWordIDs adds the "words" edge to the Word entity by IDs.
+func (feuo *FileEntityUpdateOne) AddWordIDs(ids ...int) *FileEntityUpdateOne {
+	feuo.mutation.AddWordIDs(ids...)
 	return feuo
 }
 
-// AddWordnodes adds the "wordnodes" edges to the WordNode entity.
-func (feuo *FileEntityUpdateOne) AddWordnodes(w ...*WordNode) *FileEntityUpdateOne {
+// AddWords adds the "words" edges to the Word entity.
+func (feuo *FileEntityUpdateOne) AddWords(w ...*Word) *FileEntityUpdateOne {
 	ids := make([]int, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
-	return feuo.AddWordnodeIDs(ids...)
+	return feuo.AddWordIDs(ids...)
 }
 
 // Mutation returns the FileEntityMutation object of the builder.
@@ -458,25 +458,25 @@ func (feuo *FileEntityUpdateOne) ClearOwner() *FileEntityUpdateOne {
 	return feuo
 }
 
-// ClearWordnodes clears all "wordnodes" edges to the WordNode entity.
-func (feuo *FileEntityUpdateOne) ClearWordnodes() *FileEntityUpdateOne {
-	feuo.mutation.ClearWordnodes()
+// ClearWords clears all "words" edges to the Word entity.
+func (feuo *FileEntityUpdateOne) ClearWords() *FileEntityUpdateOne {
+	feuo.mutation.ClearWords()
 	return feuo
 }
 
-// RemoveWordnodeIDs removes the "wordnodes" edge to WordNode entities by IDs.
-func (feuo *FileEntityUpdateOne) RemoveWordnodeIDs(ids ...int) *FileEntityUpdateOne {
-	feuo.mutation.RemoveWordnodeIDs(ids...)
+// RemoveWordIDs removes the "words" edge to Word entities by IDs.
+func (feuo *FileEntityUpdateOne) RemoveWordIDs(ids ...int) *FileEntityUpdateOne {
+	feuo.mutation.RemoveWordIDs(ids...)
 	return feuo
 }
 
-// RemoveWordnodes removes "wordnodes" edges to WordNode entities.
-func (feuo *FileEntityUpdateOne) RemoveWordnodes(w ...*WordNode) *FileEntityUpdateOne {
+// RemoveWords removes "words" edges to Word entities.
+func (feuo *FileEntityUpdateOne) RemoveWords(w ...*Word) *FileEntityUpdateOne {
 	ids := make([]int, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
-	return feuo.RemoveWordnodeIDs(ids...)
+	return feuo.RemoveWordIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -673,33 +673,33 @@ func (feuo *FileEntityUpdateOne) sqlSave(ctx context.Context) (_node *FileEntity
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if feuo.mutation.WordnodesCleared() {
+	if feuo.mutation.WordsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   fileentity.WordnodesTable,
-			Columns: []string{fileentity.WordnodesColumn},
+			Table:   fileentity.WordsTable,
+			Columns: []string{fileentity.WordsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: wordnode.FieldID,
+					Column: word.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := feuo.mutation.RemovedWordnodesIDs(); len(nodes) > 0 && !feuo.mutation.WordnodesCleared() {
+	if nodes := feuo.mutation.RemovedWordsIDs(); len(nodes) > 0 && !feuo.mutation.WordsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   fileentity.WordnodesTable,
-			Columns: []string{fileentity.WordnodesColumn},
+			Table:   fileentity.WordsTable,
+			Columns: []string{fileentity.WordsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: wordnode.FieldID,
+					Column: word.FieldID,
 				},
 			},
 		}
@@ -708,17 +708,17 @@ func (feuo *FileEntityUpdateOne) sqlSave(ctx context.Context) (_node *FileEntity
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := feuo.mutation.WordnodesIDs(); len(nodes) > 0 {
+	if nodes := feuo.mutation.WordsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2M,
 			Inverse: false,
-			Table:   fileentity.WordnodesTable,
-			Columns: []string{fileentity.WordnodesColumn},
+			Table:   fileentity.WordsTable,
+			Columns: []string{fileentity.WordsColumn},
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: wordnode.FieldID,
+					Column: word.FieldID,
 				},
 			},
 		}
