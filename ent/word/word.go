@@ -17,6 +17,10 @@ const (
 	FieldSentence = "sentence"
 	// FieldDuration holds the string denoting the duration field in the database.
 	FieldDuration = "duration"
+	// FieldStart holds the string denoting the start field in the database.
+	FieldStart = "start"
+	// FieldEnd holds the string denoting the end field in the database.
+	FieldEnd = "end"
 	// EdgeUser holds the string denoting the user edge name in mutations.
 	EdgeUser = "user"
 	// EdgeFile holds the string denoting the file edge name in mutations.
@@ -47,6 +51,8 @@ var Columns = []string{
 	FieldIsPreposition,
 	FieldSentence,
 	FieldDuration,
+	FieldStart,
+	FieldEnd,
 }
 
 // ForeignKeys holds the SQL foreign-keys that are owned by the "words"
@@ -78,4 +84,8 @@ var (
 	SentenceValidator func(string) error
 	// DurationValidator is a validator for the "duration" field. It is called by the builders before save.
 	DurationValidator func(string) error
+	// StartValidator is a validator for the "start" field. It is called by the builders before save.
+	StartValidator func(string) error
+	// EndValidator is a validator for the "end" field. It is called by the builders before save.
+	EndValidator func(string) error
 )

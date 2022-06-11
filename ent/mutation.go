@@ -3138,6 +3138,8 @@ type WordMutation struct {
 	isPreposition *bool
 	sentence      *string
 	duration      *string
+	start         *string
+	end           *string
 	clearedFields map[string]struct{}
 	user          *int
 	cleareduser   bool
@@ -3426,6 +3428,78 @@ func (m *WordMutation) ResetDuration() {
 	m.duration = nil
 }
 
+// SetStart sets the "start" field.
+func (m *WordMutation) SetStart(s string) {
+	m.start = &s
+}
+
+// Start returns the value of the "start" field in the mutation.
+func (m *WordMutation) Start() (r string, exists bool) {
+	v := m.start
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStart returns the old "start" field's value of the Word entity.
+// If the Word object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WordMutation) OldStart(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStart is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStart requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStart: %w", err)
+	}
+	return oldValue.Start, nil
+}
+
+// ResetStart resets all changes to the "start" field.
+func (m *WordMutation) ResetStart() {
+	m.start = nil
+}
+
+// SetEnd sets the "end" field.
+func (m *WordMutation) SetEnd(s string) {
+	m.end = &s
+}
+
+// End returns the value of the "end" field in the mutation.
+func (m *WordMutation) End() (r string, exists bool) {
+	v := m.end
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldEnd returns the old "end" field's value of the Word entity.
+// If the Word object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *WordMutation) OldEnd(ctx context.Context) (v string, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldEnd is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldEnd requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldEnd: %w", err)
+	}
+	return oldValue.End, nil
+}
+
+// ResetEnd resets all changes to the "end" field.
+func (m *WordMutation) ResetEnd() {
+	m.end = nil
+}
+
 // SetUserID sets the "user" edge to the User entity by id.
 func (m *WordMutation) SetUserID(id int) {
 	m.user = &id
@@ -3523,7 +3597,7 @@ func (m *WordMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *WordMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 7)
 	if m.title != nil {
 		fields = append(fields, word.FieldTitle)
 	}
@@ -3538,6 +3612,12 @@ func (m *WordMutation) Fields() []string {
 	}
 	if m.duration != nil {
 		fields = append(fields, word.FieldDuration)
+	}
+	if m.start != nil {
+		fields = append(fields, word.FieldStart)
+	}
+	if m.end != nil {
+		fields = append(fields, word.FieldEnd)
 	}
 	return fields
 }
@@ -3557,6 +3637,10 @@ func (m *WordMutation) Field(name string) (ent.Value, bool) {
 		return m.Sentence()
 	case word.FieldDuration:
 		return m.Duration()
+	case word.FieldStart:
+		return m.Start()
+	case word.FieldEnd:
+		return m.End()
 	}
 	return nil, false
 }
@@ -3576,6 +3660,10 @@ func (m *WordMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldSentence(ctx)
 	case word.FieldDuration:
 		return m.OldDuration(ctx)
+	case word.FieldStart:
+		return m.OldStart(ctx)
+	case word.FieldEnd:
+		return m.OldEnd(ctx)
 	}
 	return nil, fmt.Errorf("unknown Word field %s", name)
 }
@@ -3619,6 +3707,20 @@ func (m *WordMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetDuration(v)
+		return nil
+	case word.FieldStart:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStart(v)
+		return nil
+	case word.FieldEnd:
+		v, ok := value.(string)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetEnd(v)
 		return nil
 	}
 	return fmt.Errorf("unknown Word field %s", name)
@@ -3683,6 +3785,12 @@ func (m *WordMutation) ResetField(name string) error {
 		return nil
 	case word.FieldDuration:
 		m.ResetDuration()
+		return nil
+	case word.FieldStart:
+		m.ResetStart()
+		return nil
+	case word.FieldEnd:
+		m.ResetEnd()
 		return nil
 	}
 	return fmt.Errorf("unknown Word field %s", name)

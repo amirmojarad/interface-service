@@ -102,7 +102,11 @@ message Word {
 
   string duration = 6;
 
-  User user = 7;
+  string start = 7;
 
-  FileEntity file = 8;
+  string end = 8;
+
+  User user = 9;
+
+  FileEntity file = 10;
 }

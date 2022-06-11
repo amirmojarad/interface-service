@@ -27,6 +27,10 @@ type Word struct {
 	Sentence string `json:"sentence,omitempty"`
 	// Duration holds the value of the "duration" field.
 	Duration string `json:"duration,omitempty"`
+	// Start holds the value of the "start" field.
+	Start string `json:"start,omitempty"`
+	// End holds the value of the "end" field.
+	End string `json:"end,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the WordQuery when eager-loading is set.
 	Edges               WordEdges `json:"edges"`
@@ -82,7 +86,7 @@ func (*Word) scanValues(columns []string) ([]interface{}, error) {
 			values[i] = new(sql.NullBool)
 		case word.FieldID:
 			values[i] = new(sql.NullInt64)
-		case word.FieldTitle, word.FieldMeaning, word.FieldSentence, word.FieldDuration:
+		case word.FieldTitle, word.FieldMeaning, word.FieldSentence, word.FieldDuration, word.FieldStart, word.FieldEnd:
 			values[i] = new(sql.NullString)
 		case word.ForeignKeys[0]: // file_entity_words
 			values[i] = new(sql.NullInt64)
@@ -138,6 +142,18 @@ func (w *Word) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field duration", values[i])
 			} else if value.Valid {
 				w.Duration = value.String
+			}
+		case word.FieldStart:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field start", values[i])
+			} else if value.Valid {
+				w.Start = value.String
+			}
+		case word.FieldEnd:
+			if value, ok := values[i].(*sql.NullString); !ok {
+				return fmt.Errorf("unexpected type %T for field end", values[i])
+			} else if value.Valid {
+				w.End = value.String
 			}
 		case word.ForeignKeys[0]:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -201,6 +217,10 @@ func (w *Word) String() string {
 	builder.WriteString(w.Sentence)
 	builder.WriteString(", duration=")
 	builder.WriteString(w.Duration)
+	builder.WriteString(", start=")
+	builder.WriteString(w.Start)
+	builder.WriteString(", end=")
+	builder.WriteString(w.End)
 	builder.WriteByte(')')
 	return builder.String()
 }

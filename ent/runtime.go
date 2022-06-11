@@ -86,4 +86,12 @@ func init() {
 	wordDescDuration := wordFields[4].Descriptor()
 	// word.DurationValidator is a validator for the "duration" field. It is called by the builders before save.
 	word.DurationValidator = wordDescDuration.Validators[0].(func(string) error)
+	// wordDescStart is the schema descriptor for start field.
+	wordDescStart := wordFields[5].Descriptor()
+	// word.StartValidator is a validator for the "start" field. It is called by the builders before save.
+	word.StartValidator = wordDescStart.Validators[0].(func(string) error)
+	// wordDescEnd is the schema descriptor for end field.
+	wordDescEnd := wordFields[6].Descriptor()
+	// word.EndValidator is a validator for the "end" field. It is called by the builders before save.
+	word.EndValidator = wordDescEnd.Validators[0].(func(string) error)
 }

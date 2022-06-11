@@ -51,9 +51,7 @@ func checkWordTitleIsValid(wordTitle string) bool {
 func makeWordsBulk(client *ent.Client, sentences []*sentence, user *ent.User, file *ent.FileEntity) []*ent.WordCreate {
 	wordBulk := []*ent.WordCreate{}
 	for _, item := range sentences {
-		//times := strings.Split(item.timeRange, " ")
-		//start, _ := time.Parse("12:12:12,123", times[0])
-		//end, _ := time.Parse("12:12:12,123", times[2])
+		times := strings.Split(item.timeRange, " ")
 		for _, token := range item.tokens {
 			if checkWordTitleIsValid(token) {
 				if strings.Contains(token, "...") {
@@ -62,7 +60,7 @@ func makeWordsBulk(client *ent.Client, sentences []*sentence, user *ent.User, fi
 				wordBulk = append(wordBulk, client.Word.Create().
 					SetTitle(token).
 					SetMeaning("").
-					SetFile(file).
+					SetFile(file).SetEnd(times[2]).SetStart(times[0]).
 					SetIsPreposition(preposition.IsPreposition(token)).
 					SetDuration(item.timeRange).
 					SetSentence(item.RawSentence))

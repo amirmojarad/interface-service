@@ -127,6 +127,20 @@ func Duration(v string) predicate.Word {
 	})
 }
 
+// Start applies equality check predicate on the "start" field. It's identical to StartEQ.
+func Start(v string) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldStart), v))
+	})
+}
+
+// End applies equality check predicate on the "end" field. It's identical to EndEQ.
+func End(v string) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldEnd), v))
+	})
+}
+
 // TitleEQ applies the EQ predicate on the "title" field.
 func TitleEQ(v string) predicate.Word {
 	return predicate.Word(func(s *sql.Selector) {
@@ -582,6 +596,228 @@ func DurationEqualFold(v string) predicate.Word {
 func DurationContainsFold(v string) predicate.Word {
 	return predicate.Word(func(s *sql.Selector) {
 		s.Where(sql.ContainsFold(s.C(FieldDuration), v))
+	})
+}
+
+// StartEQ applies the EQ predicate on the "start" field.
+func StartEQ(v string) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldStart), v))
+	})
+}
+
+// StartNEQ applies the NEQ predicate on the "start" field.
+func StartNEQ(v string) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldStart), v))
+	})
+}
+
+// StartIn applies the In predicate on the "start" field.
+func StartIn(vs ...string) predicate.Word {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Word(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldStart), v...))
+	})
+}
+
+// StartNotIn applies the NotIn predicate on the "start" field.
+func StartNotIn(vs ...string) predicate.Word {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Word(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldStart), v...))
+	})
+}
+
+// StartGT applies the GT predicate on the "start" field.
+func StartGT(v string) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldStart), v))
+	})
+}
+
+// StartGTE applies the GTE predicate on the "start" field.
+func StartGTE(v string) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldStart), v))
+	})
+}
+
+// StartLT applies the LT predicate on the "start" field.
+func StartLT(v string) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldStart), v))
+	})
+}
+
+// StartLTE applies the LTE predicate on the "start" field.
+func StartLTE(v string) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldStart), v))
+	})
+}
+
+// StartContains applies the Contains predicate on the "start" field.
+func StartContains(v string) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldStart), v))
+	})
+}
+
+// StartHasPrefix applies the HasPrefix predicate on the "start" field.
+func StartHasPrefix(v string) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldStart), v))
+	})
+}
+
+// StartHasSuffix applies the HasSuffix predicate on the "start" field.
+func StartHasSuffix(v string) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldStart), v))
+	})
+}
+
+// StartEqualFold applies the EqualFold predicate on the "start" field.
+func StartEqualFold(v string) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldStart), v))
+	})
+}
+
+// StartContainsFold applies the ContainsFold predicate on the "start" field.
+func StartContainsFold(v string) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldStart), v))
+	})
+}
+
+// EndEQ applies the EQ predicate on the "end" field.
+func EndEQ(v string) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldEnd), v))
+	})
+}
+
+// EndNEQ applies the NEQ predicate on the "end" field.
+func EndNEQ(v string) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldEnd), v))
+	})
+}
+
+// EndIn applies the In predicate on the "end" field.
+func EndIn(vs ...string) predicate.Word {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Word(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.In(s.C(FieldEnd), v...))
+	})
+}
+
+// EndNotIn applies the NotIn predicate on the "end" field.
+func EndNotIn(vs ...string) predicate.Word {
+	v := make([]interface{}, len(vs))
+	for i := range v {
+		v[i] = vs[i]
+	}
+	return predicate.Word(func(s *sql.Selector) {
+		// if not arguments were provided, append the FALSE constants,
+		// since we can't apply "IN ()". This will make this predicate falsy.
+		if len(v) == 0 {
+			s.Where(sql.False())
+			return
+		}
+		s.Where(sql.NotIn(s.C(FieldEnd), v...))
+	})
+}
+
+// EndGT applies the GT predicate on the "end" field.
+func EndGT(v string) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.GT(s.C(FieldEnd), v))
+	})
+}
+
+// EndGTE applies the GTE predicate on the "end" field.
+func EndGTE(v string) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.GTE(s.C(FieldEnd), v))
+	})
+}
+
+// EndLT applies the LT predicate on the "end" field.
+func EndLT(v string) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.LT(s.C(FieldEnd), v))
+	})
+}
+
+// EndLTE applies the LTE predicate on the "end" field.
+func EndLTE(v string) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.LTE(s.C(FieldEnd), v))
+	})
+}
+
+// EndContains applies the Contains predicate on the "end" field.
+func EndContains(v string) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.Contains(s.C(FieldEnd), v))
+	})
+}
+
+// EndHasPrefix applies the HasPrefix predicate on the "end" field.
+func EndHasPrefix(v string) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.HasPrefix(s.C(FieldEnd), v))
+	})
+}
+
+// EndHasSuffix applies the HasSuffix predicate on the "end" field.
+func EndHasSuffix(v string) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.HasSuffix(s.C(FieldEnd), v))
+	})
+}
+
+// EndEqualFold applies the EqualFold predicate on the "end" field.
+func EndEqualFold(v string) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.EqualFold(s.C(FieldEnd), v))
+	})
+}
+
+// EndContainsFold applies the ContainsFold predicate on the "end" field.
+func EndContainsFold(v string) predicate.Word {
+	return predicate.Word(func(s *sql.Selector) {
+		s.Where(sql.ContainsFold(s.C(FieldEnd), v))
 	})
 }
 

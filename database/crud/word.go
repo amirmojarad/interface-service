@@ -22,7 +22,10 @@ func (crud Crud) GetAllWordsByTitle(fileID int, title string) ([]*ent.Word, erro
 		Select(word.FieldSentence,
 			word.FieldMeaning,
 			word.FieldIsPreposition,
-			word.FieldDuration).
+			word.FieldDuration,
+			word.FieldStart,
+			word.FieldEnd,
+		).
 		Where(word.HasFileWith(fileentity.IDEQ(fileID))).
 		Where(word.TitleEQ(title)).
 		All(*crud.Ctx)

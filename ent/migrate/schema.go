@@ -98,6 +98,8 @@ var (
 		{Name: "is_preposition", Type: field.TypeBool},
 		{Name: "sentence", Type: field.TypeString},
 		{Name: "duration", Type: field.TypeString},
+		{Name: "start", Type: field.TypeString},
+		{Name: "end", Type: field.TypeString},
 		{Name: "file_entity_words", Type: field.TypeInt, Nullable: true},
 		{Name: "user_favorite_words", Type: field.TypeInt, Nullable: true},
 	}
@@ -109,13 +111,13 @@ var (
 		ForeignKeys: []*schema.ForeignKey{
 			{
 				Symbol:     "words_file_entities_words",
-				Columns:    []*schema.Column{WordsColumns[6]},
+				Columns:    []*schema.Column{WordsColumns[8]},
 				RefColumns: []*schema.Column{FileEntitiesColumns[0]},
 				OnDelete:   schema.SetNull,
 			},
 			{
 				Symbol:     "words_users_favorite_words",
-				Columns:    []*schema.Column{WordsColumns[7]},
+				Columns:    []*schema.Column{WordsColumns[9]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
 			},

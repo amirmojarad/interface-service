@@ -21,14 +21,16 @@ func (Word) Fields() []ent.Field {
 		field.Bool("isPreposition").Annotations(entproto.Field(4)),
 		field.String("sentence").NotEmpty().Annotations(entproto.Field(5)),
 		field.String("duration").NotEmpty().Annotations(entproto.Field(6)),
+		field.String("start").NotEmpty().Annotations(entproto.Field(7)),
+		field.String("end").NotEmpty().Annotations(entproto.Field(8)),
 	}
 }
 
 // Edges of the Word.
 func (Word) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user", User.Type).Ref("favorite_words").Unique().Annotations(entproto.Field(7)),
-		edge.From("file", FileEntity.Type).Ref("words").Unique().Annotations(entproto.Field(8)),
+		edge.From("user", User.Type).Ref("favorite_words").Unique().Annotations(entproto.Field(9)),
+		edge.From("file", FileEntity.Type).Ref("words").Unique().Annotations(entproto.Field(10)),
 	}
 }
 

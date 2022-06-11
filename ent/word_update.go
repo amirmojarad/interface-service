@@ -59,6 +59,18 @@ func (wu *WordUpdate) SetDuration(s string) *WordUpdate {
 	return wu
 }
 
+// SetStart sets the "start" field.
+func (wu *WordUpdate) SetStart(s string) *WordUpdate {
+	wu.mutation.SetStart(s)
+	return wu
+}
+
+// SetEnd sets the "end" field.
+func (wu *WordUpdate) SetEnd(s string) *WordUpdate {
+	wu.mutation.SetEnd(s)
+	return wu
+}
+
 // SetUserID sets the "user" edge to the User entity by ID.
 func (wu *WordUpdate) SetUserID(id int) *WordUpdate {
 	wu.mutation.SetUserID(id)
@@ -191,6 +203,16 @@ func (wu *WordUpdate) check() error {
 			return &ValidationError{Name: "duration", err: fmt.Errorf(`ent: validator failed for field "Word.duration": %w`, err)}
 		}
 	}
+	if v, ok := wu.mutation.Start(); ok {
+		if err := word.StartValidator(v); err != nil {
+			return &ValidationError{Name: "start", err: fmt.Errorf(`ent: validator failed for field "Word.start": %w`, err)}
+		}
+	}
+	if v, ok := wu.mutation.End(); ok {
+		if err := word.EndValidator(v); err != nil {
+			return &ValidationError{Name: "end", err: fmt.Errorf(`ent: validator failed for field "Word.end": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -245,6 +267,20 @@ func (wu *WordUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Type:   field.TypeString,
 			Value:  value,
 			Column: word.FieldDuration,
+		})
+	}
+	if value, ok := wu.mutation.Start(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: word.FieldStart,
+		})
+	}
+	if value, ok := wu.mutation.End(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: word.FieldEnd,
 		})
 	}
 	if wu.mutation.UserCleared() {
@@ -363,6 +399,18 @@ func (wuo *WordUpdateOne) SetSentence(s string) *WordUpdateOne {
 // SetDuration sets the "duration" field.
 func (wuo *WordUpdateOne) SetDuration(s string) *WordUpdateOne {
 	wuo.mutation.SetDuration(s)
+	return wuo
+}
+
+// SetStart sets the "start" field.
+func (wuo *WordUpdateOne) SetStart(s string) *WordUpdateOne {
+	wuo.mutation.SetStart(s)
+	return wuo
+}
+
+// SetEnd sets the "end" field.
+func (wuo *WordUpdateOne) SetEnd(s string) *WordUpdateOne {
+	wuo.mutation.SetEnd(s)
 	return wuo
 }
 
@@ -505,6 +553,16 @@ func (wuo *WordUpdateOne) check() error {
 			return &ValidationError{Name: "duration", err: fmt.Errorf(`ent: validator failed for field "Word.duration": %w`, err)}
 		}
 	}
+	if v, ok := wuo.mutation.Start(); ok {
+		if err := word.StartValidator(v); err != nil {
+			return &ValidationError{Name: "start", err: fmt.Errorf(`ent: validator failed for field "Word.start": %w`, err)}
+		}
+	}
+	if v, ok := wuo.mutation.End(); ok {
+		if err := word.EndValidator(v); err != nil {
+			return &ValidationError{Name: "end", err: fmt.Errorf(`ent: validator failed for field "Word.end": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -576,6 +634,20 @@ func (wuo *WordUpdateOne) sqlSave(ctx context.Context) (_node *Word, err error) 
 			Type:   field.TypeString,
 			Value:  value,
 			Column: word.FieldDuration,
+		})
+	}
+	if value, ok := wuo.mutation.Start(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: word.FieldStart,
+		})
+	}
+	if value, ok := wuo.mutation.End(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: word.FieldEnd,
 		})
 	}
 	if wuo.mutation.UserCleared() {

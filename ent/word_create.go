@@ -51,6 +51,18 @@ func (wc *WordCreate) SetDuration(s string) *WordCreate {
 	return wc
 }
 
+// SetStart sets the "start" field.
+func (wc *WordCreate) SetStart(s string) *WordCreate {
+	wc.mutation.SetStart(s)
+	return wc
+}
+
+// SetEnd sets the "end" field.
+func (wc *WordCreate) SetEnd(s string) *WordCreate {
+	wc.mutation.SetEnd(s)
+	return wc
+}
+
 // SetUserID sets the "user" edge to the User entity by ID.
 func (wc *WordCreate) SetUserID(id int) *WordCreate {
 	wc.mutation.SetUserID(id)
@@ -189,6 +201,22 @@ func (wc *WordCreate) check() error {
 			return &ValidationError{Name: "duration", err: fmt.Errorf(`ent: validator failed for field "Word.duration": %w`, err)}
 		}
 	}
+	if _, ok := wc.mutation.Start(); !ok {
+		return &ValidationError{Name: "start", err: errors.New(`ent: missing required field "Word.start"`)}
+	}
+	if v, ok := wc.mutation.Start(); ok {
+		if err := word.StartValidator(v); err != nil {
+			return &ValidationError{Name: "start", err: fmt.Errorf(`ent: validator failed for field "Word.start": %w`, err)}
+		}
+	}
+	if _, ok := wc.mutation.End(); !ok {
+		return &ValidationError{Name: "end", err: errors.New(`ent: missing required field "Word.end"`)}
+	}
+	if v, ok := wc.mutation.End(); ok {
+		if err := word.EndValidator(v); err != nil {
+			return &ValidationError{Name: "end", err: fmt.Errorf(`ent: validator failed for field "Word.end": %w`, err)}
+		}
+	}
 	return nil
 }
 
@@ -255,6 +283,22 @@ func (wc *WordCreate) createSpec() (*Word, *sqlgraph.CreateSpec) {
 			Column: word.FieldDuration,
 		})
 		_node.Duration = value
+	}
+	if value, ok := wc.mutation.Start(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: word.FieldStart,
+		})
+		_node.Start = value
+	}
+	if value, ok := wc.mutation.End(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeString,
+			Value:  value,
+			Column: word.FieldEnd,
+		})
+		_node.End = value
 	}
 	if nodes := wc.mutation.UserIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
