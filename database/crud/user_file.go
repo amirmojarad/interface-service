@@ -9,10 +9,13 @@ import (
 )
 
 func (crud Crud) CheckFileIsExists(userEmail, filePath, fileName string) bool {
-	if fileEntity, err := crud.Client.FileEntity.Query().
-		Where(fileentity.HasOwnerWith(user.EmailEQ(userEmail))).
-		Where(fileentity.PathEQ(filePath)).Where(fileentity.NameEQ(fileName)).
-		First(*crud.Ctx); err != nil && fileEntity == nil {
+
+	if fileEntity, err := crud.
+		Client.
+		FileEntity.
+		Query().
+		Where(fileentity.HasOwnerWith(user.EmailEqualFold(userEmail))).
+		Where(fileentity.PathEqualFold(filePath)).First(*crud.Ctx); err != nil && fileEntity == nil {
 		return false
 	}
 	return true
