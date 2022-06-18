@@ -44,9 +44,11 @@ type WordEdges struct {
 	User *User `json:"user,omitempty"`
 	// File holds the value of the file edge.
 	File *FileEntity `json:"file,omitempty"`
+	// Category holds the value of the category edge.
+	Category []*Category `json:"category,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [3]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -75,6 +77,15 @@ func (e WordEdges) FileOrErr() (*FileEntity, error) {
 		return e.File, nil
 	}
 	return nil, &NotLoadedError{edge: "file"}
+}
+
+// CategoryOrErr returns the Category value or an error if the edge
+// was not loaded in eager-loading.
+func (e WordEdges) CategoryOrErr() ([]*Category, error) {
+	if e.loadedTypes[2] {
+		return e.Category, nil
+	}
+	return nil, &NotLoadedError{edge: "category"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -182,6 +193,11 @@ func (w *Word) QueryUser() *UserQuery {
 // QueryFile queries the "file" edge of the Word entity.
 func (w *Word) QueryFile() *FileEntityQuery {
 	return (&WordClient{config: w.config}).QueryFile(w)
+}
+
+// QueryCategory queries the "category" edge of the Word entity.
+func (w *Word) QueryCategory() *CategoryQuery {
+	return (&WordClient{config: w.config}).QueryCategory(w)
 }
 
 // Update returns a builder for updating this Word.

@@ -37,6 +37,9 @@ func (api *API) userGroup(path string) {
 	// FavoriteWords
 	userGroup.POST("/favorite_words", api.addWordsToUser())
 
+	// User Files
+	userGroup.GET("/files/all", api.getAllFiles())
+
 }
 
 func (api API) addWordsToUser() gin.HandlerFunc {

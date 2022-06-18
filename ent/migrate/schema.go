@@ -8,6 +8,19 @@ import (
 )
 
 var (
+	// CategoriesColumns holds the columns for the "categories" table.
+	CategoriesColumns = []*schema.Column{
+		{Name: "id", Type: field.TypeInt, Increment: true},
+		{Name: "title", Type: field.TypeString},
+		{Name: "created_date", Type: field.TypeTime},
+		{Name: "updated_date", Type: field.TypeTime},
+	}
+	// CategoriesTable holds the schema information for the "categories" table.
+	CategoriesTable = &schema.Table{
+		Name:       "categories",
+		Columns:    CategoriesColumns,
+		PrimaryKey: []*schema.Column{CategoriesColumns[0]},
+	}
 	// FileEntitiesColumns holds the columns for the "file_entities" table.
 	FileEntitiesColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
@@ -123,6 +136,31 @@ var (
 			},
 		},
 	}
+	// CategoryCategoryWordsColumns holds the columns for the "category_category_words" table.
+	CategoryCategoryWordsColumns = []*schema.Column{
+		{Name: "category_id", Type: field.TypeInt},
+		{Name: "word_id", Type: field.TypeInt},
+	}
+	// CategoryCategoryWordsTable holds the schema information for the "category_category_words" table.
+	CategoryCategoryWordsTable = &schema.Table{
+		Name:       "category_category_words",
+		Columns:    CategoryCategoryWordsColumns,
+		PrimaryKey: []*schema.Column{CategoryCategoryWordsColumns[0], CategoryCategoryWordsColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "category_category_words_category_id",
+				Columns:    []*schema.Column{CategoryCategoryWordsColumns[0]},
+				RefColumns: []*schema.Column{CategoriesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "category_category_words_word_id",
+				Columns:    []*schema.Column{CategoryCategoryWordsColumns[1]},
+				RefColumns: []*schema.Column{WordsColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// UserFavoriteMoviesColumns holds the columns for the "user_favorite_movies" table.
 	UserFavoriteMoviesColumns = []*schema.Column{
 		{Name: "user_id", Type: field.TypeInt},
@@ -148,14 +186,42 @@ var (
 			},
 		},
 	}
+	// UserCategoriesColumns holds the columns for the "user_categories" table.
+	UserCategoriesColumns = []*schema.Column{
+		{Name: "user_id", Type: field.TypeInt},
+		{Name: "category_id", Type: field.TypeInt},
+	}
+	// UserCategoriesTable holds the schema information for the "user_categories" table.
+	UserCategoriesTable = &schema.Table{
+		Name:       "user_categories",
+		Columns:    UserCategoriesColumns,
+		PrimaryKey: []*schema.Column{UserCategoriesColumns[0], UserCategoriesColumns[1]},
+		ForeignKeys: []*schema.ForeignKey{
+			{
+				Symbol:     "user_categories_user_id",
+				Columns:    []*schema.Column{UserCategoriesColumns[0]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "user_categories_category_id",
+				Columns:    []*schema.Column{UserCategoriesColumns[1]},
+				RefColumns: []*schema.Column{CategoriesColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+		},
+	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
+		CategoriesTable,
 		FileEntitiesTable,
 		MoviesTable,
 		SearchKeywordsTable,
 		UsersTable,
 		WordsTable,
+		CategoryCategoryWordsTable,
 		UserFavoriteMoviesTable,
+		UserCategoriesTable,
 	}
 )
 
@@ -164,6 +230,10 @@ func init() {
 	SearchKeywordsTable.ForeignKeys[0].RefTable = UsersTable
 	WordsTable.ForeignKeys[0].RefTable = FileEntitiesTable
 	WordsTable.ForeignKeys[1].RefTable = UsersTable
+	CategoryCategoryWordsTable.ForeignKeys[0].RefTable = CategoriesTable
+	CategoryCategoryWordsTable.ForeignKeys[1].RefTable = WordsTable
 	UserFavoriteMoviesTable.ForeignKeys[0].RefTable = UsersTable
 	UserFavoriteMoviesTable.ForeignKeys[1].RefTable = MoviesTable
+	UserCategoriesTable.ForeignKeys[0].RefTable = UsersTable
+	UserCategoriesTable.ForeignKeys[1].RefTable = CategoriesTable
 }

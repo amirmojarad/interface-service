@@ -5,6 +5,7 @@ package ent
 import (
 	"errors"
 	"fmt"
+	"interface_project/ent/category"
 	"interface_project/ent/fileentity"
 	"interface_project/ent/movie"
 	"interface_project/ent/searchkeyword"
@@ -33,6 +34,7 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
+		category.Table:      category.ValidColumn,
 		fileentity.Table:    fileentity.ValidColumn,
 		movie.Table:         movie.ValidColumn,
 		searchkeyword.Table: searchkeyword.ValidColumn,

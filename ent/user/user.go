@@ -35,6 +35,8 @@ const (
 	EdgeFavoriteWords = "favorite_words"
 	// EdgeFiles holds the string denoting the files edge name in mutations.
 	EdgeFiles = "files"
+	// EdgeCategories holds the string denoting the categories edge name in mutations.
+	EdgeCategories = "categories"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// FavoriteMoviesTable is the table that holds the favorite_movies relation/edge. The primary key declared below.
@@ -63,6 +65,11 @@ const (
 	FilesInverseTable = "file_entities"
 	// FilesColumn is the table column denoting the files relation/edge.
 	FilesColumn = "user_files"
+	// CategoriesTable is the table that holds the categories relation/edge. The primary key declared below.
+	CategoriesTable = "user_categories"
+	// CategoriesInverseTable is the table name for the Category entity.
+	// It exists in this package in order to avoid circular dependency with the "category" package.
+	CategoriesInverseTable = "categories"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -82,6 +89,9 @@ var (
 	// FavoriteMoviesPrimaryKey and FavoriteMoviesColumn2 are the table columns denoting the
 	// primary key for the favorite_movies relation (M2M).
 	FavoriteMoviesPrimaryKey = []string{"user_id", "movie_id"}
+	// CategoriesPrimaryKey and CategoriesColumn2 are the table columns denoting the
+	// primary key for the categories relation (M2M).
+	CategoriesPrimaryKey = []string{"user_id", "category_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).

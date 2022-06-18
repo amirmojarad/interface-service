@@ -9,6 +9,20 @@ import "google/protobuf/wrappers.proto";
 
 option go_package = "interface_project/ent/proto/entpb";
 
+message Category {
+  int32 id = 1;
+
+  string title = 2;
+
+  google.protobuf.Timestamp created_date = 3;
+
+  google.protobuf.Timestamp updated_date = 4;
+
+  repeated User user = 5;
+
+  repeated Word category_words = 6;
+}
+
 message FileEntity {
   int32 id = 1;
 
@@ -87,6 +101,8 @@ message User {
   repeated Word favorite_words = 12;
 
   repeated FileEntity files = 13;
+
+  repeated Category categories = 14;
 }
 
 message Word {
@@ -109,4 +125,6 @@ message Word {
   User user = 9;
 
   FileEntity file = 10;
+
+  repeated Category category = 11;
 }

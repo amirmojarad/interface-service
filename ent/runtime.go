@@ -3,6 +3,7 @@
 package ent
 
 import (
+	"interface_project/ent/category"
 	"interface_project/ent/fileentity"
 	"interface_project/ent/movie"
 	"interface_project/ent/schema"
@@ -16,6 +17,16 @@ import (
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
+	categoryFields := schema.Category{}.Fields()
+	_ = categoryFields
+	// categoryDescCreatedDate is the schema descriptor for created_date field.
+	categoryDescCreatedDate := categoryFields[1].Descriptor()
+	// category.DefaultCreatedDate holds the default value on creation for the created_date field.
+	category.DefaultCreatedDate = categoryDescCreatedDate.Default.(time.Time)
+	// categoryDescUpdatedDate is the schema descriptor for updated_date field.
+	categoryDescUpdatedDate := categoryFields[2].Descriptor()
+	// category.DefaultUpdatedDate holds the default value on creation for the updated_date field.
+	category.DefaultUpdatedDate = categoryDescUpdatedDate.Default.(time.Time)
 	fileentityFields := schema.FileEntity{}.Fields()
 	_ = fileentityFields
 	// fileentityDescPath is the schema descriptor for path field.

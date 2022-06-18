@@ -7,6 +7,7 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
+	"interface_project/ent/category"
 	"interface_project/ent/fileentity"
 	"interface_project/ent/movie"
 	"interface_project/ent/predicate"
@@ -34,6 +35,7 @@ type UserQuery struct {
 	withSearchedKeywords *SearchKeywordQuery
 	withFavoriteWords    *WordQuery
 	withFiles            *FileEntityQuery
+	withCategories       *CategoryQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -151,6 +153,28 @@ func (uq *UserQuery) QueryFiles() *FileEntityQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(fileentity.Table, fileentity.FieldID),
 			sqlgraph.Edge(sqlgraph.O2M, false, user.FilesTable, user.FilesColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryCategories chains the current query on the "categories" edge.
+func (uq *UserQuery) QueryCategories() *CategoryQuery {
+	query := &CategoryQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(category.Table, category.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.CategoriesTable, user.CategoriesPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -343,6 +367,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withSearchedKeywords: uq.withSearchedKeywords.Clone(),
 		withFavoriteWords:    uq.withFavoriteWords.Clone(),
 		withFiles:            uq.withFiles.Clone(),
+		withCategories:       uq.withCategories.Clone(),
 		// clone intermediate query.
 		sql:    uq.sql.Clone(),
 		path:   uq.path,
@@ -391,6 +416,17 @@ func (uq *UserQuery) WithFiles(opts ...func(*FileEntityQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withFiles = query
+	return uq
+}
+
+// WithCategories tells the query-builder to eager-load the nodes that are connected to
+// the "categories" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithCategories(opts ...func(*CategoryQuery)) *UserQuery {
+	query := &CategoryQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withCategories = query
 	return uq
 }
 
@@ -459,11 +495,12 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [4]bool{
+		loadedTypes = [5]bool{
 			uq.withFavoriteMovies != nil,
 			uq.withSearchedKeywords != nil,
 			uq.withFavoriteWords != nil,
 			uq.withFiles != nil,
+			uq.withCategories != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -635,6 +672,71 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "user_files" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Files = append(node.Edges.Files, n)
+		}
+	}
+
+	if query := uq.withCategories; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		ids := make(map[int]*User, len(nodes))
+		for _, node := range nodes {
+			ids[node.ID] = node
+			fks = append(fks, node.ID)
+			node.Edges.Categories = []*Category{}
+		}
+		var (
+			edgeids []int
+			edges   = make(map[int][]*User)
+		)
+		_spec := &sqlgraph.EdgeQuerySpec{
+			Edge: &sqlgraph.EdgeSpec{
+				Inverse: false,
+				Table:   user.CategoriesTable,
+				Columns: user.CategoriesPrimaryKey,
+			},
+			Predicate: func(s *sql.Selector) {
+				s.Where(sql.InValues(user.CategoriesPrimaryKey[0], fks...))
+			},
+			ScanValues: func() [2]interface{} {
+				return [2]interface{}{new(sql.NullInt64), new(sql.NullInt64)}
+			},
+			Assign: func(out, in interface{}) error {
+				eout, ok := out.(*sql.NullInt64)
+				if !ok || eout == nil {
+					return fmt.Errorf("unexpected id value for edge-out")
+				}
+				ein, ok := in.(*sql.NullInt64)
+				if !ok || ein == nil {
+					return fmt.Errorf("unexpected id value for edge-in")
+				}
+				outValue := int(eout.Int64)
+				inValue := int(ein.Int64)
+				node, ok := ids[outValue]
+				if !ok {
+					return fmt.Errorf("unexpected node id in edges: %v", outValue)
+				}
+				if _, ok := edges[inValue]; !ok {
+					edgeids = append(edgeids, inValue)
+				}
+				edges[inValue] = append(edges[inValue], node)
+				return nil
+			},
+		}
+		if err := sqlgraph.QueryEdges(ctx, uq.driver, _spec); err != nil {
+			return nil, fmt.Errorf(`query edges "categories": %w`, err)
+		}
+		query.Where(category.IDIn(edgeids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := edges[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected "categories" node returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Categories = append(nodes[i].Edges.Categories, n)
+			}
 		}
 	}
 

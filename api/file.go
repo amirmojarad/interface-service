@@ -40,7 +40,7 @@ func (api API) getAllFiles() gin.HandlerFunc {
 		files, err := api.Crud.GetAllFiles(user)
 		if err != nil {
 			ctx.IndentedJSON(http.StatusUnauthorized, gin.H{
-				"message": "error occured while fetching files from databse",
+				"message": "error occurred while fetching files from database",
 				"error":   err.Error(),
 			})
 			return

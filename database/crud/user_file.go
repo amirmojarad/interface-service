@@ -41,7 +41,7 @@ func (crud Crud) AddFileToUser(user *ent.User, file *os.File, path string) (*ent
 }
 
 func (crud Crud) GetAllFiles(userEntity *ent.User) ([]*ent.FileEntity, error) {
-	return userEntity.QueryFiles().All(*crud.Ctx)
+	return userEntity.QueryFiles().WithWords().All(*crud.Ctx)
 }
 
 func (crud Crud) GetFiles(userEntity *ent.User, idList []int) ([]*ent.FileEntity, error) {

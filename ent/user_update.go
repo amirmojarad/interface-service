@@ -6,6 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"interface_project/ent/category"
 	"interface_project/ent/fileentity"
 	"interface_project/ent/movie"
 	"interface_project/ent/predicate"
@@ -192,6 +193,21 @@ func (uu *UserUpdate) AddFiles(f ...*FileEntity) *UserUpdate {
 	return uu.AddFileIDs(ids...)
 }
 
+// AddCategoryIDs adds the "categories" edge to the Category entity by IDs.
+func (uu *UserUpdate) AddCategoryIDs(ids ...int) *UserUpdate {
+	uu.mutation.AddCategoryIDs(ids...)
+	return uu
+}
+
+// AddCategories adds the "categories" edges to the Category entity.
+func (uu *UserUpdate) AddCategories(c ...*Category) *UserUpdate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uu.AddCategoryIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -279,6 +295,27 @@ func (uu *UserUpdate) RemoveFiles(f ...*FileEntity) *UserUpdate {
 		ids[i] = f[i].ID
 	}
 	return uu.RemoveFileIDs(ids...)
+}
+
+// ClearCategories clears all "categories" edges to the Category entity.
+func (uu *UserUpdate) ClearCategories() *UserUpdate {
+	uu.mutation.ClearCategories()
+	return uu
+}
+
+// RemoveCategoryIDs removes the "categories" edge to Category entities by IDs.
+func (uu *UserUpdate) RemoveCategoryIDs(ids ...int) *UserUpdate {
+	uu.mutation.RemoveCategoryIDs(ids...)
+	return uu
+}
+
+// RemoveCategories removes "categories" edges to Category entities.
+func (uu *UserUpdate) RemoveCategories(c ...*Category) *UserUpdate {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uu.RemoveCategoryIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -663,6 +700,60 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.CategoriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.CategoriesTable,
+			Columns: user.CategoriesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: category.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedCategoriesIDs(); len(nodes) > 0 && !uu.mutation.CategoriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.CategoriesTable,
+			Columns: user.CategoriesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: category.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.CategoriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.CategoriesTable,
+			Columns: user.CategoriesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: category.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -842,6 +933,21 @@ func (uuo *UserUpdateOne) AddFiles(f ...*FileEntity) *UserUpdateOne {
 	return uuo.AddFileIDs(ids...)
 }
 
+// AddCategoryIDs adds the "categories" edge to the Category entity by IDs.
+func (uuo *UserUpdateOne) AddCategoryIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.AddCategoryIDs(ids...)
+	return uuo
+}
+
+// AddCategories adds the "categories" edges to the Category entity.
+func (uuo *UserUpdateOne) AddCategories(c ...*Category) *UserUpdateOne {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uuo.AddCategoryIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -929,6 +1035,27 @@ func (uuo *UserUpdateOne) RemoveFiles(f ...*FileEntity) *UserUpdateOne {
 		ids[i] = f[i].ID
 	}
 	return uuo.RemoveFileIDs(ids...)
+}
+
+// ClearCategories clears all "categories" edges to the Category entity.
+func (uuo *UserUpdateOne) ClearCategories() *UserUpdateOne {
+	uuo.mutation.ClearCategories()
+	return uuo
+}
+
+// RemoveCategoryIDs removes the "categories" edge to Category entities by IDs.
+func (uuo *UserUpdateOne) RemoveCategoryIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.RemoveCategoryIDs(ids...)
+	return uuo
+}
+
+// RemoveCategories removes "categories" edges to Category entities.
+func (uuo *UserUpdateOne) RemoveCategories(c ...*Category) *UserUpdateOne {
+	ids := make([]int, len(c))
+	for i := range c {
+		ids[i] = c[i].ID
+	}
+	return uuo.RemoveCategoryIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -1329,6 +1456,60 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: fileentity.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.CategoriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.CategoriesTable,
+			Columns: user.CategoriesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: category.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedCategoriesIDs(); len(nodes) > 0 && !uuo.mutation.CategoriesCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.CategoriesTable,
+			Columns: user.CategoriesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: category.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.CategoriesIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2M,
+			Inverse: false,
+			Table:   user.CategoriesTable,
+			Columns: user.CategoriesPrimaryKey,
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: category.FieldID,
 				},
 			},
 		}
