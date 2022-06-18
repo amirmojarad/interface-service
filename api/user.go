@@ -36,10 +36,25 @@ func (api *API) userGroup(path string) {
 
 	// FavoriteWords
 	userGroup.POST("/favorite_words", api.addWordsToUser())
+	userGroup.GET("/favorite_words", api.getFavoriteWords())
 
 	// User Files
 	userGroup.GET("/files/all", api.getAllFiles())
 
+}
+
+func (api API) getFavoriteWords() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		email := fmt.Sprint(ctx.MustGet("email"))
+		if favoriteWords, err := api.Crud.GetUserFavoriteWords(email); err != nil {
+			ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
+				"message": "error while fetching words from database",
+				"error":   err.Error(),
+			})
+		} else {
+			ctx.IndentedJSON(http.StatusOK, favoriteWords)
+		}
+	}
 }
 
 func (api API) addWordsToUser() gin.HandlerFunc {
@@ -55,7 +70,7 @@ func (api API) addWordsToUser() gin.HandlerFunc {
 		}
 		favoriteWords, err := api.Crud.AddFavoriteWordsToUser(words, email)
 		if err != nil {
-			ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
+			ctx.IndentedJSON(http.StatusConflict, gin.H{
 				"message": "error while adding words to user",
 				"error":   err.Error(),
 			})
