@@ -13,28 +13,6 @@ func GetSentences(client *ent.Client, file *os.File, user *ent.User, fileEntity 
 	return makeWordsBulk(client, generateSentences(file), user, fileEntity)
 }
 
-// func getStartAndEnd(duration string) (time.Time, time.Time) {
-// 	strs := strings.Split(duration, " ")
-// 	startAndEnd := make([]time.Time, 2)
-// 	for i, item := range strs {
-// 	if i == 2 {
-// 	continue
-// 	}
-// 	if i == 1 {
-// 		hmsString := strings.Split(item, ",")[0]
-// 		millsecond := strings.Split(item, ",")[1]
-// 		hmsList := strings.Split(hmsString, ":")
-// 		hour, _ := strconv.Atoi(hmsList[0])
-// 		min, _ := strconv.Atoi(hmsList[1])
-// 		sec, _ := strconv.Atoi(hmsList[2])
-
-// 		startAndEnd[0] = time.Date(0,0,0, hour,min,sec, )
-// 	}
-
-// 	}
-// 	return nil, nil
-// }
-
 func checkWordTitleIsValid(wordTitle string) bool {
 	invalidChars := []string{
 		"-",
@@ -64,7 +42,6 @@ func makeWordsBulk(client *ent.Client, sentences []*sentence, user *ent.User, fi
 					SetIsPreposition(preposition.IsPreposition(token)).
 					SetDuration(item.timeRange).
 					SetSentence(item.RawSentence))
-				//wordBulk = append(wordBulk, client.Word.Create().SetDuration(item.timeRange).SetMeaning("").SetSentence(item.RawSentence).SetTitle(token).SetUser(user).SetEnd(end).SetStart(start))
 			}
 		}
 	}

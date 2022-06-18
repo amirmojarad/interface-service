@@ -15,3 +15,7 @@ type WordSentencesResponse struct {
 	Links      map[string]interface{} `json:"links"`
 	Records    []*ent.Word            `json:"records"`
 }
+
+type FavoriteWord struct {
+	Title string `json:"title"`
+}

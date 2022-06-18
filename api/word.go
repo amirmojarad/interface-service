@@ -3,9 +3,8 @@ package api
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"interface_project/api/middlewares"
-
 	"interface_project/api/dto"
+	"interface_project/api/middlewares"
 	"net/http"
 	"strconv"
 )
@@ -14,9 +13,43 @@ func (api API) wordGroup(path string) {
 	group := api.Engine.Group(path, middlewares.CheckAuth())
 	group.GET("/", api.getFileWordsPage())
 	group.POST("/", api.getAllFileWordsByTitle())
+	group.GET("/search", api.searchWords())
 }
 
-const PER_PAGE = 24
+func (api API) searchWords() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		id, err := strconv.Atoi(ctx.Request.URL.Query().Get("file_id"))
+		title := ctx.Request.URL.Query().Get("title")
+		if err != nil {
+			ctx.IndentedJSON(http.StatusBadRequest, gin.H{
+				"message": "request does not contain any given file id",
+				"error":   err.Error(),
+			})
+			return
+		}
+		if title == "" {
+			//location := url.URL{Path: fmt.Sprintf("http://localhost:8080/words?file_id=%d&page_number=1", id)}
+			//ctx.Redirect(http.StatusFound, location.RequestURI())
+			ctx.IndentedJSON(http.StatusBadRequest, gin.H{
+				"message": "request does not contain any given title",
+				"error":   err.Error(),
+			})
+			return
+		}
+
+		words, err := api.Crud.SearchWord(id, title)
+		if err != nil {
+			ctx.IndentedJSON(http.StatusBadRequest, gin.H{
+				"message": "request does not contain any given file id",
+				"error":   err.Error(),
+			})
+			return
+		}
+		ctx.IndentedJSON(http.StatusOK, words)
+	}
+}
+
+const PER_PAGE = 36
 
 func (api API) getAllFileWordsByTitle() gin.HandlerFunc {
 	return func(ctx *gin.Context) {

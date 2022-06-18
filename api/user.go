@@ -34,6 +34,32 @@ func (api *API) userGroup(path string) {
 	// Upload subtitle
 	userGroup.POST("/upload", api.sendSubtitleText())
 
+	// FavoriteWords
+	userGroup.POST("/favorite_words", api.addWordsToUser())
+
+}
+
+func (api API) addWordsToUser() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		email := fmt.Sprint(ctx.MustGet("email"))
+		words := []string{}
+		if err := ctx.BindJSON(&words); err != nil {
+			ctx.IndentedJSON(http.StatusBadRequest, gin.H{
+				"message": "invalid json schema",
+				"error":   err.Error(),
+			})
+			return
+		}
+		favoriteWords, err := api.Crud.AddFavoriteWordsToUser(words, email)
+		if err != nil {
+			ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
+				"message": "error while adding words to user",
+				"error":   err.Error(),
+			})
+			return
+		}
+		ctx.IndentedJSON(http.StatusOK, favoriteWords)
+	}
 }
 
 func (api API) updateUser() gin.HandlerFunc {
@@ -204,7 +230,6 @@ func (api *API) deleteUser() gin.HandlerFunc {
 func (api *API) getAllUsers() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		isAdmin := ctx.MustGet("isAdmin")
-		log.Println("IS ADMIIIIN: ", isAdmin)
 		if isAdmin == true {
 			if users, err := api.Crud.GetAllUsers(); err != nil {
 				ctx.IndentedJSON(http.StatusInternalServerError, err)

@@ -249,20 +249,35 @@ func (api API) uploadSubtitle() gin.HandlerFunc {
 				})
 			}
 			wordCreateBulk := sentences.GetSentences(api.Crud.Client, openedFile, user, createdFile)
-			_, err = api.Crud.CreateAllWords(wordCreateBulk)
-			if err != nil {
-				ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
-					"error":   err.Error(),
-					"message": "error while creating words to database",
-				})
-				return
-			}
-			if err != nil {
-				ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
-					"error":   err.Error(),
-					"message": "error while creating sentences to database",
-				})
-				return
+			bucketSize := len(wordCreateBulk) / 65535
+			if bucketSize < 1 {
+				_, err = api.Crud.CreateAllWords(wordCreateBulk)
+				if err != nil {
+					ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
+						"error":   err.Error(),
+						"message": "error while creating words to database",
+					})
+					log.Println(bucketSize)
+					log.Println(len(wordCreateBulk))
+					return
+				}
+			} else {
+				_, err = api.Crud.CreateAllWords(wordCreateBulk[0:65535])
+				if err != nil {
+					ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
+						"error":   err.Error(),
+						"message": "error while creating words to database",
+					})
+					return
+				}
+				_, err = api.Crud.CreateAllWords(wordCreateBulk[65535:])
+				if err != nil {
+					ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
+						"error":   err.Error(),
+						"message": "error while creating words to database",
+					})
+					return
+				}
 			}
 			ctx.IndentedJSON(http.StatusOK, gin.H{
 				"message": "file downloaded successfully",

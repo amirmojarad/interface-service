@@ -12,7 +12,11 @@ func (crud Crud) CreateAllWords(bulk []*ent.WordCreate) ([]*ent.Word, error) {
 }
 
 func (crud Crud) GetAllWordsByFileID(fileID int) ([]*ent.Word, error) {
-	return crud.Client.Word.Query().Where(func(s *sql.Selector) {
+	file, err := crud.Client.FileEntity.Get(*crud.Ctx, fileID)
+	if err != nil {
+		return nil, err
+	}
+	return file.QueryWords().Where(func(s *sql.Selector) {
 		s.Distinct().OnP(s.Select("title").P()).Select("title").Dialect()
 	}).All(*crud.Ctx)
 }
@@ -29,4 +33,14 @@ func (crud Crud) GetAllWordsByTitle(fileID int, title string) ([]*ent.Word, erro
 		Where(word.HasFileWith(fileentity.IDEQ(fileID))).
 		Where(word.TitleEQ(title)).
 		All(*crud.Ctx)
+}
+
+func (crud Crud) SearchWord(fileID int, title string) ([]*ent.Word, error) {
+	file, err := crud.Client.FileEntity.Get(*crud.Ctx, fileID)
+	if err != nil {
+		return nil, err
+	}
+	return file.QueryWords().Where(word.TitleHasPrefix(title)).Where(func(s *sql.Selector) {
+		s.Distinct().OnP(s.Select("title").P()).Select("title").Dialect()
+	}).All(*crud.Ctx)
 }

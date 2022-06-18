@@ -3,6 +3,7 @@ package schema
 import (
 	"entgo.io/contrib/entproto"
 	"entgo.io/ent"
+	"entgo.io/ent/dialect/entsql"
 	"entgo.io/ent/schema"
 	"entgo.io/ent/schema/edge"
 	"entgo.io/ent/schema/field"
@@ -27,8 +28,10 @@ func (FileEntity) Fields() []ent.Field {
 // Edges of the File.
 func (FileEntity) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("owner", User.Type).Ref("files").Unique().Annotations(entproto.Field(7)),
-		edge.To("words", Word.Type).Annotations(entproto.Field(8)),
+		edge.From("owner", User.Type).Ref("files").Unique().Annotations(entproto.Field(7), entsql.Annotation{OnDelete: entsql.Cascade}),
+		edge.To("words", Word.Type).Annotations(entproto.Field(8), entsql.Annotation{
+			OnDelete: entsql.Cascade,
+		}),
 	}
 }
 

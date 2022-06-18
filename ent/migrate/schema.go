@@ -28,7 +28,7 @@ var (
 				Symbol:     "file_entities_users_files",
 				Columns:    []*schema.Column{FileEntitiesColumns[6]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -68,7 +68,7 @@ var (
 				Symbol:     "search_keywords_users_searched_keywords",
 				Columns:    []*schema.Column{SearchKeywordsColumns[3]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
@@ -113,13 +113,13 @@ var (
 				Symbol:     "words_file_entities_words",
 				Columns:    []*schema.Column{WordsColumns[8]},
 				RefColumns: []*schema.Column{FileEntitiesColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 			{
 				Symbol:     "words_users_favorite_words",
 				Columns:    []*schema.Column{WordsColumns[9]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
+				OnDelete:   schema.Cascade,
 			},
 		},
 	}
