@@ -115,6 +115,7 @@ var (
 		{Name: "end", Type: field.TypeString},
 		{Name: "file_entity_words", Type: field.TypeInt, Nullable: true},
 		{Name: "user_favorite_words", Type: field.TypeInt, Nullable: true},
+		{Name: "user_words", Type: field.TypeInt, Nullable: true},
 	}
 	// WordsTable holds the schema information for the "words" table.
 	WordsTable = &schema.Table{
@@ -131,6 +132,12 @@ var (
 			{
 				Symbol:     "words_users_favorite_words",
 				Columns:    []*schema.Column{WordsColumns[9]},
+				RefColumns: []*schema.Column{UsersColumns[0]},
+				OnDelete:   schema.Cascade,
+			},
+			{
+				Symbol:     "words_users_words",
+				Columns:    []*schema.Column{WordsColumns[10]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -230,6 +237,7 @@ func init() {
 	SearchKeywordsTable.ForeignKeys[0].RefTable = UsersTable
 	WordsTable.ForeignKeys[0].RefTable = FileEntitiesTable
 	WordsTable.ForeignKeys[1].RefTable = UsersTable
+	WordsTable.ForeignKeys[2].RefTable = UsersTable
 	CollectionCollectionWordsTable.ForeignKeys[0].RefTable = CollectionsTable
 	CollectionCollectionWordsTable.ForeignKeys[1].RefTable = WordsTable
 	UserFavoriteMoviesTable.ForeignKeys[0].RefTable = UsersTable

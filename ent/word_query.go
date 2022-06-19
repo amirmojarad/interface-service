@@ -32,6 +32,7 @@ type WordQuery struct {
 	withUser       *UserQuery
 	withFile       *FileEntityQuery
 	withCollection *CollectionQuery
+	withOwner      *UserQuery
 	withFKs        bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
@@ -128,6 +129,28 @@ func (wq *WordQuery) QueryCollection() *CollectionQuery {
 			sqlgraph.From(word.Table, word.FieldID, selector),
 			sqlgraph.To(collection.Table, collection.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, true, word.CollectionTable, word.CollectionPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(wq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryOwner chains the current query on the "owner" edge.
+func (wq *WordQuery) QueryOwner() *UserQuery {
+	query := &UserQuery{config: wq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := wq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := wq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(word.Table, word.FieldID, selector),
+			sqlgraph.To(user.Table, user.FieldID),
+			sqlgraph.Edge(sqlgraph.M2O, true, word.OwnerTable, word.OwnerColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(wq.driver.Dialect(), step)
 		return fromU, nil
@@ -319,6 +342,7 @@ func (wq *WordQuery) Clone() *WordQuery {
 		withUser:       wq.withUser.Clone(),
 		withFile:       wq.withFile.Clone(),
 		withCollection: wq.withCollection.Clone(),
+		withOwner:      wq.withOwner.Clone(),
 		// clone intermediate query.
 		sql:    wq.sql.Clone(),
 		path:   wq.path,
@@ -356,6 +380,17 @@ func (wq *WordQuery) WithCollection(opts ...func(*CollectionQuery)) *WordQuery {
 		opt(query)
 	}
 	wq.withCollection = query
+	return wq
+}
+
+// WithOwner tells the query-builder to eager-load the nodes that are connected to
+// the "owner" edge. The optional arguments are used to configure the query builder of the edge.
+func (wq *WordQuery) WithOwner(opts ...func(*UserQuery)) *WordQuery {
+	query := &UserQuery{config: wq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	wq.withOwner = query
 	return wq
 }
 
@@ -425,13 +460,14 @@ func (wq *WordQuery) sqlAll(ctx context.Context) ([]*Word, error) {
 		nodes       = []*Word{}
 		withFKs     = wq.withFKs
 		_spec       = wq.querySpec()
-		loadedTypes = [3]bool{
+		loadedTypes = [4]bool{
 			wq.withUser != nil,
 			wq.withFile != nil,
 			wq.withCollection != nil,
+			wq.withOwner != nil,
 		}
 	)
-	if wq.withUser != nil || wq.withFile != nil {
+	if wq.withUser != nil || wq.withFile != nil || wq.withOwner != nil {
 		withFKs = true
 	}
 	if withFKs {
@@ -576,6 +612,35 @@ func (wq *WordQuery) sqlAll(ctx context.Context) ([]*Word, error) {
 			}
 			for i := range nodes {
 				nodes[i].Edges.Collection = append(nodes[i].Edges.Collection, n)
+			}
+		}
+	}
+
+	if query := wq.withOwner; query != nil {
+		ids := make([]int, 0, len(nodes))
+		nodeids := make(map[int][]*Word)
+		for i := range nodes {
+			if nodes[i].user_words == nil {
+				continue
+			}
+			fk := *nodes[i].user_words
+			if _, ok := nodeids[fk]; !ok {
+				ids = append(ids, fk)
+			}
+			nodeids[fk] = append(nodeids[fk], nodes[i])
+		}
+		query.Where(user.IDIn(ids...))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			nodes, ok := nodeids[n.ID]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "user_words" returned %v`, n.ID)
+			}
+			for i := range nodes {
+				nodes[i].Edges.Owner = n
 			}
 		}
 	}

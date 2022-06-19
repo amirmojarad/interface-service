@@ -37,6 +37,8 @@ const (
 	EdgeFiles = "files"
 	// EdgeCollections holds the string denoting the collections edge name in mutations.
 	EdgeCollections = "collections"
+	// EdgeWords holds the string denoting the words edge name in mutations.
+	EdgeWords = "words"
 	// Table holds the table name of the user in the database.
 	Table = "users"
 	// FavoriteMoviesTable is the table that holds the favorite_movies relation/edge. The primary key declared below.
@@ -70,6 +72,13 @@ const (
 	// CollectionsInverseTable is the table name for the Collection entity.
 	// It exists in this package in order to avoid circular dependency with the "collection" package.
 	CollectionsInverseTable = "collections"
+	// WordsTable is the table that holds the words relation/edge.
+	WordsTable = "words"
+	// WordsInverseTable is the table name for the Word entity.
+	// It exists in this package in order to avoid circular dependency with the "word" package.
+	WordsInverseTable = "words"
+	// WordsColumn is the table column denoting the words relation/edge.
+	WordsColumn = "user_words"
 )
 
 // Columns holds all SQL columns for user fields.

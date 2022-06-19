@@ -208,6 +208,21 @@ func (uu *UserUpdate) AddCollections(c ...*Collection) *UserUpdate {
 	return uu.AddCollectionIDs(ids...)
 }
 
+// AddWordIDs adds the "words" edge to the Word entity by IDs.
+func (uu *UserUpdate) AddWordIDs(ids ...int) *UserUpdate {
+	uu.mutation.AddWordIDs(ids...)
+	return uu
+}
+
+// AddWords adds the "words" edges to the Word entity.
+func (uu *UserUpdate) AddWords(w ...*Word) *UserUpdate {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uu.AddWordIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
@@ -316,6 +331,27 @@ func (uu *UserUpdate) RemoveCollections(c ...*Collection) *UserUpdate {
 		ids[i] = c[i].ID
 	}
 	return uu.RemoveCollectionIDs(ids...)
+}
+
+// ClearWords clears all "words" edges to the Word entity.
+func (uu *UserUpdate) ClearWords() *UserUpdate {
+	uu.mutation.ClearWords()
+	return uu
+}
+
+// RemoveWordIDs removes the "words" edge to Word entities by IDs.
+func (uu *UserUpdate) RemoveWordIDs(ids ...int) *UserUpdate {
+	uu.mutation.RemoveWordIDs(ids...)
+	return uu
+}
+
+// RemoveWords removes "words" edges to Word entities.
+func (uu *UserUpdate) RemoveWords(w ...*Word) *UserUpdate {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uu.RemoveWordIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -754,6 +790,60 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
+	if uu.mutation.WordsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WordsTable,
+			Columns: []string{user.WordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: word.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedWordsIDs(); len(nodes) > 0 && !uu.mutation.WordsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WordsTable,
+			Columns: []string{user.WordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: word.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.WordsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WordsTable,
+			Columns: []string{user.WordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: word.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
 	if n, err = sqlgraph.UpdateNodes(ctx, uu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
 			err = &NotFoundError{user.Label}
@@ -948,6 +1038,21 @@ func (uuo *UserUpdateOne) AddCollections(c ...*Collection) *UserUpdateOne {
 	return uuo.AddCollectionIDs(ids...)
 }
 
+// AddWordIDs adds the "words" edge to the Word entity by IDs.
+func (uuo *UserUpdateOne) AddWordIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.AddWordIDs(ids...)
+	return uuo
+}
+
+// AddWords adds the "words" edges to the Word entity.
+func (uuo *UserUpdateOne) AddWords(w ...*Word) *UserUpdateOne {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uuo.AddWordIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
@@ -1056,6 +1161,27 @@ func (uuo *UserUpdateOne) RemoveCollections(c ...*Collection) *UserUpdateOne {
 		ids[i] = c[i].ID
 	}
 	return uuo.RemoveCollectionIDs(ids...)
+}
+
+// ClearWords clears all "words" edges to the Word entity.
+func (uuo *UserUpdateOne) ClearWords() *UserUpdateOne {
+	uuo.mutation.ClearWords()
+	return uuo
+}
+
+// RemoveWordIDs removes the "words" edge to Word entities by IDs.
+func (uuo *UserUpdateOne) RemoveWordIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.RemoveWordIDs(ids...)
+	return uuo
+}
+
+// RemoveWords removes "words" edges to Word entities.
+func (uuo *UserUpdateOne) RemoveWords(w ...*Word) *UserUpdateOne {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uuo.RemoveWordIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -1510,6 +1636,60 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: collection.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.WordsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WordsTable,
+			Columns: []string{user.WordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: word.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedWordsIDs(); len(nodes) > 0 && !uuo.mutation.WordsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WordsTable,
+			Columns: []string{user.WordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: word.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.WordsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WordsTable,
+			Columns: []string{user.WordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: word.FieldID,
 				},
 			},
 		}

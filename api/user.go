@@ -42,7 +42,7 @@ func (api *API) userGroup(path string) {
 	// User Collections
 	userGroup.GET("/collections/all", api.getAllCollections())
 	userGroup.POST("/collections", api.addCollection())
-	userGroup.GET("/collections")
+	userGroup.GET("/collections", api.getCollection())
 
 	// User Files
 	userGroup.GET("/files/all", api.getAllFiles())
@@ -52,7 +52,7 @@ func (api *API) userGroup(path string) {
 func (api API) getCollection() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		email := fmt.Sprint(ctx.MustGet("email"))
-		id, err := strconv.Atoi(ctx.Request.URL.Query().Get("file_id"))
+		id, err := strconv.Atoi(ctx.Request.URL.Query().Get("collection_id"))
 		if err != nil {
 			ctx.IndentedJSON(http.StatusBadRequest, gin.H{
 				"message": "request does not contain any id in url",

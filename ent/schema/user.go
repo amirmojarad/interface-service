@@ -52,6 +52,7 @@ func (User) Edges() []ent.Edge {
 		edge.To("favorite_words", Word.Type).Annotations(entproto.Field(12), entsql.Annotation{OnDelete: entsql.Cascade}),
 		edge.To("files", FileEntity.Type).Annotations(entproto.Field(13), entsql.Annotation{OnDelete: entsql.Cascade}),
 		edge.To("collections", Collection.Type).Annotations(entproto.Field(14), entsql.Annotation{OnDelete: entsql.Cascade}),
+		edge.To("words", Word.Type).Annotations(entproto.Field(15), entsql.Annotation{OnDelete: entsql.Cascade}),
 	}
 }
 

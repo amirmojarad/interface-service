@@ -38,5 +38,12 @@ func (crud Crud) GetUserWords(email string, titles []string, fileID int) ([]*ent
 		return nil, err
 	}
 	return file.QueryWords().Where(word.TitleIn(titles...)).All(*crud.Ctx)
+}
 
+func (crud Crud) GetWordSentences(email, title string) ([]*ent.Word, error) {
+	user, err := crud.GetUserByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+	return user.QueryWords().Where(word.TitleEQ(title)).All(*crud.Ctx)
 }

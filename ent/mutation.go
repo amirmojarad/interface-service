@@ -2682,6 +2682,9 @@ type UserMutation struct {
 	collections              map[int]struct{}
 	removedcollections       map[int]struct{}
 	clearedcollections       bool
+	words                    map[int]struct{}
+	removedwords             map[int]struct{}
+	clearedwords             bool
 	done                     bool
 	oldValue                 func(context.Context) (*User, error)
 	predicates               []predicate.User
@@ -3369,6 +3372,60 @@ func (m *UserMutation) ResetCollections() {
 	m.removedcollections = nil
 }
 
+// AddWordIDs adds the "words" edge to the Word entity by ids.
+func (m *UserMutation) AddWordIDs(ids ...int) {
+	if m.words == nil {
+		m.words = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.words[ids[i]] = struct{}{}
+	}
+}
+
+// ClearWords clears the "words" edge to the Word entity.
+func (m *UserMutation) ClearWords() {
+	m.clearedwords = true
+}
+
+// WordsCleared reports if the "words" edge to the Word entity was cleared.
+func (m *UserMutation) WordsCleared() bool {
+	return m.clearedwords
+}
+
+// RemoveWordIDs removes the "words" edge to the Word entity by IDs.
+func (m *UserMutation) RemoveWordIDs(ids ...int) {
+	if m.removedwords == nil {
+		m.removedwords = make(map[int]struct{})
+	}
+	for i := range ids {
+		delete(m.words, ids[i])
+		m.removedwords[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedWords returns the removed IDs of the "words" edge to the Word entity.
+func (m *UserMutation) RemovedWordsIDs() (ids []int) {
+	for id := range m.removedwords {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// WordsIDs returns the "words" edge IDs in the mutation.
+func (m *UserMutation) WordsIDs() (ids []int) {
+	for id := range m.words {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetWords resets all changes to the "words" edge.
+func (m *UserMutation) ResetWords() {
+	m.words = nil
+	m.clearedwords = false
+	m.removedwords = nil
+}
+
 // Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
@@ -3621,7 +3678,7 @@ func (m *UserMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.favorite_movies != nil {
 		edges = append(edges, user.EdgeFavoriteMovies)
 	}
@@ -3636,6 +3693,9 @@ func (m *UserMutation) AddedEdges() []string {
 	}
 	if m.collections != nil {
 		edges = append(edges, user.EdgeCollections)
+	}
+	if m.words != nil {
+		edges = append(edges, user.EdgeWords)
 	}
 	return edges
 }
@@ -3674,13 +3734,19 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeWords:
+		ids := make([]ent.Value, 0, len(m.words))
+		for id := range m.words {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.removedfavorite_movies != nil {
 		edges = append(edges, user.EdgeFavoriteMovies)
 	}
@@ -3695,6 +3761,9 @@ func (m *UserMutation) RemovedEdges() []string {
 	}
 	if m.removedcollections != nil {
 		edges = append(edges, user.EdgeCollections)
+	}
+	if m.removedwords != nil {
+		edges = append(edges, user.EdgeWords)
 	}
 	return edges
 }
@@ -3733,13 +3802,19 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case user.EdgeWords:
+		ids := make([]ent.Value, 0, len(m.removedwords))
+		for id := range m.removedwords {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 5)
+	edges := make([]string, 0, 6)
 	if m.clearedfavorite_movies {
 		edges = append(edges, user.EdgeFavoriteMovies)
 	}
@@ -3754,6 +3829,9 @@ func (m *UserMutation) ClearedEdges() []string {
 	}
 	if m.clearedcollections {
 		edges = append(edges, user.EdgeCollections)
+	}
+	if m.clearedwords {
+		edges = append(edges, user.EdgeWords)
 	}
 	return edges
 }
@@ -3772,6 +3850,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedfiles
 	case user.EdgeCollections:
 		return m.clearedcollections
+	case user.EdgeWords:
+		return m.clearedwords
 	}
 	return false
 }
@@ -3803,6 +3883,9 @@ func (m *UserMutation) ResetEdge(name string) error {
 	case user.EdgeCollections:
 		m.ResetCollections()
 		return nil
+	case user.EdgeWords:
+		m.ResetWords()
+		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)
 }
@@ -3828,6 +3911,8 @@ type WordMutation struct {
 	collection        map[int]struct{}
 	removedcollection map[int]struct{}
 	clearedcollection bool
+	owner             *int
+	clearedowner      bool
 	done              bool
 	oldValue          func(context.Context) (*Word, error)
 	predicates        []predicate.Word
@@ -4315,6 +4400,45 @@ func (m *WordMutation) ResetCollection() {
 	m.removedcollection = nil
 }
 
+// SetOwnerID sets the "owner" edge to the User entity by id.
+func (m *WordMutation) SetOwnerID(id int) {
+	m.owner = &id
+}
+
+// ClearOwner clears the "owner" edge to the User entity.
+func (m *WordMutation) ClearOwner() {
+	m.clearedowner = true
+}
+
+// OwnerCleared reports if the "owner" edge to the User entity was cleared.
+func (m *WordMutation) OwnerCleared() bool {
+	return m.clearedowner
+}
+
+// OwnerID returns the "owner" edge ID in the mutation.
+func (m *WordMutation) OwnerID() (id int, exists bool) {
+	if m.owner != nil {
+		return *m.owner, true
+	}
+	return
+}
+
+// OwnerIDs returns the "owner" edge IDs in the mutation.
+// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
+// OwnerID instead. It exists only for internal usage by the builders.
+func (m *WordMutation) OwnerIDs() (ids []int) {
+	if id := m.owner; id != nil {
+		ids = append(ids, *id)
+	}
+	return
+}
+
+// ResetOwner resets all changes to the "owner" edge.
+func (m *WordMutation) ResetOwner() {
+	m.owner = nil
+	m.clearedowner = false
+}
+
 // Where appends a list predicates to the WordMutation builder.
 func (m *WordMutation) Where(ps ...predicate.Word) {
 	m.predicates = append(m.predicates, ps...)
@@ -4535,7 +4659,7 @@ func (m *WordMutation) ResetField(name string) error {
 
 // AddedEdges returns all edge names that were set/added in this mutation.
 func (m *WordMutation) AddedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.user != nil {
 		edges = append(edges, word.EdgeUser)
 	}
@@ -4544,6 +4668,9 @@ func (m *WordMutation) AddedEdges() []string {
 	}
 	if m.collection != nil {
 		edges = append(edges, word.EdgeCollection)
+	}
+	if m.owner != nil {
+		edges = append(edges, word.EdgeOwner)
 	}
 	return edges
 }
@@ -4566,13 +4693,17 @@ func (m *WordMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
+	case word.EdgeOwner:
+		if id := m.owner; id != nil {
+			return []ent.Value{*id}
+		}
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *WordMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.removedcollection != nil {
 		edges = append(edges, word.EdgeCollection)
 	}
@@ -4595,7 +4726,7 @@ func (m *WordMutation) RemovedIDs(name string) []ent.Value {
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
 func (m *WordMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 3)
+	edges := make([]string, 0, 4)
 	if m.cleareduser {
 		edges = append(edges, word.EdgeUser)
 	}
@@ -4604,6 +4735,9 @@ func (m *WordMutation) ClearedEdges() []string {
 	}
 	if m.clearedcollection {
 		edges = append(edges, word.EdgeCollection)
+	}
+	if m.clearedowner {
+		edges = append(edges, word.EdgeOwner)
 	}
 	return edges
 }
@@ -4618,6 +4752,8 @@ func (m *WordMutation) EdgeCleared(name string) bool {
 		return m.clearedfile
 	case word.EdgeCollection:
 		return m.clearedcollection
+	case word.EdgeOwner:
+		return m.clearedowner
 	}
 	return false
 }
@@ -4631,6 +4767,9 @@ func (m *WordMutation) ClearEdge(name string) error {
 		return nil
 	case word.EdgeFile:
 		m.ClearFile()
+		return nil
+	case word.EdgeOwner:
+		m.ClearOwner()
 		return nil
 	}
 	return fmt.Errorf("unknown Word unique edge %s", name)
@@ -4648,6 +4787,9 @@ func (m *WordMutation) ResetEdge(name string) error {
 		return nil
 	case word.EdgeCollection:
 		m.ResetCollection()
+		return nil
+	case word.EdgeOwner:
+		m.ResetOwner()
 		return nil
 	}
 	return fmt.Errorf("unknown Word edge %s", name)

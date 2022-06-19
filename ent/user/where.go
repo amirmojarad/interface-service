@@ -1038,6 +1038,34 @@ func HasCollectionsWith(preds ...predicate.Collection) predicate.User {
 	})
 }
 
+// HasWords applies the HasEdge predicate on the "words" edge.
+func HasWords() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(WordsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, WordsTable, WordsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasWordsWith applies the HasEdge predicate on the "words" edge with a given conditions (other predicates).
+func HasWordsWith(preds ...predicate.Word) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(WordsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, WordsTable, WordsColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
 // And groups predicates with the AND operator between them.
 func And(predicates ...predicate.User) predicate.User {
 	return predicate.User(func(s *sql.Selector) {

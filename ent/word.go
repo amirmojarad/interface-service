@@ -36,6 +36,7 @@ type Word struct {
 	Edges               WordEdges `json:"edges"`
 	file_entity_words   *int
 	user_favorite_words *int
+	user_words          *int
 }
 
 // WordEdges holds the relations/edges for other nodes in the graph.
@@ -46,9 +47,11 @@ type WordEdges struct {
 	File *FileEntity `json:"file,omitempty"`
 	// Collection holds the value of the collection edge.
 	Collection []*Collection `json:"collection,omitempty"`
+	// Owner holds the value of the owner edge.
+	Owner *User `json:"owner,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [3]bool
+	loadedTypes [4]bool
 }
 
 // UserOrErr returns the User value or an error if the edge
@@ -88,6 +91,20 @@ func (e WordEdges) CollectionOrErr() ([]*Collection, error) {
 	return nil, &NotLoadedError{edge: "collection"}
 }
 
+// OwnerOrErr returns the Owner value or an error if the edge
+// was not loaded in eager-loading, or loaded but was not found.
+func (e WordEdges) OwnerOrErr() (*User, error) {
+	if e.loadedTypes[3] {
+		if e.Owner == nil {
+			// The edge owner was loaded in eager-loading,
+			// but was not found.
+			return nil, &NotFoundError{label: user.Label}
+		}
+		return e.Owner, nil
+	}
+	return nil, &NotLoadedError{edge: "owner"}
+}
+
 // scanValues returns the types for scanning values from sql.Rows.
 func (*Word) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
@@ -102,6 +119,8 @@ func (*Word) scanValues(columns []string) ([]interface{}, error) {
 		case word.ForeignKeys[0]: // file_entity_words
 			values[i] = new(sql.NullInt64)
 		case word.ForeignKeys[1]: // user_favorite_words
+			values[i] = new(sql.NullInt64)
+		case word.ForeignKeys[2]: // user_words
 			values[i] = new(sql.NullInt64)
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type Word", columns[i])
@@ -180,6 +199,13 @@ func (w *Word) assignValues(columns []string, values []interface{}) error {
 				w.user_favorite_words = new(int)
 				*w.user_favorite_words = int(value.Int64)
 			}
+		case word.ForeignKeys[2]:
+			if value, ok := values[i].(*sql.NullInt64); !ok {
+				return fmt.Errorf("unexpected type %T for edge-field user_words", value)
+			} else if value.Valid {
+				w.user_words = new(int)
+				*w.user_words = int(value.Int64)
+			}
 		}
 	}
 	return nil
@@ -198,6 +224,11 @@ func (w *Word) QueryFile() *FileEntityQuery {
 // QueryCollection queries the "collection" edge of the Word entity.
 func (w *Word) QueryCollection() *CollectionQuery {
 	return (&WordClient{config: w.config}).QueryCollection(w)
+}
+
+// QueryOwner queries the "owner" edge of the Word entity.
+func (w *Word) QueryOwner() *UserQuery {
+	return (&WordClient{config: w.config}).QueryOwner(w)
 }
 
 // Update returns a builder for updating this Word.

@@ -36,6 +36,7 @@ type UserQuery struct {
 	withFavoriteWords    *WordQuery
 	withFiles            *FileEntityQuery
 	withCollections      *CollectionQuery
+	withWords            *WordQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -175,6 +176,28 @@ func (uq *UserQuery) QueryCollections() *CollectionQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(collection.Table, collection.FieldID),
 			sqlgraph.Edge(sqlgraph.M2M, false, user.CollectionsTable, user.CollectionsPrimaryKey...),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryWords chains the current query on the "words" edge.
+func (uq *UserQuery) QueryWords() *WordQuery {
+	query := &WordQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery(ctx)
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(word.Table, word.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.WordsTable, user.WordsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -368,6 +391,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withFavoriteWords:    uq.withFavoriteWords.Clone(),
 		withFiles:            uq.withFiles.Clone(),
 		withCollections:      uq.withCollections.Clone(),
+		withWords:            uq.withWords.Clone(),
 		// clone intermediate query.
 		sql:    uq.sql.Clone(),
 		path:   uq.path,
@@ -427,6 +451,17 @@ func (uq *UserQuery) WithCollections(opts ...func(*CollectionQuery)) *UserQuery 
 		opt(query)
 	}
 	uq.withCollections = query
+	return uq
+}
+
+// WithWords tells the query-builder to eager-load the nodes that are connected to
+// the "words" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithWords(opts ...func(*WordQuery)) *UserQuery {
+	query := &WordQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withWords = query
 	return uq
 }
 
@@ -495,12 +530,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [5]bool{
+		loadedTypes = [6]bool{
 			uq.withFavoriteMovies != nil,
 			uq.withSearchedKeywords != nil,
 			uq.withFavoriteWords != nil,
 			uq.withFiles != nil,
 			uq.withCollections != nil,
+			uq.withWords != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -737,6 +773,35 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			for i := range nodes {
 				nodes[i].Edges.Collections = append(nodes[i].Edges.Collections, n)
 			}
+		}
+	}
+
+	if query := uq.withWords; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+			nodes[i].Edges.Words = []*Word{}
+		}
+		query.withFKs = true
+		query.Where(predicate.Word(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.WordsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.user_words
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "user_words" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "user_words" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Words = append(node.Edges.Words, n)
 		}
 	}
 

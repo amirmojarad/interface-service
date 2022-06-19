@@ -117,6 +117,25 @@ func (wc *WordCreate) AddCollection(c ...*Collection) *WordCreate {
 	return wc.AddCollectionIDs(ids...)
 }
 
+// SetOwnerID sets the "owner" edge to the User entity by ID.
+func (wc *WordCreate) SetOwnerID(id int) *WordCreate {
+	wc.mutation.SetOwnerID(id)
+	return wc
+}
+
+// SetNillableOwnerID sets the "owner" edge to the User entity by ID if the given value is not nil.
+func (wc *WordCreate) SetNillableOwnerID(id *int) *WordCreate {
+	if id != nil {
+		wc = wc.SetOwnerID(*id)
+	}
+	return wc
+}
+
+// SetOwner sets the "owner" edge to the User entity.
+func (wc *WordCreate) SetOwner(u *User) *WordCreate {
+	return wc.SetOwnerID(u.ID)
+}
+
 // Mutation returns the WordMutation object of the builder.
 func (wc *WordCreate) Mutation() *WordMutation {
 	return wc.mutation
@@ -373,6 +392,26 @@ func (wc *WordCreate) createSpec() (*Word, *sqlgraph.CreateSpec) {
 		for _, k := range nodes {
 			edge.Target.Nodes = append(edge.Target.Nodes, k)
 		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := wc.mutation.OwnerIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.M2O,
+			Inverse: true,
+			Table:   word.OwnerTable,
+			Columns: []string{word.OwnerColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: user.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_node.user_words = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
 	return _node, _spec

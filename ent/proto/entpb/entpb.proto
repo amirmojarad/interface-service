@@ -103,6 +103,8 @@ message User {
   repeated FileEntity files = 13;
 
   repeated Collection collections = 14;
+
+  repeated Word words = 15;
 }
 
 message Word {
@@ -127,4 +129,6 @@ message Word {
   FileEntity file = 10;
 
   repeated Collection collection = 11;
+
+  User owner = 12;
 }

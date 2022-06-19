@@ -188,6 +188,21 @@ func (uc *UserCreate) AddCollections(c ...*Collection) *UserCreate {
 	return uc.AddCollectionIDs(ids...)
 }
 
+// AddWordIDs adds the "words" edge to the Word entity by IDs.
+func (uc *UserCreate) AddWordIDs(ids ...int) *UserCreate {
+	uc.mutation.AddWordIDs(ids...)
+	return uc
+}
+
+// AddWords adds the "words" edges to the Word entity.
+func (uc *UserCreate) AddWords(w ...*Word) *UserCreate {
+	ids := make([]int, len(w))
+	for i := range w {
+		ids[i] = w[i].ID
+	}
+	return uc.AddWordIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uc *UserCreate) Mutation() *UserMutation {
 	return uc.mutation
@@ -490,6 +505,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: collection.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.WordsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.WordsTable,
+			Columns: []string{user.WordsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: word.FieldID,
 				},
 			},
 		}

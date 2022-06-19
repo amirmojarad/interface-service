@@ -27,6 +27,8 @@ const (
 	EdgeFile = "file"
 	// EdgeCollection holds the string denoting the collection edge name in mutations.
 	EdgeCollection = "collection"
+	// EdgeOwner holds the string denoting the owner edge name in mutations.
+	EdgeOwner = "owner"
 	// Table holds the table name of the word in the database.
 	Table = "words"
 	// UserTable is the table that holds the user relation/edge.
@@ -48,6 +50,13 @@ const (
 	// CollectionInverseTable is the table name for the Collection entity.
 	// It exists in this package in order to avoid circular dependency with the "collection" package.
 	CollectionInverseTable = "collections"
+	// OwnerTable is the table that holds the owner relation/edge.
+	OwnerTable = "words"
+	// OwnerInverseTable is the table name for the User entity.
+	// It exists in this package in order to avoid circular dependency with the "user" package.
+	OwnerInverseTable = "users"
+	// OwnerColumn is the table column denoting the owner relation/edge.
+	OwnerColumn = "user_words"
 )
 
 // Columns holds all SQL columns for word fields.
@@ -67,6 +76,7 @@ var Columns = []string{
 var ForeignKeys = []string{
 	"file_entity_words",
 	"user_favorite_words",
+	"user_words",
 }
 
 var (

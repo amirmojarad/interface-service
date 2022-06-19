@@ -14,6 +14,30 @@ func (api API) wordGroup(path string) {
 	group.GET("/", api.getFileWordsPage())
 	group.POST("/", api.getAllFileWordsByTitle())
 	group.GET("/search", api.searchWords())
+	group.GET("/collections", api.getWordSentences())
+}
+
+func (api API) getWordSentences() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		email := fmt.Sprint(ctx.MustGet("email"))
+		title := ctx.Request.URL.Query().Get("title")
+		if title == "" {
+			ctx.IndentedJSON(http.StatusBadRequest, gin.H{
+				"message": "request does not contain any given title",
+			})
+			return
+		}
+		words, err := api.Crud.GetWordSentences(email, title)
+		if err != nil {
+			ctx.IndentedJSON(http.StatusBadRequest, gin.H{
+				"message": "error while fetching sentences from database",
+				"error":   err.Error(),
+			})
+			return
+		}
+		ctx.IndentedJSON(http.StatusOK, words)
+
+	}
 }
 
 func (api API) searchWords() gin.HandlerFunc {

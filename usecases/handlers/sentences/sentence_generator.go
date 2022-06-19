@@ -40,7 +40,7 @@ func makeWordsBulk(client *ent.Client, sentences []*sentence, user *ent.User, fi
 					SetMeaning("").
 					SetFile(file).SetEnd(times[2]).SetStart(times[0]).
 					SetIsPreposition(preposition.IsPreposition(token)).
-					SetDuration(item.timeRange).
+					SetDuration(item.timeRange).SetOwner(user).
 					SetSentence(item.RawSentence))
 			}
 		}
