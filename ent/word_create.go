@@ -6,7 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"interface_project/ent/category"
+	"interface_project/ent/collection"
 	"interface_project/ent/fileentity"
 	"interface_project/ent/user"
 	"interface_project/ent/word"
@@ -102,19 +102,19 @@ func (wc *WordCreate) SetFile(f *FileEntity) *WordCreate {
 	return wc.SetFileID(f.ID)
 }
 
-// AddCategoryIDs adds the "category" edge to the Category entity by IDs.
-func (wc *WordCreate) AddCategoryIDs(ids ...int) *WordCreate {
-	wc.mutation.AddCategoryIDs(ids...)
+// AddCollectionIDs adds the "collection" edge to the Collection entity by IDs.
+func (wc *WordCreate) AddCollectionIDs(ids ...int) *WordCreate {
+	wc.mutation.AddCollectionIDs(ids...)
 	return wc
 }
 
-// AddCategory adds the "category" edges to the Category entity.
-func (wc *WordCreate) AddCategory(c ...*Category) *WordCreate {
+// AddCollection adds the "collection" edges to the Collection entity.
+func (wc *WordCreate) AddCollection(c ...*Collection) *WordCreate {
 	ids := make([]int, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
-	return wc.AddCategoryIDs(ids...)
+	return wc.AddCollectionIDs(ids...)
 }
 
 // Mutation returns the WordMutation object of the builder.
@@ -356,17 +356,17 @@ func (wc *WordCreate) createSpec() (*Word, *sqlgraph.CreateSpec) {
 		_node.file_entity_words = &nodes[0]
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := wc.mutation.CategoryIDs(); len(nodes) > 0 {
+	if nodes := wc.mutation.CollectionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   word.CategoryTable,
-			Columns: word.CategoryPrimaryKey,
+			Table:   word.CollectionTable,
+			Columns: word.CollectionPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: category.FieldID,
+					Column: collection.FieldID,
 				},
 			},
 		}

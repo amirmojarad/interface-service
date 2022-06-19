@@ -31,7 +31,7 @@ func (Word) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("user", User.Type).Ref("favorite_words").Unique().Annotations(entproto.Field(9)),
 		edge.From("file", FileEntity.Type).Ref("words").Unique().Annotations(entproto.Field(10)),
-		edge.From("category", Category.Type).Ref("category_words").Annotations(entproto.Field(11)),
+		edge.From("collection", Collection.Type).Ref("collection_words").Annotations(entproto.Field(11)),
 	}
 }
 

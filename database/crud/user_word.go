@@ -32,6 +32,11 @@ func (crud Crud) GetUserFavoriteWords(email string) ([]*ent.Word, error) {
 	}).All(*crud.Ctx)
 }
 
-func (crud Crud) GetUserWords(user *ent.User) ([]*ent.Word, error) {
-	return nil, nil
+func (crud Crud) GetUserWords(email string, titles []string, fileID int) ([]*ent.Word, error) {
+	file, err := crud.GetUserFileByID(fileID, email)
+	if err != nil {
+		return nil, err
+	}
+	return file.QueryWords().Where(word.TitleIn(titles...)).All(*crud.Ctx)
+
 }

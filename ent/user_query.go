@@ -7,7 +7,7 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"interface_project/ent/category"
+	"interface_project/ent/collection"
 	"interface_project/ent/fileentity"
 	"interface_project/ent/movie"
 	"interface_project/ent/predicate"
@@ -35,7 +35,7 @@ type UserQuery struct {
 	withSearchedKeywords *SearchKeywordQuery
 	withFavoriteWords    *WordQuery
 	withFiles            *FileEntityQuery
-	withCategories       *CategoryQuery
+	withCollections      *CollectionQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -160,9 +160,9 @@ func (uq *UserQuery) QueryFiles() *FileEntityQuery {
 	return query
 }
 
-// QueryCategories chains the current query on the "categories" edge.
-func (uq *UserQuery) QueryCategories() *CategoryQuery {
-	query := &CategoryQuery{config: uq.config}
+// QueryCollections chains the current query on the "collections" edge.
+func (uq *UserQuery) QueryCollections() *CollectionQuery {
+	query := &CollectionQuery{config: uq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := uq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -173,8 +173,8 @@ func (uq *UserQuery) QueryCategories() *CategoryQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(category.Table, category.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, user.CategoriesTable, user.CategoriesPrimaryKey...),
+			sqlgraph.To(collection.Table, collection.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.CollectionsTable, user.CollectionsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -367,7 +367,7 @@ func (uq *UserQuery) Clone() *UserQuery {
 		withSearchedKeywords: uq.withSearchedKeywords.Clone(),
 		withFavoriteWords:    uq.withFavoriteWords.Clone(),
 		withFiles:            uq.withFiles.Clone(),
-		withCategories:       uq.withCategories.Clone(),
+		withCollections:      uq.withCollections.Clone(),
 		// clone intermediate query.
 		sql:    uq.sql.Clone(),
 		path:   uq.path,
@@ -419,14 +419,14 @@ func (uq *UserQuery) WithFiles(opts ...func(*FileEntityQuery)) *UserQuery {
 	return uq
 }
 
-// WithCategories tells the query-builder to eager-load the nodes that are connected to
-// the "categories" edge. The optional arguments are used to configure the query builder of the edge.
-func (uq *UserQuery) WithCategories(opts ...func(*CategoryQuery)) *UserQuery {
-	query := &CategoryQuery{config: uq.config}
+// WithCollections tells the query-builder to eager-load the nodes that are connected to
+// the "collections" edge. The optional arguments are used to configure the query builder of the edge.
+func (uq *UserQuery) WithCollections(opts ...func(*CollectionQuery)) *UserQuery {
+	query := &CollectionQuery{config: uq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	uq.withCategories = query
+	uq.withCollections = query
 	return uq
 }
 
@@ -500,7 +500,7 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			uq.withSearchedKeywords != nil,
 			uq.withFavoriteWords != nil,
 			uq.withFiles != nil,
-			uq.withCategories != nil,
+			uq.withCollections != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
@@ -675,13 +675,13 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		}
 	}
 
-	if query := uq.withCategories; query != nil {
+	if query := uq.withCollections; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		ids := make(map[int]*User, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
-			node.Edges.Categories = []*Category{}
+			node.Edges.Collections = []*Collection{}
 		}
 		var (
 			edgeids []int
@@ -690,11 +690,11 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
 				Inverse: false,
-				Table:   user.CategoriesTable,
-				Columns: user.CategoriesPrimaryKey,
+				Table:   user.CollectionsTable,
+				Columns: user.CollectionsPrimaryKey,
 			},
 			Predicate: func(s *sql.Selector) {
-				s.Where(sql.InValues(user.CategoriesPrimaryKey[0], fks...))
+				s.Where(sql.InValues(user.CollectionsPrimaryKey[0], fks...))
 			},
 			ScanValues: func() [2]interface{} {
 				return [2]interface{}{new(sql.NullInt64), new(sql.NullInt64)}
@@ -722,9 +722,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 			},
 		}
 		if err := sqlgraph.QueryEdges(ctx, uq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "categories": %w`, err)
+			return nil, fmt.Errorf(`query edges "collections": %w`, err)
 		}
-		query.Where(category.IDIn(edgeids...))
+		query.Where(collection.IDIn(edgeids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
@@ -732,10 +732,10 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 		for _, n := range neighbors {
 			nodes, ok := edges[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected "categories" node returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected "collections" node returned %v`, n.ID)
 			}
 			for i := range nodes {
-				nodes[i].Edges.Categories = append(nodes[i].Edges.Categories, n)
+				nodes[i].Edges.Collections = append(nodes[i].Edges.Collections, n)
 			}
 		}
 	}

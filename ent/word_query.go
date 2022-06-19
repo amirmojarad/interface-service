@@ -7,7 +7,7 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"interface_project/ent/category"
+	"interface_project/ent/collection"
 	"interface_project/ent/fileentity"
 	"interface_project/ent/predicate"
 	"interface_project/ent/user"
@@ -29,10 +29,10 @@ type WordQuery struct {
 	fields     []string
 	predicates []predicate.Word
 	// eager-loading edges.
-	withUser     *UserQuery
-	withFile     *FileEntityQuery
-	withCategory *CategoryQuery
-	withFKs      bool
+	withUser       *UserQuery
+	withFile       *FileEntityQuery
+	withCollection *CollectionQuery
+	withFKs        bool
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -113,9 +113,9 @@ func (wq *WordQuery) QueryFile() *FileEntityQuery {
 	return query
 }
 
-// QueryCategory chains the current query on the "category" edge.
-func (wq *WordQuery) QueryCategory() *CategoryQuery {
-	query := &CategoryQuery{config: wq.config}
+// QueryCollection chains the current query on the "collection" edge.
+func (wq *WordQuery) QueryCollection() *CollectionQuery {
+	query := &CollectionQuery{config: wq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := wq.prepareQuery(ctx); err != nil {
 			return nil, err
@@ -126,8 +126,8 @@ func (wq *WordQuery) QueryCategory() *CategoryQuery {
 		}
 		step := sqlgraph.NewStep(
 			sqlgraph.From(word.Table, word.FieldID, selector),
-			sqlgraph.To(category.Table, category.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, word.CategoryTable, word.CategoryPrimaryKey...),
+			sqlgraph.To(collection.Table, collection.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, word.CollectionTable, word.CollectionPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(wq.driver.Dialect(), step)
 		return fromU, nil
@@ -311,14 +311,14 @@ func (wq *WordQuery) Clone() *WordQuery {
 		return nil
 	}
 	return &WordQuery{
-		config:       wq.config,
-		limit:        wq.limit,
-		offset:       wq.offset,
-		order:        append([]OrderFunc{}, wq.order...),
-		predicates:   append([]predicate.Word{}, wq.predicates...),
-		withUser:     wq.withUser.Clone(),
-		withFile:     wq.withFile.Clone(),
-		withCategory: wq.withCategory.Clone(),
+		config:         wq.config,
+		limit:          wq.limit,
+		offset:         wq.offset,
+		order:          append([]OrderFunc{}, wq.order...),
+		predicates:     append([]predicate.Word{}, wq.predicates...),
+		withUser:       wq.withUser.Clone(),
+		withFile:       wq.withFile.Clone(),
+		withCollection: wq.withCollection.Clone(),
 		// clone intermediate query.
 		sql:    wq.sql.Clone(),
 		path:   wq.path,
@@ -348,14 +348,14 @@ func (wq *WordQuery) WithFile(opts ...func(*FileEntityQuery)) *WordQuery {
 	return wq
 }
 
-// WithCategory tells the query-builder to eager-load the nodes that are connected to
-// the "category" edge. The optional arguments are used to configure the query builder of the edge.
-func (wq *WordQuery) WithCategory(opts ...func(*CategoryQuery)) *WordQuery {
-	query := &CategoryQuery{config: wq.config}
+// WithCollection tells the query-builder to eager-load the nodes that are connected to
+// the "collection" edge. The optional arguments are used to configure the query builder of the edge.
+func (wq *WordQuery) WithCollection(opts ...func(*CollectionQuery)) *WordQuery {
+	query := &CollectionQuery{config: wq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	wq.withCategory = query
+	wq.withCollection = query
 	return wq
 }
 
@@ -428,7 +428,7 @@ func (wq *WordQuery) sqlAll(ctx context.Context) ([]*Word, error) {
 		loadedTypes = [3]bool{
 			wq.withUser != nil,
 			wq.withFile != nil,
-			wq.withCategory != nil,
+			wq.withCollection != nil,
 		}
 	)
 	if wq.withUser != nil || wq.withFile != nil {
@@ -515,13 +515,13 @@ func (wq *WordQuery) sqlAll(ctx context.Context) ([]*Word, error) {
 		}
 	}
 
-	if query := wq.withCategory; query != nil {
+	if query := wq.withCollection; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
 		ids := make(map[int]*Word, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
-			node.Edges.Category = []*Category{}
+			node.Edges.Collection = []*Collection{}
 		}
 		var (
 			edgeids []int
@@ -530,11 +530,11 @@ func (wq *WordQuery) sqlAll(ctx context.Context) ([]*Word, error) {
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
 				Inverse: true,
-				Table:   word.CategoryTable,
-				Columns: word.CategoryPrimaryKey,
+				Table:   word.CollectionTable,
+				Columns: word.CollectionPrimaryKey,
 			},
 			Predicate: func(s *sql.Selector) {
-				s.Where(sql.InValues(word.CategoryPrimaryKey[1], fks...))
+				s.Where(sql.InValues(word.CollectionPrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
 				return [2]interface{}{new(sql.NullInt64), new(sql.NullInt64)}
@@ -562,9 +562,9 @@ func (wq *WordQuery) sqlAll(ctx context.Context) ([]*Word, error) {
 			},
 		}
 		if err := sqlgraph.QueryEdges(ctx, wq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "category": %w`, err)
+			return nil, fmt.Errorf(`query edges "collection": %w`, err)
 		}
-		query.Where(category.IDIn(edgeids...))
+		query.Where(collection.IDIn(edgeids...))
 		neighbors, err := query.All(ctx)
 		if err != nil {
 			return nil, err
@@ -572,10 +572,10 @@ func (wq *WordQuery) sqlAll(ctx context.Context) ([]*Word, error) {
 		for _, n := range neighbors {
 			nodes, ok := edges[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected "category" node returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected "collection" node returned %v`, n.ID)
 			}
 			for i := range nodes {
-				nodes[i].Edges.Category = append(nodes[i].Edges.Category, n)
+				nodes[i].Edges.Collection = append(nodes[i].Edges.Collection, n)
 			}
 		}
 	}

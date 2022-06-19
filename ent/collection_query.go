@@ -7,7 +7,7 @@ import (
 	"database/sql/driver"
 	"errors"
 	"fmt"
-	"interface_project/ent/category"
+	"interface_project/ent/collection"
 	"interface_project/ent/predicate"
 	"interface_project/ent/user"
 	"interface_project/ent/word"
@@ -18,56 +18,56 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// CategoryQuery is the builder for querying Category entities.
-type CategoryQuery struct {
+// CollectionQuery is the builder for querying Collection entities.
+type CollectionQuery struct {
 	config
 	limit      *int
 	offset     *int
 	unique     *bool
 	order      []OrderFunc
 	fields     []string
-	predicates []predicate.Category
+	predicates []predicate.Collection
 	// eager-loading edges.
-	withUser          *UserQuery
-	withCategoryWords *WordQuery
+	withUser            *UserQuery
+	withCollectionWords *WordQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
 }
 
-// Where adds a new predicate for the CategoryQuery builder.
-func (cq *CategoryQuery) Where(ps ...predicate.Category) *CategoryQuery {
+// Where adds a new predicate for the CollectionQuery builder.
+func (cq *CollectionQuery) Where(ps ...predicate.Collection) *CollectionQuery {
 	cq.predicates = append(cq.predicates, ps...)
 	return cq
 }
 
 // Limit adds a limit step to the query.
-func (cq *CategoryQuery) Limit(limit int) *CategoryQuery {
+func (cq *CollectionQuery) Limit(limit int) *CollectionQuery {
 	cq.limit = &limit
 	return cq
 }
 
 // Offset adds an offset step to the query.
-func (cq *CategoryQuery) Offset(offset int) *CategoryQuery {
+func (cq *CollectionQuery) Offset(offset int) *CollectionQuery {
 	cq.offset = &offset
 	return cq
 }
 
 // Unique configures the query builder to filter duplicate records on query.
 // By default, unique is set to true, and can be disabled using this method.
-func (cq *CategoryQuery) Unique(unique bool) *CategoryQuery {
+func (cq *CollectionQuery) Unique(unique bool) *CollectionQuery {
 	cq.unique = &unique
 	return cq
 }
 
 // Order adds an order step to the query.
-func (cq *CategoryQuery) Order(o ...OrderFunc) *CategoryQuery {
+func (cq *CollectionQuery) Order(o ...OrderFunc) *CollectionQuery {
 	cq.order = append(cq.order, o...)
 	return cq
 }
 
 // QueryUser chains the current query on the "user" edge.
-func (cq *CategoryQuery) QueryUser() *UserQuery {
+func (cq *CollectionQuery) QueryUser() *UserQuery {
 	query := &UserQuery{config: cq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := cq.prepareQuery(ctx); err != nil {
@@ -78,9 +78,9 @@ func (cq *CategoryQuery) QueryUser() *UserQuery {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(category.Table, category.FieldID, selector),
+			sqlgraph.From(collection.Table, collection.FieldID, selector),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, category.UserTable, category.UserPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2M, true, collection.UserTable, collection.UserPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -88,8 +88,8 @@ func (cq *CategoryQuery) QueryUser() *UserQuery {
 	return query
 }
 
-// QueryCategoryWords chains the current query on the "category_words" edge.
-func (cq *CategoryQuery) QueryCategoryWords() *WordQuery {
+// QueryCollectionWords chains the current query on the "collection_words" edge.
+func (cq *CollectionQuery) QueryCollectionWords() *WordQuery {
 	query := &WordQuery{config: cq.config}
 	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
 		if err := cq.prepareQuery(ctx); err != nil {
@@ -100,9 +100,9 @@ func (cq *CategoryQuery) QueryCategoryWords() *WordQuery {
 			return nil, err
 		}
 		step := sqlgraph.NewStep(
-			sqlgraph.From(category.Table, category.FieldID, selector),
+			sqlgraph.From(collection.Table, collection.FieldID, selector),
 			sqlgraph.To(word.Table, word.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, category.CategoryWordsTable, category.CategoryWordsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2M, false, collection.CollectionWordsTable, collection.CollectionWordsPrimaryKey...),
 		)
 		fromU = sqlgraph.SetNeighbors(cq.driver.Dialect(), step)
 		return fromU, nil
@@ -110,21 +110,21 @@ func (cq *CategoryQuery) QueryCategoryWords() *WordQuery {
 	return query
 }
 
-// First returns the first Category entity from the query.
-// Returns a *NotFoundError when no Category was found.
-func (cq *CategoryQuery) First(ctx context.Context) (*Category, error) {
+// First returns the first Collection entity from the query.
+// Returns a *NotFoundError when no Collection was found.
+func (cq *CollectionQuery) First(ctx context.Context) (*Collection, error) {
 	nodes, err := cq.Limit(1).All(ctx)
 	if err != nil {
 		return nil, err
 	}
 	if len(nodes) == 0 {
-		return nil, &NotFoundError{category.Label}
+		return nil, &NotFoundError{collection.Label}
 	}
 	return nodes[0], nil
 }
 
 // FirstX is like First, but panics if an error occurs.
-func (cq *CategoryQuery) FirstX(ctx context.Context) *Category {
+func (cq *CollectionQuery) FirstX(ctx context.Context) *Collection {
 	node, err := cq.First(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -132,22 +132,22 @@ func (cq *CategoryQuery) FirstX(ctx context.Context) *Category {
 	return node
 }
 
-// FirstID returns the first Category ID from the query.
-// Returns a *NotFoundError when no Category ID was found.
-func (cq *CategoryQuery) FirstID(ctx context.Context) (id int, err error) {
+// FirstID returns the first Collection ID from the query.
+// Returns a *NotFoundError when no Collection ID was found.
+func (cq *CollectionQuery) FirstID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = cq.Limit(1).IDs(ctx); err != nil {
 		return
 	}
 	if len(ids) == 0 {
-		err = &NotFoundError{category.Label}
+		err = &NotFoundError{collection.Label}
 		return
 	}
 	return ids[0], nil
 }
 
 // FirstIDX is like FirstID, but panics if an error occurs.
-func (cq *CategoryQuery) FirstIDX(ctx context.Context) int {
+func (cq *CollectionQuery) FirstIDX(ctx context.Context) int {
 	id, err := cq.FirstID(ctx)
 	if err != nil && !IsNotFound(err) {
 		panic(err)
@@ -155,10 +155,10 @@ func (cq *CategoryQuery) FirstIDX(ctx context.Context) int {
 	return id
 }
 
-// Only returns a single Category entity found by the query, ensuring it only returns one.
-// Returns a *NotSingularError when more than one Category entity is found.
-// Returns a *NotFoundError when no Category entities are found.
-func (cq *CategoryQuery) Only(ctx context.Context) (*Category, error) {
+// Only returns a single Collection entity found by the query, ensuring it only returns one.
+// Returns a *NotSingularError when more than one Collection entity is found.
+// Returns a *NotFoundError when no Collection entities are found.
+func (cq *CollectionQuery) Only(ctx context.Context) (*Collection, error) {
 	nodes, err := cq.Limit(2).All(ctx)
 	if err != nil {
 		return nil, err
@@ -167,14 +167,14 @@ func (cq *CategoryQuery) Only(ctx context.Context) (*Category, error) {
 	case 1:
 		return nodes[0], nil
 	case 0:
-		return nil, &NotFoundError{category.Label}
+		return nil, &NotFoundError{collection.Label}
 	default:
-		return nil, &NotSingularError{category.Label}
+		return nil, &NotSingularError{collection.Label}
 	}
 }
 
 // OnlyX is like Only, but panics if an error occurs.
-func (cq *CategoryQuery) OnlyX(ctx context.Context) *Category {
+func (cq *CollectionQuery) OnlyX(ctx context.Context) *Collection {
 	node, err := cq.Only(ctx)
 	if err != nil {
 		panic(err)
@@ -182,10 +182,10 @@ func (cq *CategoryQuery) OnlyX(ctx context.Context) *Category {
 	return node
 }
 
-// OnlyID is like Only, but returns the only Category ID in the query.
-// Returns a *NotSingularError when more than one Category ID is found.
+// OnlyID is like Only, but returns the only Collection ID in the query.
+// Returns a *NotSingularError when more than one Collection ID is found.
 // Returns a *NotFoundError when no entities are found.
-func (cq *CategoryQuery) OnlyID(ctx context.Context) (id int, err error) {
+func (cq *CollectionQuery) OnlyID(ctx context.Context) (id int, err error) {
 	var ids []int
 	if ids, err = cq.Limit(2).IDs(ctx); err != nil {
 		return
@@ -194,15 +194,15 @@ func (cq *CategoryQuery) OnlyID(ctx context.Context) (id int, err error) {
 	case 1:
 		id = ids[0]
 	case 0:
-		err = &NotFoundError{category.Label}
+		err = &NotFoundError{collection.Label}
 	default:
-		err = &NotSingularError{category.Label}
+		err = &NotSingularError{collection.Label}
 	}
 	return
 }
 
 // OnlyIDX is like OnlyID, but panics if an error occurs.
-func (cq *CategoryQuery) OnlyIDX(ctx context.Context) int {
+func (cq *CollectionQuery) OnlyIDX(ctx context.Context) int {
 	id, err := cq.OnlyID(ctx)
 	if err != nil {
 		panic(err)
@@ -210,8 +210,8 @@ func (cq *CategoryQuery) OnlyIDX(ctx context.Context) int {
 	return id
 }
 
-// All executes the query and returns a list of Categories.
-func (cq *CategoryQuery) All(ctx context.Context) ([]*Category, error) {
+// All executes the query and returns a list of Collections.
+func (cq *CollectionQuery) All(ctx context.Context) ([]*Collection, error) {
 	if err := cq.prepareQuery(ctx); err != nil {
 		return nil, err
 	}
@@ -219,7 +219,7 @@ func (cq *CategoryQuery) All(ctx context.Context) ([]*Category, error) {
 }
 
 // AllX is like All, but panics if an error occurs.
-func (cq *CategoryQuery) AllX(ctx context.Context) []*Category {
+func (cq *CollectionQuery) AllX(ctx context.Context) []*Collection {
 	nodes, err := cq.All(ctx)
 	if err != nil {
 		panic(err)
@@ -227,17 +227,17 @@ func (cq *CategoryQuery) AllX(ctx context.Context) []*Category {
 	return nodes
 }
 
-// IDs executes the query and returns a list of Category IDs.
-func (cq *CategoryQuery) IDs(ctx context.Context) ([]int, error) {
+// IDs executes the query and returns a list of Collection IDs.
+func (cq *CollectionQuery) IDs(ctx context.Context) ([]int, error) {
 	var ids []int
-	if err := cq.Select(category.FieldID).Scan(ctx, &ids); err != nil {
+	if err := cq.Select(collection.FieldID).Scan(ctx, &ids); err != nil {
 		return nil, err
 	}
 	return ids, nil
 }
 
 // IDsX is like IDs, but panics if an error occurs.
-func (cq *CategoryQuery) IDsX(ctx context.Context) []int {
+func (cq *CollectionQuery) IDsX(ctx context.Context) []int {
 	ids, err := cq.IDs(ctx)
 	if err != nil {
 		panic(err)
@@ -246,7 +246,7 @@ func (cq *CategoryQuery) IDsX(ctx context.Context) []int {
 }
 
 // Count returns the count of the given query.
-func (cq *CategoryQuery) Count(ctx context.Context) (int, error) {
+func (cq *CollectionQuery) Count(ctx context.Context) (int, error) {
 	if err := cq.prepareQuery(ctx); err != nil {
 		return 0, err
 	}
@@ -254,7 +254,7 @@ func (cq *CategoryQuery) Count(ctx context.Context) (int, error) {
 }
 
 // CountX is like Count, but panics if an error occurs.
-func (cq *CategoryQuery) CountX(ctx context.Context) int {
+func (cq *CollectionQuery) CountX(ctx context.Context) int {
 	count, err := cq.Count(ctx)
 	if err != nil {
 		panic(err)
@@ -263,7 +263,7 @@ func (cq *CategoryQuery) CountX(ctx context.Context) int {
 }
 
 // Exist returns true if the query has elements in the graph.
-func (cq *CategoryQuery) Exist(ctx context.Context) (bool, error) {
+func (cq *CollectionQuery) Exist(ctx context.Context) (bool, error) {
 	if err := cq.prepareQuery(ctx); err != nil {
 		return false, err
 	}
@@ -271,7 +271,7 @@ func (cq *CategoryQuery) Exist(ctx context.Context) (bool, error) {
 }
 
 // ExistX is like Exist, but panics if an error occurs.
-func (cq *CategoryQuery) ExistX(ctx context.Context) bool {
+func (cq *CollectionQuery) ExistX(ctx context.Context) bool {
 	exist, err := cq.Exist(ctx)
 	if err != nil {
 		panic(err)
@@ -279,20 +279,20 @@ func (cq *CategoryQuery) ExistX(ctx context.Context) bool {
 	return exist
 }
 
-// Clone returns a duplicate of the CategoryQuery builder, including all associated steps. It can be
+// Clone returns a duplicate of the CollectionQuery builder, including all associated steps. It can be
 // used to prepare common query builders and use them differently after the clone is made.
-func (cq *CategoryQuery) Clone() *CategoryQuery {
+func (cq *CollectionQuery) Clone() *CollectionQuery {
 	if cq == nil {
 		return nil
 	}
-	return &CategoryQuery{
-		config:            cq.config,
-		limit:             cq.limit,
-		offset:            cq.offset,
-		order:             append([]OrderFunc{}, cq.order...),
-		predicates:        append([]predicate.Category{}, cq.predicates...),
-		withUser:          cq.withUser.Clone(),
-		withCategoryWords: cq.withCategoryWords.Clone(),
+	return &CollectionQuery{
+		config:              cq.config,
+		limit:               cq.limit,
+		offset:              cq.offset,
+		order:               append([]OrderFunc{}, cq.order...),
+		predicates:          append([]predicate.Collection{}, cq.predicates...),
+		withUser:            cq.withUser.Clone(),
+		withCollectionWords: cq.withCollectionWords.Clone(),
 		// clone intermediate query.
 		sql:    cq.sql.Clone(),
 		path:   cq.path,
@@ -302,7 +302,7 @@ func (cq *CategoryQuery) Clone() *CategoryQuery {
 
 // WithUser tells the query-builder to eager-load the nodes that are connected to
 // the "user" edge. The optional arguments are used to configure the query builder of the edge.
-func (cq *CategoryQuery) WithUser(opts ...func(*UserQuery)) *CategoryQuery {
+func (cq *CollectionQuery) WithUser(opts ...func(*UserQuery)) *CollectionQuery {
 	query := &UserQuery{config: cq.config}
 	for _, opt := range opts {
 		opt(query)
@@ -311,14 +311,14 @@ func (cq *CategoryQuery) WithUser(opts ...func(*UserQuery)) *CategoryQuery {
 	return cq
 }
 
-// WithCategoryWords tells the query-builder to eager-load the nodes that are connected to
-// the "category_words" edge. The optional arguments are used to configure the query builder of the edge.
-func (cq *CategoryQuery) WithCategoryWords(opts ...func(*WordQuery)) *CategoryQuery {
+// WithCollectionWords tells the query-builder to eager-load the nodes that are connected to
+// the "collection_words" edge. The optional arguments are used to configure the query builder of the edge.
+func (cq *CollectionQuery) WithCollectionWords(opts ...func(*WordQuery)) *CollectionQuery {
 	query := &WordQuery{config: cq.config}
 	for _, opt := range opts {
 		opt(query)
 	}
-	cq.withCategoryWords = query
+	cq.withCollectionWords = query
 	return cq
 }
 
@@ -332,13 +332,13 @@ func (cq *CategoryQuery) WithCategoryWords(opts ...func(*WordQuery)) *CategoryQu
 //		Count int `json:"count,omitempty"`
 //	}
 //
-//	client.Category.Query().
-//		GroupBy(category.FieldTitle).
+//	client.Collection.Query().
+//		GroupBy(collection.FieldTitle).
 //		Aggregate(ent.Count()).
 //		Scan(ctx, &v)
 //
-func (cq *CategoryQuery) GroupBy(field string, fields ...string) *CategoryGroupBy {
-	group := &CategoryGroupBy{config: cq.config}
+func (cq *CollectionQuery) GroupBy(field string, fields ...string) *CollectionGroupBy {
+	group := &CollectionGroupBy{config: cq.config}
 	group.fields = append([]string{field}, fields...)
 	group.path = func(ctx context.Context) (prev *sql.Selector, err error) {
 		if err := cq.prepareQuery(ctx); err != nil {
@@ -358,18 +358,18 @@ func (cq *CategoryQuery) GroupBy(field string, fields ...string) *CategoryGroupB
 //		Title string `json:"title,omitempty"`
 //	}
 //
-//	client.Category.Query().
-//		Select(category.FieldTitle).
+//	client.Collection.Query().
+//		Select(collection.FieldTitle).
 //		Scan(ctx, &v)
 //
-func (cq *CategoryQuery) Select(fields ...string) *CategorySelect {
+func (cq *CollectionQuery) Select(fields ...string) *CollectionSelect {
 	cq.fields = append(cq.fields, fields...)
-	return &CategorySelect{CategoryQuery: cq}
+	return &CollectionSelect{CollectionQuery: cq}
 }
 
-func (cq *CategoryQuery) prepareQuery(ctx context.Context) error {
+func (cq *CollectionQuery) prepareQuery(ctx context.Context) error {
 	for _, f := range cq.fields {
-		if !category.ValidColumn(f) {
+		if !collection.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 		}
 	}
@@ -383,17 +383,17 @@ func (cq *CategoryQuery) prepareQuery(ctx context.Context) error {
 	return nil
 }
 
-func (cq *CategoryQuery) sqlAll(ctx context.Context) ([]*Category, error) {
+func (cq *CollectionQuery) sqlAll(ctx context.Context) ([]*Collection, error) {
 	var (
-		nodes       = []*Category{}
+		nodes       = []*Collection{}
 		_spec       = cq.querySpec()
 		loadedTypes = [2]bool{
 			cq.withUser != nil,
-			cq.withCategoryWords != nil,
+			cq.withCollectionWords != nil,
 		}
 	)
 	_spec.ScanValues = func(columns []string) ([]interface{}, error) {
-		node := &Category{config: cq.config}
+		node := &Collection{config: cq.config}
 		nodes = append(nodes, node)
 		return node.scanValues(columns)
 	}
@@ -414,7 +414,7 @@ func (cq *CategoryQuery) sqlAll(ctx context.Context) ([]*Category, error) {
 
 	if query := cq.withUser; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[int]*Category, len(nodes))
+		ids := make(map[int]*Collection, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
@@ -422,16 +422,16 @@ func (cq *CategoryQuery) sqlAll(ctx context.Context) ([]*Category, error) {
 		}
 		var (
 			edgeids []int
-			edges   = make(map[int][]*Category)
+			edges   = make(map[int][]*Collection)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
 				Inverse: true,
-				Table:   category.UserTable,
-				Columns: category.UserPrimaryKey,
+				Table:   collection.UserTable,
+				Columns: collection.UserPrimaryKey,
 			},
 			Predicate: func(s *sql.Selector) {
-				s.Where(sql.InValues(category.UserPrimaryKey[1], fks...))
+				s.Where(sql.InValues(collection.UserPrimaryKey[1], fks...))
 			},
 			ScanValues: func() [2]interface{} {
 				return [2]interface{}{new(sql.NullInt64), new(sql.NullInt64)}
@@ -477,26 +477,26 @@ func (cq *CategoryQuery) sqlAll(ctx context.Context) ([]*Category, error) {
 		}
 	}
 
-	if query := cq.withCategoryWords; query != nil {
+	if query := cq.withCollectionWords; query != nil {
 		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[int]*Category, len(nodes))
+		ids := make(map[int]*Collection, len(nodes))
 		for _, node := range nodes {
 			ids[node.ID] = node
 			fks = append(fks, node.ID)
-			node.Edges.CategoryWords = []*Word{}
+			node.Edges.CollectionWords = []*Word{}
 		}
 		var (
 			edgeids []int
-			edges   = make(map[int][]*Category)
+			edges   = make(map[int][]*Collection)
 		)
 		_spec := &sqlgraph.EdgeQuerySpec{
 			Edge: &sqlgraph.EdgeSpec{
 				Inverse: false,
-				Table:   category.CategoryWordsTable,
-				Columns: category.CategoryWordsPrimaryKey,
+				Table:   collection.CollectionWordsTable,
+				Columns: collection.CollectionWordsPrimaryKey,
 			},
 			Predicate: func(s *sql.Selector) {
-				s.Where(sql.InValues(category.CategoryWordsPrimaryKey[0], fks...))
+				s.Where(sql.InValues(collection.CollectionWordsPrimaryKey[0], fks...))
 			},
 			ScanValues: func() [2]interface{} {
 				return [2]interface{}{new(sql.NullInt64), new(sql.NullInt64)}
@@ -524,7 +524,7 @@ func (cq *CategoryQuery) sqlAll(ctx context.Context) ([]*Category, error) {
 			},
 		}
 		if err := sqlgraph.QueryEdges(ctx, cq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "category_words": %w`, err)
+			return nil, fmt.Errorf(`query edges "collection_words": %w`, err)
 		}
 		query.Where(word.IDIn(edgeids...))
 		neighbors, err := query.All(ctx)
@@ -534,10 +534,10 @@ func (cq *CategoryQuery) sqlAll(ctx context.Context) ([]*Category, error) {
 		for _, n := range neighbors {
 			nodes, ok := edges[n.ID]
 			if !ok {
-				return nil, fmt.Errorf(`unexpected "category_words" node returned %v`, n.ID)
+				return nil, fmt.Errorf(`unexpected "collection_words" node returned %v`, n.ID)
 			}
 			for i := range nodes {
-				nodes[i].Edges.CategoryWords = append(nodes[i].Edges.CategoryWords, n)
+				nodes[i].Edges.CollectionWords = append(nodes[i].Edges.CollectionWords, n)
 			}
 		}
 	}
@@ -545,7 +545,7 @@ func (cq *CategoryQuery) sqlAll(ctx context.Context) ([]*Category, error) {
 	return nodes, nil
 }
 
-func (cq *CategoryQuery) sqlCount(ctx context.Context) (int, error) {
+func (cq *CollectionQuery) sqlCount(ctx context.Context) (int, error) {
 	_spec := cq.querySpec()
 	_spec.Node.Columns = cq.fields
 	if len(cq.fields) > 0 {
@@ -554,7 +554,7 @@ func (cq *CategoryQuery) sqlCount(ctx context.Context) (int, error) {
 	return sqlgraph.CountNodes(ctx, cq.driver, _spec)
 }
 
-func (cq *CategoryQuery) sqlExist(ctx context.Context) (bool, error) {
+func (cq *CollectionQuery) sqlExist(ctx context.Context) (bool, error) {
 	n, err := cq.sqlCount(ctx)
 	if err != nil {
 		return false, fmt.Errorf("ent: check existence: %w", err)
@@ -562,14 +562,14 @@ func (cq *CategoryQuery) sqlExist(ctx context.Context) (bool, error) {
 	return n > 0, nil
 }
 
-func (cq *CategoryQuery) querySpec() *sqlgraph.QuerySpec {
+func (cq *CollectionQuery) querySpec() *sqlgraph.QuerySpec {
 	_spec := &sqlgraph.QuerySpec{
 		Node: &sqlgraph.NodeSpec{
-			Table:   category.Table,
-			Columns: category.Columns,
+			Table:   collection.Table,
+			Columns: collection.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
-				Column: category.FieldID,
+				Column: collection.FieldID,
 			},
 		},
 		From:   cq.sql,
@@ -580,9 +580,9 @@ func (cq *CategoryQuery) querySpec() *sqlgraph.QuerySpec {
 	}
 	if fields := cq.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, category.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, collection.FieldID)
 		for i := range fields {
-			if fields[i] != category.FieldID {
+			if fields[i] != collection.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, fields[i])
 			}
 		}
@@ -610,12 +610,12 @@ func (cq *CategoryQuery) querySpec() *sqlgraph.QuerySpec {
 	return _spec
 }
 
-func (cq *CategoryQuery) sqlQuery(ctx context.Context) *sql.Selector {
+func (cq *CollectionQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	builder := sql.Dialect(cq.driver.Dialect())
-	t1 := builder.Table(category.Table)
+	t1 := builder.Table(collection.Table)
 	columns := cq.fields
 	if len(columns) == 0 {
-		columns = category.Columns
+		columns = collection.Columns
 	}
 	selector := builder.Select(t1.Columns(columns...)...).From(t1)
 	if cq.sql != nil {
@@ -642,8 +642,8 @@ func (cq *CategoryQuery) sqlQuery(ctx context.Context) *sql.Selector {
 	return selector
 }
 
-// CategoryGroupBy is the group-by builder for Category entities.
-type CategoryGroupBy struct {
+// CollectionGroupBy is the group-by builder for Collection entities.
+type CollectionGroupBy struct {
 	config
 	fields []string
 	fns    []AggregateFunc
@@ -653,13 +653,13 @@ type CategoryGroupBy struct {
 }
 
 // Aggregate adds the given aggregation functions to the group-by query.
-func (cgb *CategoryGroupBy) Aggregate(fns ...AggregateFunc) *CategoryGroupBy {
+func (cgb *CollectionGroupBy) Aggregate(fns ...AggregateFunc) *CollectionGroupBy {
 	cgb.fns = append(cgb.fns, fns...)
 	return cgb
 }
 
 // Scan applies the group-by query and scans the result into the given value.
-func (cgb *CategoryGroupBy) Scan(ctx context.Context, v interface{}) error {
+func (cgb *CollectionGroupBy) Scan(ctx context.Context, v interface{}) error {
 	query, err := cgb.path(ctx)
 	if err != nil {
 		return err
@@ -669,7 +669,7 @@ func (cgb *CategoryGroupBy) Scan(ctx context.Context, v interface{}) error {
 }
 
 // ScanX is like Scan, but panics if an error occurs.
-func (cgb *CategoryGroupBy) ScanX(ctx context.Context, v interface{}) {
+func (cgb *CollectionGroupBy) ScanX(ctx context.Context, v interface{}) {
 	if err := cgb.Scan(ctx, v); err != nil {
 		panic(err)
 	}
@@ -677,9 +677,9 @@ func (cgb *CategoryGroupBy) ScanX(ctx context.Context, v interface{}) {
 
 // Strings returns list of strings from group-by.
 // It is only allowed when executing a group-by query with one field.
-func (cgb *CategoryGroupBy) Strings(ctx context.Context) ([]string, error) {
+func (cgb *CollectionGroupBy) Strings(ctx context.Context) ([]string, error) {
 	if len(cgb.fields) > 1 {
-		return nil, errors.New("ent: CategoryGroupBy.Strings is not achievable when grouping more than 1 field")
+		return nil, errors.New("ent: CollectionGroupBy.Strings is not achievable when grouping more than 1 field")
 	}
 	var v []string
 	if err := cgb.Scan(ctx, &v); err != nil {
@@ -689,7 +689,7 @@ func (cgb *CategoryGroupBy) Strings(ctx context.Context) ([]string, error) {
 }
 
 // StringsX is like Strings, but panics if an error occurs.
-func (cgb *CategoryGroupBy) StringsX(ctx context.Context) []string {
+func (cgb *CollectionGroupBy) StringsX(ctx context.Context) []string {
 	v, err := cgb.Strings(ctx)
 	if err != nil {
 		panic(err)
@@ -699,7 +699,7 @@ func (cgb *CategoryGroupBy) StringsX(ctx context.Context) []string {
 
 // String returns a single string from a group-by query.
 // It is only allowed when executing a group-by query with one field.
-func (cgb *CategoryGroupBy) String(ctx context.Context) (_ string, err error) {
+func (cgb *CollectionGroupBy) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = cgb.Strings(ctx); err != nil {
 		return
@@ -708,15 +708,15 @@ func (cgb *CategoryGroupBy) String(ctx context.Context) (_ string, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{category.Label}
+		err = &NotFoundError{collection.Label}
 	default:
-		err = fmt.Errorf("ent: CategoryGroupBy.Strings returned %d results when one was expected", len(v))
+		err = fmt.Errorf("ent: CollectionGroupBy.Strings returned %d results when one was expected", len(v))
 	}
 	return
 }
 
 // StringX is like String, but panics if an error occurs.
-func (cgb *CategoryGroupBy) StringX(ctx context.Context) string {
+func (cgb *CollectionGroupBy) StringX(ctx context.Context) string {
 	v, err := cgb.String(ctx)
 	if err != nil {
 		panic(err)
@@ -726,9 +726,9 @@ func (cgb *CategoryGroupBy) StringX(ctx context.Context) string {
 
 // Ints returns list of ints from group-by.
 // It is only allowed when executing a group-by query with one field.
-func (cgb *CategoryGroupBy) Ints(ctx context.Context) ([]int, error) {
+func (cgb *CollectionGroupBy) Ints(ctx context.Context) ([]int, error) {
 	if len(cgb.fields) > 1 {
-		return nil, errors.New("ent: CategoryGroupBy.Ints is not achievable when grouping more than 1 field")
+		return nil, errors.New("ent: CollectionGroupBy.Ints is not achievable when grouping more than 1 field")
 	}
 	var v []int
 	if err := cgb.Scan(ctx, &v); err != nil {
@@ -738,7 +738,7 @@ func (cgb *CategoryGroupBy) Ints(ctx context.Context) ([]int, error) {
 }
 
 // IntsX is like Ints, but panics if an error occurs.
-func (cgb *CategoryGroupBy) IntsX(ctx context.Context) []int {
+func (cgb *CollectionGroupBy) IntsX(ctx context.Context) []int {
 	v, err := cgb.Ints(ctx)
 	if err != nil {
 		panic(err)
@@ -748,7 +748,7 @@ func (cgb *CategoryGroupBy) IntsX(ctx context.Context) []int {
 
 // Int returns a single int from a group-by query.
 // It is only allowed when executing a group-by query with one field.
-func (cgb *CategoryGroupBy) Int(ctx context.Context) (_ int, err error) {
+func (cgb *CollectionGroupBy) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = cgb.Ints(ctx); err != nil {
 		return
@@ -757,15 +757,15 @@ func (cgb *CategoryGroupBy) Int(ctx context.Context) (_ int, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{category.Label}
+		err = &NotFoundError{collection.Label}
 	default:
-		err = fmt.Errorf("ent: CategoryGroupBy.Ints returned %d results when one was expected", len(v))
+		err = fmt.Errorf("ent: CollectionGroupBy.Ints returned %d results when one was expected", len(v))
 	}
 	return
 }
 
 // IntX is like Int, but panics if an error occurs.
-func (cgb *CategoryGroupBy) IntX(ctx context.Context) int {
+func (cgb *CollectionGroupBy) IntX(ctx context.Context) int {
 	v, err := cgb.Int(ctx)
 	if err != nil {
 		panic(err)
@@ -775,9 +775,9 @@ func (cgb *CategoryGroupBy) IntX(ctx context.Context) int {
 
 // Float64s returns list of float64s from group-by.
 // It is only allowed when executing a group-by query with one field.
-func (cgb *CategoryGroupBy) Float64s(ctx context.Context) ([]float64, error) {
+func (cgb *CollectionGroupBy) Float64s(ctx context.Context) ([]float64, error) {
 	if len(cgb.fields) > 1 {
-		return nil, errors.New("ent: CategoryGroupBy.Float64s is not achievable when grouping more than 1 field")
+		return nil, errors.New("ent: CollectionGroupBy.Float64s is not achievable when grouping more than 1 field")
 	}
 	var v []float64
 	if err := cgb.Scan(ctx, &v); err != nil {
@@ -787,7 +787,7 @@ func (cgb *CategoryGroupBy) Float64s(ctx context.Context) ([]float64, error) {
 }
 
 // Float64sX is like Float64s, but panics if an error occurs.
-func (cgb *CategoryGroupBy) Float64sX(ctx context.Context) []float64 {
+func (cgb *CollectionGroupBy) Float64sX(ctx context.Context) []float64 {
 	v, err := cgb.Float64s(ctx)
 	if err != nil {
 		panic(err)
@@ -797,7 +797,7 @@ func (cgb *CategoryGroupBy) Float64sX(ctx context.Context) []float64 {
 
 // Float64 returns a single float64 from a group-by query.
 // It is only allowed when executing a group-by query with one field.
-func (cgb *CategoryGroupBy) Float64(ctx context.Context) (_ float64, err error) {
+func (cgb *CollectionGroupBy) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = cgb.Float64s(ctx); err != nil {
 		return
@@ -806,15 +806,15 @@ func (cgb *CategoryGroupBy) Float64(ctx context.Context) (_ float64, err error) 
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{category.Label}
+		err = &NotFoundError{collection.Label}
 	default:
-		err = fmt.Errorf("ent: CategoryGroupBy.Float64s returned %d results when one was expected", len(v))
+		err = fmt.Errorf("ent: CollectionGroupBy.Float64s returned %d results when one was expected", len(v))
 	}
 	return
 }
 
 // Float64X is like Float64, but panics if an error occurs.
-func (cgb *CategoryGroupBy) Float64X(ctx context.Context) float64 {
+func (cgb *CollectionGroupBy) Float64X(ctx context.Context) float64 {
 	v, err := cgb.Float64(ctx)
 	if err != nil {
 		panic(err)
@@ -824,9 +824,9 @@ func (cgb *CategoryGroupBy) Float64X(ctx context.Context) float64 {
 
 // Bools returns list of bools from group-by.
 // It is only allowed when executing a group-by query with one field.
-func (cgb *CategoryGroupBy) Bools(ctx context.Context) ([]bool, error) {
+func (cgb *CollectionGroupBy) Bools(ctx context.Context) ([]bool, error) {
 	if len(cgb.fields) > 1 {
-		return nil, errors.New("ent: CategoryGroupBy.Bools is not achievable when grouping more than 1 field")
+		return nil, errors.New("ent: CollectionGroupBy.Bools is not achievable when grouping more than 1 field")
 	}
 	var v []bool
 	if err := cgb.Scan(ctx, &v); err != nil {
@@ -836,7 +836,7 @@ func (cgb *CategoryGroupBy) Bools(ctx context.Context) ([]bool, error) {
 }
 
 // BoolsX is like Bools, but panics if an error occurs.
-func (cgb *CategoryGroupBy) BoolsX(ctx context.Context) []bool {
+func (cgb *CollectionGroupBy) BoolsX(ctx context.Context) []bool {
 	v, err := cgb.Bools(ctx)
 	if err != nil {
 		panic(err)
@@ -846,7 +846,7 @@ func (cgb *CategoryGroupBy) BoolsX(ctx context.Context) []bool {
 
 // Bool returns a single bool from a group-by query.
 // It is only allowed when executing a group-by query with one field.
-func (cgb *CategoryGroupBy) Bool(ctx context.Context) (_ bool, err error) {
+func (cgb *CollectionGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = cgb.Bools(ctx); err != nil {
 		return
@@ -855,15 +855,15 @@ func (cgb *CategoryGroupBy) Bool(ctx context.Context) (_ bool, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{category.Label}
+		err = &NotFoundError{collection.Label}
 	default:
-		err = fmt.Errorf("ent: CategoryGroupBy.Bools returned %d results when one was expected", len(v))
+		err = fmt.Errorf("ent: CollectionGroupBy.Bools returned %d results when one was expected", len(v))
 	}
 	return
 }
 
 // BoolX is like Bool, but panics if an error occurs.
-func (cgb *CategoryGroupBy) BoolX(ctx context.Context) bool {
+func (cgb *CollectionGroupBy) BoolX(ctx context.Context) bool {
 	v, err := cgb.Bool(ctx)
 	if err != nil {
 		panic(err)
@@ -871,9 +871,9 @@ func (cgb *CategoryGroupBy) BoolX(ctx context.Context) bool {
 	return v
 }
 
-func (cgb *CategoryGroupBy) sqlScan(ctx context.Context, v interface{}) error {
+func (cgb *CollectionGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 	for _, f := range cgb.fields {
-		if !category.ValidColumn(f) {
+		if !collection.ValidColumn(f) {
 			return &ValidationError{Name: f, err: fmt.Errorf("invalid field %q for group-by", f)}
 		}
 	}
@@ -890,7 +890,7 @@ func (cgb *CategoryGroupBy) sqlScan(ctx context.Context, v interface{}) error {
 	return sql.ScanSlice(rows, v)
 }
 
-func (cgb *CategoryGroupBy) sqlQuery() *sql.Selector {
+func (cgb *CollectionGroupBy) sqlQuery() *sql.Selector {
 	selector := cgb.sql.Select()
 	aggregation := make([]string, 0, len(cgb.fns))
 	for _, fn := range cgb.fns {
@@ -909,33 +909,33 @@ func (cgb *CategoryGroupBy) sqlQuery() *sql.Selector {
 	return selector.GroupBy(selector.Columns(cgb.fields...)...)
 }
 
-// CategorySelect is the builder for selecting fields of Category entities.
-type CategorySelect struct {
-	*CategoryQuery
+// CollectionSelect is the builder for selecting fields of Collection entities.
+type CollectionSelect struct {
+	*CollectionQuery
 	// intermediate query (i.e. traversal path).
 	sql *sql.Selector
 }
 
 // Scan applies the selector query and scans the result into the given value.
-func (cs *CategorySelect) Scan(ctx context.Context, v interface{}) error {
+func (cs *CollectionSelect) Scan(ctx context.Context, v interface{}) error {
 	if err := cs.prepareQuery(ctx); err != nil {
 		return err
 	}
-	cs.sql = cs.CategoryQuery.sqlQuery(ctx)
+	cs.sql = cs.CollectionQuery.sqlQuery(ctx)
 	return cs.sqlScan(ctx, v)
 }
 
 // ScanX is like Scan, but panics if an error occurs.
-func (cs *CategorySelect) ScanX(ctx context.Context, v interface{}) {
+func (cs *CollectionSelect) ScanX(ctx context.Context, v interface{}) {
 	if err := cs.Scan(ctx, v); err != nil {
 		panic(err)
 	}
 }
 
 // Strings returns list of strings from a selector. It is only allowed when selecting one field.
-func (cs *CategorySelect) Strings(ctx context.Context) ([]string, error) {
+func (cs *CollectionSelect) Strings(ctx context.Context) ([]string, error) {
 	if len(cs.fields) > 1 {
-		return nil, errors.New("ent: CategorySelect.Strings is not achievable when selecting more than 1 field")
+		return nil, errors.New("ent: CollectionSelect.Strings is not achievable when selecting more than 1 field")
 	}
 	var v []string
 	if err := cs.Scan(ctx, &v); err != nil {
@@ -945,7 +945,7 @@ func (cs *CategorySelect) Strings(ctx context.Context) ([]string, error) {
 }
 
 // StringsX is like Strings, but panics if an error occurs.
-func (cs *CategorySelect) StringsX(ctx context.Context) []string {
+func (cs *CollectionSelect) StringsX(ctx context.Context) []string {
 	v, err := cs.Strings(ctx)
 	if err != nil {
 		panic(err)
@@ -954,7 +954,7 @@ func (cs *CategorySelect) StringsX(ctx context.Context) []string {
 }
 
 // String returns a single string from a selector. It is only allowed when selecting one field.
-func (cs *CategorySelect) String(ctx context.Context) (_ string, err error) {
+func (cs *CollectionSelect) String(ctx context.Context) (_ string, err error) {
 	var v []string
 	if v, err = cs.Strings(ctx); err != nil {
 		return
@@ -963,15 +963,15 @@ func (cs *CategorySelect) String(ctx context.Context) (_ string, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{category.Label}
+		err = &NotFoundError{collection.Label}
 	default:
-		err = fmt.Errorf("ent: CategorySelect.Strings returned %d results when one was expected", len(v))
+		err = fmt.Errorf("ent: CollectionSelect.Strings returned %d results when one was expected", len(v))
 	}
 	return
 }
 
 // StringX is like String, but panics if an error occurs.
-func (cs *CategorySelect) StringX(ctx context.Context) string {
+func (cs *CollectionSelect) StringX(ctx context.Context) string {
 	v, err := cs.String(ctx)
 	if err != nil {
 		panic(err)
@@ -980,9 +980,9 @@ func (cs *CategorySelect) StringX(ctx context.Context) string {
 }
 
 // Ints returns list of ints from a selector. It is only allowed when selecting one field.
-func (cs *CategorySelect) Ints(ctx context.Context) ([]int, error) {
+func (cs *CollectionSelect) Ints(ctx context.Context) ([]int, error) {
 	if len(cs.fields) > 1 {
-		return nil, errors.New("ent: CategorySelect.Ints is not achievable when selecting more than 1 field")
+		return nil, errors.New("ent: CollectionSelect.Ints is not achievable when selecting more than 1 field")
 	}
 	var v []int
 	if err := cs.Scan(ctx, &v); err != nil {
@@ -992,7 +992,7 @@ func (cs *CategorySelect) Ints(ctx context.Context) ([]int, error) {
 }
 
 // IntsX is like Ints, but panics if an error occurs.
-func (cs *CategorySelect) IntsX(ctx context.Context) []int {
+func (cs *CollectionSelect) IntsX(ctx context.Context) []int {
 	v, err := cs.Ints(ctx)
 	if err != nil {
 		panic(err)
@@ -1001,7 +1001,7 @@ func (cs *CategorySelect) IntsX(ctx context.Context) []int {
 }
 
 // Int returns a single int from a selector. It is only allowed when selecting one field.
-func (cs *CategorySelect) Int(ctx context.Context) (_ int, err error) {
+func (cs *CollectionSelect) Int(ctx context.Context) (_ int, err error) {
 	var v []int
 	if v, err = cs.Ints(ctx); err != nil {
 		return
@@ -1010,15 +1010,15 @@ func (cs *CategorySelect) Int(ctx context.Context) (_ int, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{category.Label}
+		err = &NotFoundError{collection.Label}
 	default:
-		err = fmt.Errorf("ent: CategorySelect.Ints returned %d results when one was expected", len(v))
+		err = fmt.Errorf("ent: CollectionSelect.Ints returned %d results when one was expected", len(v))
 	}
 	return
 }
 
 // IntX is like Int, but panics if an error occurs.
-func (cs *CategorySelect) IntX(ctx context.Context) int {
+func (cs *CollectionSelect) IntX(ctx context.Context) int {
 	v, err := cs.Int(ctx)
 	if err != nil {
 		panic(err)
@@ -1027,9 +1027,9 @@ func (cs *CategorySelect) IntX(ctx context.Context) int {
 }
 
 // Float64s returns list of float64s from a selector. It is only allowed when selecting one field.
-func (cs *CategorySelect) Float64s(ctx context.Context) ([]float64, error) {
+func (cs *CollectionSelect) Float64s(ctx context.Context) ([]float64, error) {
 	if len(cs.fields) > 1 {
-		return nil, errors.New("ent: CategorySelect.Float64s is not achievable when selecting more than 1 field")
+		return nil, errors.New("ent: CollectionSelect.Float64s is not achievable when selecting more than 1 field")
 	}
 	var v []float64
 	if err := cs.Scan(ctx, &v); err != nil {
@@ -1039,7 +1039,7 @@ func (cs *CategorySelect) Float64s(ctx context.Context) ([]float64, error) {
 }
 
 // Float64sX is like Float64s, but panics if an error occurs.
-func (cs *CategorySelect) Float64sX(ctx context.Context) []float64 {
+func (cs *CollectionSelect) Float64sX(ctx context.Context) []float64 {
 	v, err := cs.Float64s(ctx)
 	if err != nil {
 		panic(err)
@@ -1048,7 +1048,7 @@ func (cs *CategorySelect) Float64sX(ctx context.Context) []float64 {
 }
 
 // Float64 returns a single float64 from a selector. It is only allowed when selecting one field.
-func (cs *CategorySelect) Float64(ctx context.Context) (_ float64, err error) {
+func (cs *CollectionSelect) Float64(ctx context.Context) (_ float64, err error) {
 	var v []float64
 	if v, err = cs.Float64s(ctx); err != nil {
 		return
@@ -1057,15 +1057,15 @@ func (cs *CategorySelect) Float64(ctx context.Context) (_ float64, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{category.Label}
+		err = &NotFoundError{collection.Label}
 	default:
-		err = fmt.Errorf("ent: CategorySelect.Float64s returned %d results when one was expected", len(v))
+		err = fmt.Errorf("ent: CollectionSelect.Float64s returned %d results when one was expected", len(v))
 	}
 	return
 }
 
 // Float64X is like Float64, but panics if an error occurs.
-func (cs *CategorySelect) Float64X(ctx context.Context) float64 {
+func (cs *CollectionSelect) Float64X(ctx context.Context) float64 {
 	v, err := cs.Float64(ctx)
 	if err != nil {
 		panic(err)
@@ -1074,9 +1074,9 @@ func (cs *CategorySelect) Float64X(ctx context.Context) float64 {
 }
 
 // Bools returns list of bools from a selector. It is only allowed when selecting one field.
-func (cs *CategorySelect) Bools(ctx context.Context) ([]bool, error) {
+func (cs *CollectionSelect) Bools(ctx context.Context) ([]bool, error) {
 	if len(cs.fields) > 1 {
-		return nil, errors.New("ent: CategorySelect.Bools is not achievable when selecting more than 1 field")
+		return nil, errors.New("ent: CollectionSelect.Bools is not achievable when selecting more than 1 field")
 	}
 	var v []bool
 	if err := cs.Scan(ctx, &v); err != nil {
@@ -1086,7 +1086,7 @@ func (cs *CategorySelect) Bools(ctx context.Context) ([]bool, error) {
 }
 
 // BoolsX is like Bools, but panics if an error occurs.
-func (cs *CategorySelect) BoolsX(ctx context.Context) []bool {
+func (cs *CollectionSelect) BoolsX(ctx context.Context) []bool {
 	v, err := cs.Bools(ctx)
 	if err != nil {
 		panic(err)
@@ -1095,7 +1095,7 @@ func (cs *CategorySelect) BoolsX(ctx context.Context) []bool {
 }
 
 // Bool returns a single bool from a selector. It is only allowed when selecting one field.
-func (cs *CategorySelect) Bool(ctx context.Context) (_ bool, err error) {
+func (cs *CollectionSelect) Bool(ctx context.Context) (_ bool, err error) {
 	var v []bool
 	if v, err = cs.Bools(ctx); err != nil {
 		return
@@ -1104,15 +1104,15 @@ func (cs *CategorySelect) Bool(ctx context.Context) (_ bool, err error) {
 	case 1:
 		return v[0], nil
 	case 0:
-		err = &NotFoundError{category.Label}
+		err = &NotFoundError{collection.Label}
 	default:
-		err = fmt.Errorf("ent: CategorySelect.Bools returned %d results when one was expected", len(v))
+		err = fmt.Errorf("ent: CollectionSelect.Bools returned %d results when one was expected", len(v))
 	}
 	return
 }
 
 // BoolX is like Bool, but panics if an error occurs.
-func (cs *CategorySelect) BoolX(ctx context.Context) bool {
+func (cs *CollectionSelect) BoolX(ctx context.Context) bool {
 	v, err := cs.Bool(ctx)
 	if err != nil {
 		panic(err)
@@ -1120,7 +1120,7 @@ func (cs *CategorySelect) BoolX(ctx context.Context) bool {
 	return v
 }
 
-func (cs *CategorySelect) sqlScan(ctx context.Context, v interface{}) error {
+func (cs *CollectionSelect) sqlScan(ctx context.Context, v interface{}) error {
 	rows := &sql.Rows{}
 	query, args := cs.sql.Query()
 	if err := cs.driver.Query(ctx, query, args, rows); err != nil {

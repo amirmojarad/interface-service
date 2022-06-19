@@ -8,18 +8,18 @@ import (
 )
 
 var (
-	// CategoriesColumns holds the columns for the "categories" table.
-	CategoriesColumns = []*schema.Column{
+	// CollectionsColumns holds the columns for the "collections" table.
+	CollectionsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "title", Type: field.TypeString},
 		{Name: "created_date", Type: field.TypeTime},
 		{Name: "updated_date", Type: field.TypeTime},
 	}
-	// CategoriesTable holds the schema information for the "categories" table.
-	CategoriesTable = &schema.Table{
-		Name:       "categories",
-		Columns:    CategoriesColumns,
-		PrimaryKey: []*schema.Column{CategoriesColumns[0]},
+	// CollectionsTable holds the schema information for the "collections" table.
+	CollectionsTable = &schema.Table{
+		Name:       "collections",
+		Columns:    CollectionsColumns,
+		PrimaryKey: []*schema.Column{CollectionsColumns[0]},
 	}
 	// FileEntitiesColumns holds the columns for the "file_entities" table.
 	FileEntitiesColumns = []*schema.Column{
@@ -136,26 +136,26 @@ var (
 			},
 		},
 	}
-	// CategoryCategoryWordsColumns holds the columns for the "category_category_words" table.
-	CategoryCategoryWordsColumns = []*schema.Column{
-		{Name: "category_id", Type: field.TypeInt},
+	// CollectionCollectionWordsColumns holds the columns for the "collection_collection_words" table.
+	CollectionCollectionWordsColumns = []*schema.Column{
+		{Name: "collection_id", Type: field.TypeInt},
 		{Name: "word_id", Type: field.TypeInt},
 	}
-	// CategoryCategoryWordsTable holds the schema information for the "category_category_words" table.
-	CategoryCategoryWordsTable = &schema.Table{
-		Name:       "category_category_words",
-		Columns:    CategoryCategoryWordsColumns,
-		PrimaryKey: []*schema.Column{CategoryCategoryWordsColumns[0], CategoryCategoryWordsColumns[1]},
+	// CollectionCollectionWordsTable holds the schema information for the "collection_collection_words" table.
+	CollectionCollectionWordsTable = &schema.Table{
+		Name:       "collection_collection_words",
+		Columns:    CollectionCollectionWordsColumns,
+		PrimaryKey: []*schema.Column{CollectionCollectionWordsColumns[0], CollectionCollectionWordsColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "category_category_words_category_id",
-				Columns:    []*schema.Column{CategoryCategoryWordsColumns[0]},
-				RefColumns: []*schema.Column{CategoriesColumns[0]},
+				Symbol:     "collection_collection_words_collection_id",
+				Columns:    []*schema.Column{CollectionCollectionWordsColumns[0]},
+				RefColumns: []*schema.Column{CollectionsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:     "category_category_words_word_id",
-				Columns:    []*schema.Column{CategoryCategoryWordsColumns[1]},
+				Symbol:     "collection_collection_words_word_id",
+				Columns:    []*schema.Column{CollectionCollectionWordsColumns[1]},
 				RefColumns: []*schema.Column{WordsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
@@ -186,42 +186,42 @@ var (
 			},
 		},
 	}
-	// UserCategoriesColumns holds the columns for the "user_categories" table.
-	UserCategoriesColumns = []*schema.Column{
+	// UserCollectionsColumns holds the columns for the "user_collections" table.
+	UserCollectionsColumns = []*schema.Column{
 		{Name: "user_id", Type: field.TypeInt},
-		{Name: "category_id", Type: field.TypeInt},
+		{Name: "collection_id", Type: field.TypeInt},
 	}
-	// UserCategoriesTable holds the schema information for the "user_categories" table.
-	UserCategoriesTable = &schema.Table{
-		Name:       "user_categories",
-		Columns:    UserCategoriesColumns,
-		PrimaryKey: []*schema.Column{UserCategoriesColumns[0], UserCategoriesColumns[1]},
+	// UserCollectionsTable holds the schema information for the "user_collections" table.
+	UserCollectionsTable = &schema.Table{
+		Name:       "user_collections",
+		Columns:    UserCollectionsColumns,
+		PrimaryKey: []*schema.Column{UserCollectionsColumns[0], UserCollectionsColumns[1]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:     "user_categories_user_id",
-				Columns:    []*schema.Column{UserCategoriesColumns[0]},
+				Symbol:     "user_collections_user_id",
+				Columns:    []*schema.Column{UserCollectionsColumns[0]},
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 			{
-				Symbol:     "user_categories_category_id",
-				Columns:    []*schema.Column{UserCategoriesColumns[1]},
-				RefColumns: []*schema.Column{CategoriesColumns[0]},
+				Symbol:     "user_collections_collection_id",
+				Columns:    []*schema.Column{UserCollectionsColumns[1]},
+				RefColumns: []*schema.Column{CollectionsColumns[0]},
 				OnDelete:   schema.Cascade,
 			},
 		},
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		CategoriesTable,
+		CollectionsTable,
 		FileEntitiesTable,
 		MoviesTable,
 		SearchKeywordsTable,
 		UsersTable,
 		WordsTable,
-		CategoryCategoryWordsTable,
+		CollectionCollectionWordsTable,
 		UserFavoriteMoviesTable,
-		UserCategoriesTable,
+		UserCollectionsTable,
 	}
 )
 
@@ -230,10 +230,10 @@ func init() {
 	SearchKeywordsTable.ForeignKeys[0].RefTable = UsersTable
 	WordsTable.ForeignKeys[0].RefTable = FileEntitiesTable
 	WordsTable.ForeignKeys[1].RefTable = UsersTable
-	CategoryCategoryWordsTable.ForeignKeys[0].RefTable = CategoriesTable
-	CategoryCategoryWordsTable.ForeignKeys[1].RefTable = WordsTable
+	CollectionCollectionWordsTable.ForeignKeys[0].RefTable = CollectionsTable
+	CollectionCollectionWordsTable.ForeignKeys[1].RefTable = WordsTable
 	UserFavoriteMoviesTable.ForeignKeys[0].RefTable = UsersTable
 	UserFavoriteMoviesTable.ForeignKeys[1].RefTable = MoviesTable
-	UserCategoriesTable.ForeignKeys[0].RefTable = UsersTable
-	UserCategoriesTable.ForeignKeys[1].RefTable = CategoriesTable
+	UserCollectionsTable.ForeignKeys[0].RefTable = UsersTable
+	UserCollectionsTable.ForeignKeys[1].RefTable = CollectionsTable
 }

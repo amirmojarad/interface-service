@@ -9,13 +9,13 @@ import (
 	"time"
 )
 
-// Category holds the schema definition for the Category entity.
-type Category struct {
+// Collection holds the schema definition for the Collection entity.
+type Collection struct {
 	ent.Schema
 }
 
-// Fields of the Category.
-func (Category) Fields() []ent.Field {
+// Fields of the Collection.
+func (Collection) Fields() []ent.Field {
 	return []ent.Field{
 		field.String("title").Annotations(entproto.Field(2)),
 		field.Time("created_date").Default(time.Now()).Annotations(entproto.Field(3)),
@@ -23,15 +23,15 @@ func (Category) Fields() []ent.Field {
 	}
 }
 
-// Edges of the Category.
-func (Category) Edges() []ent.Edge {
+// Edges of the Collection.
+func (Collection) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.From("user", User.Type).Ref("categories").Annotations(entproto.Field(5)),
-		edge.To("category_words", Word.Type).Annotations(entproto.Field(6)),
+		edge.From("user", User.Type).Ref("collections").Annotations(entproto.Field(5)),
+		edge.To("collection_words", Word.Type).Annotations(entproto.Field(6)),
 	}
 }
 
-func (Category) Annotations() []schema.Annotation {
+func (Collection) Annotations() []schema.Annotation {
 	return []schema.Annotation{
 		entproto.Message(),
 	}

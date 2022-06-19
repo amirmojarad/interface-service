@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"interface_project/api/dto"
 	"interface_project/api/middlewares"
 	"interface_project/ent"
 	"log"
@@ -38,9 +39,91 @@ func (api *API) userGroup(path string) {
 	userGroup.POST("/favorite_words", api.addWordsToUser())
 	userGroup.GET("/favorite_words", api.getFavoriteWords())
 
+	// User Collections
+	userGroup.GET("/collections/all", api.getAllCollections())
+	userGroup.POST("/collections", api.addCollection())
+	userGroup.GET("/collections")
+
 	// User Files
 	userGroup.GET("/files/all", api.getAllFiles())
 
+}
+
+func (api API) getCollection() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		email := fmt.Sprint(ctx.MustGet("email"))
+		id, err := strconv.Atoi(ctx.Request.URL.Query().Get("file_id"))
+		if err != nil {
+			ctx.IndentedJSON(http.StatusBadRequest, gin.H{
+				"message": "request does not contain any id in url",
+				"error":   err.Error(),
+			})
+			return
+		}
+		if collection, err := api.Crud.GetCollection(email, id); err != nil {
+			ctx.IndentedJSON(http.StatusBadRequest, gin.H{
+				"message": "error while getting collection from database",
+				"error":   err.Error(),
+			})
+			return
+		} else {
+			ctx.IndentedJSON(http.StatusOK, collection)
+		}
+
+	}
+}
+
+func (api API) getAllCollections() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		email := fmt.Sprint(ctx.MustGet("email"))
+		if collections, err := api.Crud.GetCollections(email); err != nil {
+			ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
+				"message": "error occurred while fetching collections from database",
+				"error":   err.Error(),
+			})
+		} else {
+			ctx.IndentedJSON(http.StatusOK, collections)
+		}
+	}
+}
+
+func (api API) addCollection() gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		email := fmt.Sprint(ctx.MustGet("email"))
+		id, err := strconv.Atoi(ctx.Request.URL.Query().Get("file_id"))
+		if err != nil {
+			ctx.IndentedJSON(http.StatusBadRequest, gin.H{
+				"message": "request does not contain any id in url",
+				"error":   err.Error(),
+			})
+		}
+		collectionSchema := dto.Collection{}
+
+		err = ctx.BindJSON(&collectionSchema)
+		if err != nil {
+			ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
+				"message": "invalid json schema",
+				"error":   err.Error(),
+			})
+			return
+		}
+		if fetchedWords, err := api.Crud.GetUserWords(email, collectionSchema.WordTitles, id); err != nil {
+			ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
+				"message": "error while fetching words from database",
+				"error":   err.Error(),
+			})
+			return
+		} else {
+			if collection, err := api.Crud.CreateCollection(email, collectionSchema.Title, fetchedWords); err != nil {
+				ctx.IndentedJSON(http.StatusInternalServerError, gin.H{
+					"message": "error while creating collection",
+					"error":   err.Error(),
+				})
+			} else {
+				ctx.IndentedJSON(http.StatusOK, collection)
+			}
+		}
+	}
 }
 
 func (api API) getFavoriteWords() gin.HandlerFunc {

@@ -47,8 +47,8 @@ type UserEdges struct {
 	FavoriteWords []*Word `json:"favorite_words,omitempty"`
 	// Files holds the value of the files edge.
 	Files []*FileEntity `json:"files,omitempty"`
-	// Categories holds the value of the categories edge.
-	Categories []*Category `json:"categories,omitempty"`
+	// Collections holds the value of the collections edge.
+	Collections []*Collection `json:"collections,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [5]bool
@@ -90,13 +90,13 @@ func (e UserEdges) FilesOrErr() ([]*FileEntity, error) {
 	return nil, &NotLoadedError{edge: "files"}
 }
 
-// CategoriesOrErr returns the Categories value or an error if the edge
+// CollectionsOrErr returns the Collections value or an error if the edge
 // was not loaded in eager-loading.
-func (e UserEdges) CategoriesOrErr() ([]*Category, error) {
+func (e UserEdges) CollectionsOrErr() ([]*Collection, error) {
 	if e.loadedTypes[4] {
-		return e.Categories, nil
+		return e.Collections, nil
 	}
-	return nil, &NotLoadedError{edge: "categories"}
+	return nil, &NotLoadedError{edge: "collections"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -206,9 +206,9 @@ func (u *User) QueryFiles() *FileEntityQuery {
 	return (&UserClient{config: u.config}).QueryFiles(u)
 }
 
-// QueryCategories queries the "categories" edge of the User entity.
-func (u *User) QueryCategories() *CategoryQuery {
-	return (&UserClient{config: u.config}).QueryCategories(u)
+// QueryCollections queries the "collections" edge of the User entity.
+func (u *User) QueryCollections() *CollectionQuery {
+	return (&UserClient{config: u.config}).QueryCollections(u)
 }
 
 // Update returns a builder for updating this User.

@@ -6,7 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"interface_project/ent/category"
+	"interface_project/ent/collection"
 	"interface_project/ent/user"
 	"interface_project/ent/word"
 	"time"
@@ -15,27 +15,27 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// CategoryCreate is the builder for creating a Category entity.
-type CategoryCreate struct {
+// CollectionCreate is the builder for creating a Collection entity.
+type CollectionCreate struct {
 	config
-	mutation *CategoryMutation
+	mutation *CollectionMutation
 	hooks    []Hook
 }
 
 // SetTitle sets the "title" field.
-func (cc *CategoryCreate) SetTitle(s string) *CategoryCreate {
+func (cc *CollectionCreate) SetTitle(s string) *CollectionCreate {
 	cc.mutation.SetTitle(s)
 	return cc
 }
 
 // SetCreatedDate sets the "created_date" field.
-func (cc *CategoryCreate) SetCreatedDate(t time.Time) *CategoryCreate {
+func (cc *CollectionCreate) SetCreatedDate(t time.Time) *CollectionCreate {
 	cc.mutation.SetCreatedDate(t)
 	return cc
 }
 
 // SetNillableCreatedDate sets the "created_date" field if the given value is not nil.
-func (cc *CategoryCreate) SetNillableCreatedDate(t *time.Time) *CategoryCreate {
+func (cc *CollectionCreate) SetNillableCreatedDate(t *time.Time) *CollectionCreate {
 	if t != nil {
 		cc.SetCreatedDate(*t)
 	}
@@ -43,13 +43,13 @@ func (cc *CategoryCreate) SetNillableCreatedDate(t *time.Time) *CategoryCreate {
 }
 
 // SetUpdatedDate sets the "updated_date" field.
-func (cc *CategoryCreate) SetUpdatedDate(t time.Time) *CategoryCreate {
+func (cc *CollectionCreate) SetUpdatedDate(t time.Time) *CollectionCreate {
 	cc.mutation.SetUpdatedDate(t)
 	return cc
 }
 
 // SetNillableUpdatedDate sets the "updated_date" field if the given value is not nil.
-func (cc *CategoryCreate) SetNillableUpdatedDate(t *time.Time) *CategoryCreate {
+func (cc *CollectionCreate) SetNillableUpdatedDate(t *time.Time) *CollectionCreate {
 	if t != nil {
 		cc.SetUpdatedDate(*t)
 	}
@@ -57,13 +57,13 @@ func (cc *CategoryCreate) SetNillableUpdatedDate(t *time.Time) *CategoryCreate {
 }
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
-func (cc *CategoryCreate) AddUserIDs(ids ...int) *CategoryCreate {
+func (cc *CollectionCreate) AddUserIDs(ids ...int) *CollectionCreate {
 	cc.mutation.AddUserIDs(ids...)
 	return cc
 }
 
 // AddUser adds the "user" edges to the User entity.
-func (cc *CategoryCreate) AddUser(u ...*User) *CategoryCreate {
+func (cc *CollectionCreate) AddUser(u ...*User) *CollectionCreate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
@@ -71,31 +71,31 @@ func (cc *CategoryCreate) AddUser(u ...*User) *CategoryCreate {
 	return cc.AddUserIDs(ids...)
 }
 
-// AddCategoryWordIDs adds the "category_words" edge to the Word entity by IDs.
-func (cc *CategoryCreate) AddCategoryWordIDs(ids ...int) *CategoryCreate {
-	cc.mutation.AddCategoryWordIDs(ids...)
+// AddCollectionWordIDs adds the "collection_words" edge to the Word entity by IDs.
+func (cc *CollectionCreate) AddCollectionWordIDs(ids ...int) *CollectionCreate {
+	cc.mutation.AddCollectionWordIDs(ids...)
 	return cc
 }
 
-// AddCategoryWords adds the "category_words" edges to the Word entity.
-func (cc *CategoryCreate) AddCategoryWords(w ...*Word) *CategoryCreate {
+// AddCollectionWords adds the "collection_words" edges to the Word entity.
+func (cc *CollectionCreate) AddCollectionWords(w ...*Word) *CollectionCreate {
 	ids := make([]int, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
-	return cc.AddCategoryWordIDs(ids...)
+	return cc.AddCollectionWordIDs(ids...)
 }
 
-// Mutation returns the CategoryMutation object of the builder.
-func (cc *CategoryCreate) Mutation() *CategoryMutation {
+// Mutation returns the CollectionMutation object of the builder.
+func (cc *CollectionCreate) Mutation() *CollectionMutation {
 	return cc.mutation
 }
 
-// Save creates the Category in the database.
-func (cc *CategoryCreate) Save(ctx context.Context) (*Category, error) {
+// Save creates the Collection in the database.
+func (cc *CollectionCreate) Save(ctx context.Context) (*Collection, error) {
 	var (
 		err  error
-		node *Category
+		node *Collection
 	)
 	cc.defaults()
 	if len(cc.hooks) == 0 {
@@ -105,7 +105,7 @@ func (cc *CategoryCreate) Save(ctx context.Context) (*Category, error) {
 		node, err = cc.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*CategoryMutation)
+			mutation, ok := m.(*CollectionMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
 			}
@@ -134,7 +134,7 @@ func (cc *CategoryCreate) Save(ctx context.Context) (*Category, error) {
 }
 
 // SaveX calls Save and panics if Save returns an error.
-func (cc *CategoryCreate) SaveX(ctx context.Context) *Category {
+func (cc *CollectionCreate) SaveX(ctx context.Context) *Collection {
 	v, err := cc.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -143,45 +143,45 @@ func (cc *CategoryCreate) SaveX(ctx context.Context) *Category {
 }
 
 // Exec executes the query.
-func (cc *CategoryCreate) Exec(ctx context.Context) error {
+func (cc *CollectionCreate) Exec(ctx context.Context) error {
 	_, err := cc.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cc *CategoryCreate) ExecX(ctx context.Context) {
+func (cc *CollectionCreate) ExecX(ctx context.Context) {
 	if err := cc.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
 // defaults sets the default values of the builder before save.
-func (cc *CategoryCreate) defaults() {
+func (cc *CollectionCreate) defaults() {
 	if _, ok := cc.mutation.CreatedDate(); !ok {
-		v := category.DefaultCreatedDate
+		v := collection.DefaultCreatedDate
 		cc.mutation.SetCreatedDate(v)
 	}
 	if _, ok := cc.mutation.UpdatedDate(); !ok {
-		v := category.DefaultUpdatedDate
+		v := collection.DefaultUpdatedDate
 		cc.mutation.SetUpdatedDate(v)
 	}
 }
 
 // check runs all checks and user-defined validators on the builder.
-func (cc *CategoryCreate) check() error {
+func (cc *CollectionCreate) check() error {
 	if _, ok := cc.mutation.Title(); !ok {
-		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "Category.title"`)}
+		return &ValidationError{Name: "title", err: errors.New(`ent: missing required field "Collection.title"`)}
 	}
 	if _, ok := cc.mutation.CreatedDate(); !ok {
-		return &ValidationError{Name: "created_date", err: errors.New(`ent: missing required field "Category.created_date"`)}
+		return &ValidationError{Name: "created_date", err: errors.New(`ent: missing required field "Collection.created_date"`)}
 	}
 	if _, ok := cc.mutation.UpdatedDate(); !ok {
-		return &ValidationError{Name: "updated_date", err: errors.New(`ent: missing required field "Category.updated_date"`)}
+		return &ValidationError{Name: "updated_date", err: errors.New(`ent: missing required field "Collection.updated_date"`)}
 	}
 	return nil
 }
 
-func (cc *CategoryCreate) sqlSave(ctx context.Context) (*Category, error) {
+func (cc *CollectionCreate) sqlSave(ctx context.Context) (*Collection, error) {
 	_node, _spec := cc.createSpec()
 	if err := sqlgraph.CreateNode(ctx, cc.driver, _spec); err != nil {
 		if sqlgraph.IsConstraintError(err) {
@@ -194,14 +194,14 @@ func (cc *CategoryCreate) sqlSave(ctx context.Context) (*Category, error) {
 	return _node, nil
 }
 
-func (cc *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
+func (cc *CollectionCreate) createSpec() (*Collection, *sqlgraph.CreateSpec) {
 	var (
-		_node = &Category{config: cc.config}
+		_node = &Collection{config: cc.config}
 		_spec = &sqlgraph.CreateSpec{
-			Table: category.Table,
+			Table: collection.Table,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
-				Column: category.FieldID,
+				Column: collection.FieldID,
 			},
 		}
 	)
@@ -209,7 +209,7 @@ func (cc *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: category.FieldTitle,
+			Column: collection.FieldTitle,
 		})
 		_node.Title = value
 	}
@@ -217,7 +217,7 @@ func (cc *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: category.FieldCreatedDate,
+			Column: collection.FieldCreatedDate,
 		})
 		_node.CreatedDate = value
 	}
@@ -225,7 +225,7 @@ func (cc *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: category.FieldUpdatedDate,
+			Column: collection.FieldUpdatedDate,
 		})
 		_node.UpdatedDate = value
 	}
@@ -233,8 +233,8 @@ func (cc *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   category.UserTable,
-			Columns: category.UserPrimaryKey,
+			Table:   collection.UserTable,
+			Columns: collection.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -248,12 +248,12 @@ func (cc *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := cc.mutation.CategoryWordsIDs(); len(nodes) > 0 {
+	if nodes := cc.mutation.CollectionWordsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   category.CategoryWordsTable,
-			Columns: category.CategoryWordsPrimaryKey,
+			Table:   collection.CollectionWordsTable,
+			Columns: collection.CollectionWordsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -270,23 +270,23 @@ func (cc *CategoryCreate) createSpec() (*Category, *sqlgraph.CreateSpec) {
 	return _node, _spec
 }
 
-// CategoryCreateBulk is the builder for creating many Category entities in bulk.
-type CategoryCreateBulk struct {
+// CollectionCreateBulk is the builder for creating many Collection entities in bulk.
+type CollectionCreateBulk struct {
 	config
-	builders []*CategoryCreate
+	builders []*CollectionCreate
 }
 
-// Save creates the Category entities in the database.
-func (ccb *CategoryCreateBulk) Save(ctx context.Context) ([]*Category, error) {
+// Save creates the Collection entities in the database.
+func (ccb *CollectionCreateBulk) Save(ctx context.Context) ([]*Collection, error) {
 	specs := make([]*sqlgraph.CreateSpec, len(ccb.builders))
-	nodes := make([]*Category, len(ccb.builders))
+	nodes := make([]*Collection, len(ccb.builders))
 	mutators := make([]Mutator, len(ccb.builders))
 	for i := range ccb.builders {
 		func(i int, root context.Context) {
 			builder := ccb.builders[i]
 			builder.defaults()
 			var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-				mutation, ok := m.(*CategoryMutation)
+				mutation, ok := m.(*CollectionMutation)
 				if !ok {
 					return nil, fmt.Errorf("unexpected mutation type %T", m)
 				}
@@ -333,7 +333,7 @@ func (ccb *CategoryCreateBulk) Save(ctx context.Context) ([]*Category, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (ccb *CategoryCreateBulk) SaveX(ctx context.Context) []*Category {
+func (ccb *CollectionCreateBulk) SaveX(ctx context.Context) []*Collection {
 	v, err := ccb.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -342,13 +342,13 @@ func (ccb *CategoryCreateBulk) SaveX(ctx context.Context) []*Category {
 }
 
 // Exec executes the query.
-func (ccb *CategoryCreateBulk) Exec(ctx context.Context) error {
+func (ccb *CollectionCreateBulk) Exec(ctx context.Context) error {
 	_, err := ccb.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (ccb *CategoryCreateBulk) ExecX(ctx context.Context) {
+func (ccb *CollectionCreateBulk) ExecX(ctx context.Context) {
 	if err := ccb.Exec(ctx); err != nil {
 		panic(err)
 	}

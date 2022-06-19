@@ -6,7 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"interface_project/ent/category"
+	"interface_project/ent/collection"
 	"interface_project/ent/fileentity"
 	"interface_project/ent/predicate"
 	"interface_project/ent/user"
@@ -110,19 +110,19 @@ func (wu *WordUpdate) SetFile(f *FileEntity) *WordUpdate {
 	return wu.SetFileID(f.ID)
 }
 
-// AddCategoryIDs adds the "category" edge to the Category entity by IDs.
-func (wu *WordUpdate) AddCategoryIDs(ids ...int) *WordUpdate {
-	wu.mutation.AddCategoryIDs(ids...)
+// AddCollectionIDs adds the "collection" edge to the Collection entity by IDs.
+func (wu *WordUpdate) AddCollectionIDs(ids ...int) *WordUpdate {
+	wu.mutation.AddCollectionIDs(ids...)
 	return wu
 }
 
-// AddCategory adds the "category" edges to the Category entity.
-func (wu *WordUpdate) AddCategory(c ...*Category) *WordUpdate {
+// AddCollection adds the "collection" edges to the Collection entity.
+func (wu *WordUpdate) AddCollection(c ...*Collection) *WordUpdate {
 	ids := make([]int, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
-	return wu.AddCategoryIDs(ids...)
+	return wu.AddCollectionIDs(ids...)
 }
 
 // Mutation returns the WordMutation object of the builder.
@@ -142,25 +142,25 @@ func (wu *WordUpdate) ClearFile() *WordUpdate {
 	return wu
 }
 
-// ClearCategory clears all "category" edges to the Category entity.
-func (wu *WordUpdate) ClearCategory() *WordUpdate {
-	wu.mutation.ClearCategory()
+// ClearCollection clears all "collection" edges to the Collection entity.
+func (wu *WordUpdate) ClearCollection() *WordUpdate {
+	wu.mutation.ClearCollection()
 	return wu
 }
 
-// RemoveCategoryIDs removes the "category" edge to Category entities by IDs.
-func (wu *WordUpdate) RemoveCategoryIDs(ids ...int) *WordUpdate {
-	wu.mutation.RemoveCategoryIDs(ids...)
+// RemoveCollectionIDs removes the "collection" edge to Collection entities by IDs.
+func (wu *WordUpdate) RemoveCollectionIDs(ids ...int) *WordUpdate {
+	wu.mutation.RemoveCollectionIDs(ids...)
 	return wu
 }
 
-// RemoveCategory removes "category" edges to Category entities.
-func (wu *WordUpdate) RemoveCategory(c ...*Category) *WordUpdate {
+// RemoveCollection removes "collection" edges to Collection entities.
+func (wu *WordUpdate) RemoveCollection(c ...*Collection) *WordUpdate {
 	ids := make([]int, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
-	return wu.RemoveCategoryIDs(ids...)
+	return wu.RemoveCollectionIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
@@ -390,33 +390,33 @@ func (wu *WordUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if wu.mutation.CategoryCleared() {
+	if wu.mutation.CollectionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   word.CategoryTable,
-			Columns: word.CategoryPrimaryKey,
+			Table:   word.CollectionTable,
+			Columns: word.CollectionPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: category.FieldID,
+					Column: collection.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := wu.mutation.RemovedCategoryIDs(); len(nodes) > 0 && !wu.mutation.CategoryCleared() {
+	if nodes := wu.mutation.RemovedCollectionIDs(); len(nodes) > 0 && !wu.mutation.CollectionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   word.CategoryTable,
-			Columns: word.CategoryPrimaryKey,
+			Table:   word.CollectionTable,
+			Columns: word.CollectionPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: category.FieldID,
+					Column: collection.FieldID,
 				},
 			},
 		}
@@ -425,17 +425,17 @@ func (wu *WordUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := wu.mutation.CategoryIDs(); len(nodes) > 0 {
+	if nodes := wu.mutation.CollectionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   word.CategoryTable,
-			Columns: word.CategoryPrimaryKey,
+			Table:   word.CollectionTable,
+			Columns: word.CollectionPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: category.FieldID,
+					Column: collection.FieldID,
 				},
 			},
 		}
@@ -543,19 +543,19 @@ func (wuo *WordUpdateOne) SetFile(f *FileEntity) *WordUpdateOne {
 	return wuo.SetFileID(f.ID)
 }
 
-// AddCategoryIDs adds the "category" edge to the Category entity by IDs.
-func (wuo *WordUpdateOne) AddCategoryIDs(ids ...int) *WordUpdateOne {
-	wuo.mutation.AddCategoryIDs(ids...)
+// AddCollectionIDs adds the "collection" edge to the Collection entity by IDs.
+func (wuo *WordUpdateOne) AddCollectionIDs(ids ...int) *WordUpdateOne {
+	wuo.mutation.AddCollectionIDs(ids...)
 	return wuo
 }
 
-// AddCategory adds the "category" edges to the Category entity.
-func (wuo *WordUpdateOne) AddCategory(c ...*Category) *WordUpdateOne {
+// AddCollection adds the "collection" edges to the Collection entity.
+func (wuo *WordUpdateOne) AddCollection(c ...*Collection) *WordUpdateOne {
 	ids := make([]int, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
-	return wuo.AddCategoryIDs(ids...)
+	return wuo.AddCollectionIDs(ids...)
 }
 
 // Mutation returns the WordMutation object of the builder.
@@ -575,25 +575,25 @@ func (wuo *WordUpdateOne) ClearFile() *WordUpdateOne {
 	return wuo
 }
 
-// ClearCategory clears all "category" edges to the Category entity.
-func (wuo *WordUpdateOne) ClearCategory() *WordUpdateOne {
-	wuo.mutation.ClearCategory()
+// ClearCollection clears all "collection" edges to the Collection entity.
+func (wuo *WordUpdateOne) ClearCollection() *WordUpdateOne {
+	wuo.mutation.ClearCollection()
 	return wuo
 }
 
-// RemoveCategoryIDs removes the "category" edge to Category entities by IDs.
-func (wuo *WordUpdateOne) RemoveCategoryIDs(ids ...int) *WordUpdateOne {
-	wuo.mutation.RemoveCategoryIDs(ids...)
+// RemoveCollectionIDs removes the "collection" edge to Collection entities by IDs.
+func (wuo *WordUpdateOne) RemoveCollectionIDs(ids ...int) *WordUpdateOne {
+	wuo.mutation.RemoveCollectionIDs(ids...)
 	return wuo
 }
 
-// RemoveCategory removes "category" edges to Category entities.
-func (wuo *WordUpdateOne) RemoveCategory(c ...*Category) *WordUpdateOne {
+// RemoveCollection removes "collection" edges to Collection entities.
+func (wuo *WordUpdateOne) RemoveCollection(c ...*Collection) *WordUpdateOne {
 	ids := make([]int, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
-	return wuo.RemoveCategoryIDs(ids...)
+	return wuo.RemoveCollectionIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
@@ -847,33 +847,33 @@ func (wuo *WordUpdateOne) sqlSave(ctx context.Context) (_node *Word, err error) 
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if wuo.mutation.CategoryCleared() {
+	if wuo.mutation.CollectionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   word.CategoryTable,
-			Columns: word.CategoryPrimaryKey,
+			Table:   word.CollectionTable,
+			Columns: word.CollectionPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: category.FieldID,
+					Column: collection.FieldID,
 				},
 			},
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := wuo.mutation.RemovedCategoryIDs(); len(nodes) > 0 && !wuo.mutation.CategoryCleared() {
+	if nodes := wuo.mutation.RemovedCollectionIDs(); len(nodes) > 0 && !wuo.mutation.CollectionCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   word.CategoryTable,
-			Columns: word.CategoryPrimaryKey,
+			Table:   word.CollectionTable,
+			Columns: word.CollectionPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: category.FieldID,
+					Column: collection.FieldID,
 				},
 			},
 		}
@@ -882,17 +882,17 @@ func (wuo *WordUpdateOne) sqlSave(ctx context.Context) (_node *Word, err error) 
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := wuo.mutation.CategoryIDs(); len(nodes) > 0 {
+	if nodes := wuo.mutation.CollectionIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   word.CategoryTable,
-			Columns: word.CategoryPrimaryKey,
+			Table:   word.CollectionTable,
+			Columns: word.CollectionPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: category.FieldID,
+					Column: collection.FieldID,
 				},
 			},
 		}

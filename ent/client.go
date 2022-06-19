@@ -9,7 +9,7 @@ import (
 
 	"interface_project/ent/migrate"
 
-	"interface_project/ent/category"
+	"interface_project/ent/collection"
 	"interface_project/ent/fileentity"
 	"interface_project/ent/movie"
 	"interface_project/ent/searchkeyword"
@@ -26,8 +26,8 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
-	// Category is the client for interacting with the Category builders.
-	Category *CategoryClient
+	// Collection is the client for interacting with the Collection builders.
+	Collection *CollectionClient
 	// FileEntity is the client for interacting with the FileEntity builders.
 	FileEntity *FileEntityClient
 	// Movie is the client for interacting with the Movie builders.
@@ -51,7 +51,7 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
-	c.Category = NewCategoryClient(c.config)
+	c.Collection = NewCollectionClient(c.config)
 	c.FileEntity = NewFileEntityClient(c.config)
 	c.Movie = NewMovieClient(c.config)
 	c.SearchKeyword = NewSearchKeywordClient(c.config)
@@ -90,7 +90,7 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:           ctx,
 		config:        cfg,
-		Category:      NewCategoryClient(cfg),
+		Collection:    NewCollectionClient(cfg),
 		FileEntity:    NewFileEntityClient(cfg),
 		Movie:         NewMovieClient(cfg),
 		SearchKeyword: NewSearchKeywordClient(cfg),
@@ -115,7 +115,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:           ctx,
 		config:        cfg,
-		Category:      NewCategoryClient(cfg),
+		Collection:    NewCollectionClient(cfg),
 		FileEntity:    NewFileEntityClient(cfg),
 		Movie:         NewMovieClient(cfg),
 		SearchKeyword: NewSearchKeywordClient(cfg),
@@ -127,7 +127,7 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Category.
+//		Collection.
 //		Query().
 //		Count(ctx)
 //
@@ -150,7 +150,7 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Category.Use(hooks...)
+	c.Collection.Use(hooks...)
 	c.FileEntity.Use(hooks...)
 	c.Movie.Use(hooks...)
 	c.SearchKeyword.Use(hooks...)
@@ -158,84 +158,84 @@ func (c *Client) Use(hooks ...Hook) {
 	c.Word.Use(hooks...)
 }
 
-// CategoryClient is a client for the Category schema.
-type CategoryClient struct {
+// CollectionClient is a client for the Collection schema.
+type CollectionClient struct {
 	config
 }
 
-// NewCategoryClient returns a client for the Category from the given config.
-func NewCategoryClient(c config) *CategoryClient {
-	return &CategoryClient{config: c}
+// NewCollectionClient returns a client for the Collection from the given config.
+func NewCollectionClient(c config) *CollectionClient {
+	return &CollectionClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `category.Hooks(f(g(h())))`.
-func (c *CategoryClient) Use(hooks ...Hook) {
-	c.hooks.Category = append(c.hooks.Category, hooks...)
+// A call to `Use(f, g, h)` equals to `collection.Hooks(f(g(h())))`.
+func (c *CollectionClient) Use(hooks ...Hook) {
+	c.hooks.Collection = append(c.hooks.Collection, hooks...)
 }
 
-// Create returns a create builder for Category.
-func (c *CategoryClient) Create() *CategoryCreate {
-	mutation := newCategoryMutation(c.config, OpCreate)
-	return &CategoryCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a create builder for Collection.
+func (c *CollectionClient) Create() *CollectionCreate {
+	mutation := newCollectionMutation(c.config, OpCreate)
+	return &CollectionCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of Category entities.
-func (c *CategoryClient) CreateBulk(builders ...*CategoryCreate) *CategoryCreateBulk {
-	return &CategoryCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Collection entities.
+func (c *CollectionClient) CreateBulk(builders ...*CollectionCreate) *CollectionCreateBulk {
+	return &CollectionCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for Category.
-func (c *CategoryClient) Update() *CategoryUpdate {
-	mutation := newCategoryMutation(c.config, OpUpdate)
-	return &CategoryUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Collection.
+func (c *CollectionClient) Update() *CollectionUpdate {
+	mutation := newCollectionMutation(c.config, OpUpdate)
+	return &CollectionUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *CategoryClient) UpdateOne(ca *Category) *CategoryUpdateOne {
-	mutation := newCategoryMutation(c.config, OpUpdateOne, withCategory(ca))
-	return &CategoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *CollectionClient) UpdateOne(co *Collection) *CollectionUpdateOne {
+	mutation := newCollectionMutation(c.config, OpUpdateOne, withCollection(co))
+	return &CollectionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *CategoryClient) UpdateOneID(id int) *CategoryUpdateOne {
-	mutation := newCategoryMutation(c.config, OpUpdateOne, withCategoryID(id))
-	return &CategoryUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *CollectionClient) UpdateOneID(id int) *CollectionUpdateOne {
+	mutation := newCollectionMutation(c.config, OpUpdateOne, withCollectionID(id))
+	return &CollectionUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for Category.
-func (c *CategoryClient) Delete() *CategoryDelete {
-	mutation := newCategoryMutation(c.config, OpDelete)
-	return &CategoryDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Collection.
+func (c *CollectionClient) Delete() *CollectionDelete {
+	mutation := newCollectionMutation(c.config, OpDelete)
+	return &CollectionDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
-func (c *CategoryClient) DeleteOne(ca *Category) *CategoryDeleteOne {
-	return c.DeleteOneID(ca.ID)
+func (c *CollectionClient) DeleteOne(co *Collection) *CollectionDeleteOne {
+	return c.DeleteOneID(co.ID)
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *CategoryClient) DeleteOneID(id int) *CategoryDeleteOne {
-	builder := c.Delete().Where(category.ID(id))
+func (c *CollectionClient) DeleteOneID(id int) *CollectionDeleteOne {
+	builder := c.Delete().Where(collection.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &CategoryDeleteOne{builder}
+	return &CollectionDeleteOne{builder}
 }
 
-// Query returns a query builder for Category.
-func (c *CategoryClient) Query() *CategoryQuery {
-	return &CategoryQuery{
+// Query returns a query builder for Collection.
+func (c *CollectionClient) Query() *CollectionQuery {
+	return &CollectionQuery{
 		config: c.config,
 	}
 }
 
-// Get returns a Category entity by its id.
-func (c *CategoryClient) Get(ctx context.Context, id int) (*Category, error) {
-	return c.Query().Where(category.ID(id)).Only(ctx)
+// Get returns a Collection entity by its id.
+func (c *CollectionClient) Get(ctx context.Context, id int) (*Collection, error) {
+	return c.Query().Where(collection.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *CategoryClient) GetX(ctx context.Context, id int) *Category {
+func (c *CollectionClient) GetX(ctx context.Context, id int) *Collection {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -243,41 +243,41 @@ func (c *CategoryClient) GetX(ctx context.Context, id int) *Category {
 	return obj
 }
 
-// QueryUser queries the user edge of a Category.
-func (c *CategoryClient) QueryUser(ca *Category) *UserQuery {
+// QueryUser queries the user edge of a Collection.
+func (c *CollectionClient) QueryUser(co *Collection) *UserQuery {
 	query := &UserQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := ca.ID
+		id := co.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(category.Table, category.FieldID, id),
+			sqlgraph.From(collection.Table, collection.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, category.UserTable, category.UserPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2M, true, collection.UserTable, collection.UserPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(ca.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(co.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
-// QueryCategoryWords queries the category_words edge of a Category.
-func (c *CategoryClient) QueryCategoryWords(ca *Category) *WordQuery {
+// QueryCollectionWords queries the collection_words edge of a Collection.
+func (c *CollectionClient) QueryCollectionWords(co *Collection) *WordQuery {
 	query := &WordQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := ca.ID
+		id := co.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(category.Table, category.FieldID, id),
+			sqlgraph.From(collection.Table, collection.FieldID, id),
 			sqlgraph.To(word.Table, word.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, category.CategoryWordsTable, category.CategoryWordsPrimaryKey...),
+			sqlgraph.Edge(sqlgraph.M2M, false, collection.CollectionWordsTable, collection.CollectionWordsPrimaryKey...),
 		)
-		fromV = sqlgraph.Neighbors(ca.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(co.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *CategoryClient) Hooks() []Hook {
-	return c.hooks.Category
+func (c *CollectionClient) Hooks() []Hook {
+	return c.hooks.Collection
 }
 
 // FileEntityClient is a client for the FileEntity schema.
@@ -763,15 +763,15 @@ func (c *UserClient) QueryFiles(u *User) *FileEntityQuery {
 	return query
 }
 
-// QueryCategories queries the categories edge of a User.
-func (c *UserClient) QueryCategories(u *User) *CategoryQuery {
-	query := &CategoryQuery{config: c.config}
+// QueryCollections queries the collections edge of a User.
+func (c *UserClient) QueryCollections(u *User) *CollectionQuery {
+	query := &CollectionQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := u.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(category.Table, category.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, user.CategoriesTable, user.CategoriesPrimaryKey...),
+			sqlgraph.To(collection.Table, collection.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, false, user.CollectionsTable, user.CollectionsPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
@@ -901,15 +901,15 @@ func (c *WordClient) QueryFile(w *Word) *FileEntityQuery {
 	return query
 }
 
-// QueryCategory queries the category edge of a Word.
-func (c *WordClient) QueryCategory(w *Word) *CategoryQuery {
-	query := &CategoryQuery{config: c.config}
+// QueryCollection queries the collection edge of a Word.
+func (c *WordClient) QueryCollection(w *Word) *CollectionQuery {
+	query := &CollectionQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
 		id := w.ID
 		step := sqlgraph.NewStep(
 			sqlgraph.From(word.Table, word.FieldID, id),
-			sqlgraph.To(category.Table, category.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, word.CategoryTable, word.CategoryPrimaryKey...),
+			sqlgraph.To(collection.Table, collection.FieldID),
+			sqlgraph.Edge(sqlgraph.M2M, true, word.CollectionTable, word.CollectionPrimaryKey...),
 		)
 		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
 		return fromV, nil

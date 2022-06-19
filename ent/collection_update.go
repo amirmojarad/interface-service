@@ -6,7 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"interface_project/ent/category"
+	"interface_project/ent/collection"
 	"interface_project/ent/predicate"
 	"interface_project/ent/user"
 	"interface_project/ent/word"
@@ -17,33 +17,33 @@ import (
 	"entgo.io/ent/schema/field"
 )
 
-// CategoryUpdate is the builder for updating Category entities.
-type CategoryUpdate struct {
+// CollectionUpdate is the builder for updating Collection entities.
+type CollectionUpdate struct {
 	config
 	hooks    []Hook
-	mutation *CategoryMutation
+	mutation *CollectionMutation
 }
 
-// Where appends a list predicates to the CategoryUpdate builder.
-func (cu *CategoryUpdate) Where(ps ...predicate.Category) *CategoryUpdate {
+// Where appends a list predicates to the CollectionUpdate builder.
+func (cu *CollectionUpdate) Where(ps ...predicate.Collection) *CollectionUpdate {
 	cu.mutation.Where(ps...)
 	return cu
 }
 
 // SetTitle sets the "title" field.
-func (cu *CategoryUpdate) SetTitle(s string) *CategoryUpdate {
+func (cu *CollectionUpdate) SetTitle(s string) *CollectionUpdate {
 	cu.mutation.SetTitle(s)
 	return cu
 }
 
 // SetCreatedDate sets the "created_date" field.
-func (cu *CategoryUpdate) SetCreatedDate(t time.Time) *CategoryUpdate {
+func (cu *CollectionUpdate) SetCreatedDate(t time.Time) *CollectionUpdate {
 	cu.mutation.SetCreatedDate(t)
 	return cu
 }
 
 // SetNillableCreatedDate sets the "created_date" field if the given value is not nil.
-func (cu *CategoryUpdate) SetNillableCreatedDate(t *time.Time) *CategoryUpdate {
+func (cu *CollectionUpdate) SetNillableCreatedDate(t *time.Time) *CollectionUpdate {
 	if t != nil {
 		cu.SetCreatedDate(*t)
 	}
@@ -51,13 +51,13 @@ func (cu *CategoryUpdate) SetNillableCreatedDate(t *time.Time) *CategoryUpdate {
 }
 
 // SetUpdatedDate sets the "updated_date" field.
-func (cu *CategoryUpdate) SetUpdatedDate(t time.Time) *CategoryUpdate {
+func (cu *CollectionUpdate) SetUpdatedDate(t time.Time) *CollectionUpdate {
 	cu.mutation.SetUpdatedDate(t)
 	return cu
 }
 
 // SetNillableUpdatedDate sets the "updated_date" field if the given value is not nil.
-func (cu *CategoryUpdate) SetNillableUpdatedDate(t *time.Time) *CategoryUpdate {
+func (cu *CollectionUpdate) SetNillableUpdatedDate(t *time.Time) *CollectionUpdate {
 	if t != nil {
 		cu.SetUpdatedDate(*t)
 	}
@@ -65,13 +65,13 @@ func (cu *CategoryUpdate) SetNillableUpdatedDate(t *time.Time) *CategoryUpdate {
 }
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
-func (cu *CategoryUpdate) AddUserIDs(ids ...int) *CategoryUpdate {
+func (cu *CollectionUpdate) AddUserIDs(ids ...int) *CollectionUpdate {
 	cu.mutation.AddUserIDs(ids...)
 	return cu
 }
 
 // AddUser adds the "user" edges to the User entity.
-func (cu *CategoryUpdate) AddUser(u ...*User) *CategoryUpdate {
+func (cu *CollectionUpdate) AddUser(u ...*User) *CollectionUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
@@ -79,40 +79,40 @@ func (cu *CategoryUpdate) AddUser(u ...*User) *CategoryUpdate {
 	return cu.AddUserIDs(ids...)
 }
 
-// AddCategoryWordIDs adds the "category_words" edge to the Word entity by IDs.
-func (cu *CategoryUpdate) AddCategoryWordIDs(ids ...int) *CategoryUpdate {
-	cu.mutation.AddCategoryWordIDs(ids...)
+// AddCollectionWordIDs adds the "collection_words" edge to the Word entity by IDs.
+func (cu *CollectionUpdate) AddCollectionWordIDs(ids ...int) *CollectionUpdate {
+	cu.mutation.AddCollectionWordIDs(ids...)
 	return cu
 }
 
-// AddCategoryWords adds the "category_words" edges to the Word entity.
-func (cu *CategoryUpdate) AddCategoryWords(w ...*Word) *CategoryUpdate {
+// AddCollectionWords adds the "collection_words" edges to the Word entity.
+func (cu *CollectionUpdate) AddCollectionWords(w ...*Word) *CollectionUpdate {
 	ids := make([]int, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
-	return cu.AddCategoryWordIDs(ids...)
+	return cu.AddCollectionWordIDs(ids...)
 }
 
-// Mutation returns the CategoryMutation object of the builder.
-func (cu *CategoryUpdate) Mutation() *CategoryMutation {
+// Mutation returns the CollectionMutation object of the builder.
+func (cu *CollectionUpdate) Mutation() *CollectionMutation {
 	return cu.mutation
 }
 
 // ClearUser clears all "user" edges to the User entity.
-func (cu *CategoryUpdate) ClearUser() *CategoryUpdate {
+func (cu *CollectionUpdate) ClearUser() *CollectionUpdate {
 	cu.mutation.ClearUser()
 	return cu
 }
 
 // RemoveUserIDs removes the "user" edge to User entities by IDs.
-func (cu *CategoryUpdate) RemoveUserIDs(ids ...int) *CategoryUpdate {
+func (cu *CollectionUpdate) RemoveUserIDs(ids ...int) *CollectionUpdate {
 	cu.mutation.RemoveUserIDs(ids...)
 	return cu
 }
 
 // RemoveUser removes "user" edges to User entities.
-func (cu *CategoryUpdate) RemoveUser(u ...*User) *CategoryUpdate {
+func (cu *CollectionUpdate) RemoveUser(u ...*User) *CollectionUpdate {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
@@ -120,29 +120,29 @@ func (cu *CategoryUpdate) RemoveUser(u ...*User) *CategoryUpdate {
 	return cu.RemoveUserIDs(ids...)
 }
 
-// ClearCategoryWords clears all "category_words" edges to the Word entity.
-func (cu *CategoryUpdate) ClearCategoryWords() *CategoryUpdate {
-	cu.mutation.ClearCategoryWords()
+// ClearCollectionWords clears all "collection_words" edges to the Word entity.
+func (cu *CollectionUpdate) ClearCollectionWords() *CollectionUpdate {
+	cu.mutation.ClearCollectionWords()
 	return cu
 }
 
-// RemoveCategoryWordIDs removes the "category_words" edge to Word entities by IDs.
-func (cu *CategoryUpdate) RemoveCategoryWordIDs(ids ...int) *CategoryUpdate {
-	cu.mutation.RemoveCategoryWordIDs(ids...)
+// RemoveCollectionWordIDs removes the "collection_words" edge to Word entities by IDs.
+func (cu *CollectionUpdate) RemoveCollectionWordIDs(ids ...int) *CollectionUpdate {
+	cu.mutation.RemoveCollectionWordIDs(ids...)
 	return cu
 }
 
-// RemoveCategoryWords removes "category_words" edges to Word entities.
-func (cu *CategoryUpdate) RemoveCategoryWords(w ...*Word) *CategoryUpdate {
+// RemoveCollectionWords removes "collection_words" edges to Word entities.
+func (cu *CollectionUpdate) RemoveCollectionWords(w ...*Word) *CollectionUpdate {
 	ids := make([]int, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
-	return cu.RemoveCategoryWordIDs(ids...)
+	return cu.RemoveCollectionWordIDs(ids...)
 }
 
 // Save executes the query and returns the number of nodes affected by the update operation.
-func (cu *CategoryUpdate) Save(ctx context.Context) (int, error) {
+func (cu *CollectionUpdate) Save(ctx context.Context) (int, error) {
 	var (
 		err      error
 		affected int
@@ -151,7 +151,7 @@ func (cu *CategoryUpdate) Save(ctx context.Context) (int, error) {
 		affected, err = cu.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*CategoryMutation)
+			mutation, ok := m.(*CollectionMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
 			}
@@ -174,7 +174,7 @@ func (cu *CategoryUpdate) Save(ctx context.Context) (int, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (cu *CategoryUpdate) SaveX(ctx context.Context) int {
+func (cu *CollectionUpdate) SaveX(ctx context.Context) int {
 	affected, err := cu.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -183,26 +183,26 @@ func (cu *CategoryUpdate) SaveX(ctx context.Context) int {
 }
 
 // Exec executes the query.
-func (cu *CategoryUpdate) Exec(ctx context.Context) error {
+func (cu *CollectionUpdate) Exec(ctx context.Context) error {
 	_, err := cu.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cu *CategoryUpdate) ExecX(ctx context.Context) {
+func (cu *CollectionUpdate) ExecX(ctx context.Context) {
 	if err := cu.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (cu *CategoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
+func (cu *CollectionUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
-			Table:   category.Table,
-			Columns: category.Columns,
+			Table:   collection.Table,
+			Columns: collection.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
-				Column: category.FieldID,
+				Column: collection.FieldID,
 			},
 		},
 	}
@@ -217,29 +217,29 @@ func (cu *CategoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: category.FieldTitle,
+			Column: collection.FieldTitle,
 		})
 	}
 	if value, ok := cu.mutation.CreatedDate(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: category.FieldCreatedDate,
+			Column: collection.FieldCreatedDate,
 		})
 	}
 	if value, ok := cu.mutation.UpdatedDate(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: category.FieldUpdatedDate,
+			Column: collection.FieldUpdatedDate,
 		})
 	}
 	if cu.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   category.UserTable,
-			Columns: category.UserPrimaryKey,
+			Table:   collection.UserTable,
+			Columns: collection.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -254,8 +254,8 @@ func (cu *CategoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   category.UserTable,
-			Columns: category.UserPrimaryKey,
+			Table:   collection.UserTable,
+			Columns: collection.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -273,8 +273,8 @@ func (cu *CategoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   category.UserTable,
-			Columns: category.UserPrimaryKey,
+			Table:   collection.UserTable,
+			Columns: collection.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -288,12 +288,12 @@ func (cu *CategoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if cu.mutation.CategoryWordsCleared() {
+	if cu.mutation.CollectionWordsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   category.CategoryWordsTable,
-			Columns: category.CategoryWordsPrimaryKey,
+			Table:   collection.CollectionWordsTable,
+			Columns: collection.CollectionWordsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -304,12 +304,12 @@ func (cu *CategoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.RemovedCategoryWordsIDs(); len(nodes) > 0 && !cu.mutation.CategoryWordsCleared() {
+	if nodes := cu.mutation.RemovedCollectionWordsIDs(); len(nodes) > 0 && !cu.mutation.CollectionWordsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   category.CategoryWordsTable,
-			Columns: category.CategoryWordsPrimaryKey,
+			Table:   collection.CollectionWordsTable,
+			Columns: collection.CollectionWordsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -323,12 +323,12 @@ func (cu *CategoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cu.mutation.CategoryWordsIDs(); len(nodes) > 0 {
+	if nodes := cu.mutation.CollectionWordsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   category.CategoryWordsTable,
-			Columns: category.CategoryWordsPrimaryKey,
+			Table:   collection.CollectionWordsTable,
+			Columns: collection.CollectionWordsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -344,7 +344,7 @@ func (cu *CategoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	}
 	if n, err = sqlgraph.UpdateNodes(ctx, cu.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{category.Label}
+			err = &NotFoundError{collection.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{err.Error(), err}
 		}
@@ -353,28 +353,28 @@ func (cu *CategoryUpdate) sqlSave(ctx context.Context) (n int, err error) {
 	return n, nil
 }
 
-// CategoryUpdateOne is the builder for updating a single Category entity.
-type CategoryUpdateOne struct {
+// CollectionUpdateOne is the builder for updating a single Collection entity.
+type CollectionUpdateOne struct {
 	config
 	fields   []string
 	hooks    []Hook
-	mutation *CategoryMutation
+	mutation *CollectionMutation
 }
 
 // SetTitle sets the "title" field.
-func (cuo *CategoryUpdateOne) SetTitle(s string) *CategoryUpdateOne {
+func (cuo *CollectionUpdateOne) SetTitle(s string) *CollectionUpdateOne {
 	cuo.mutation.SetTitle(s)
 	return cuo
 }
 
 // SetCreatedDate sets the "created_date" field.
-func (cuo *CategoryUpdateOne) SetCreatedDate(t time.Time) *CategoryUpdateOne {
+func (cuo *CollectionUpdateOne) SetCreatedDate(t time.Time) *CollectionUpdateOne {
 	cuo.mutation.SetCreatedDate(t)
 	return cuo
 }
 
 // SetNillableCreatedDate sets the "created_date" field if the given value is not nil.
-func (cuo *CategoryUpdateOne) SetNillableCreatedDate(t *time.Time) *CategoryUpdateOne {
+func (cuo *CollectionUpdateOne) SetNillableCreatedDate(t *time.Time) *CollectionUpdateOne {
 	if t != nil {
 		cuo.SetCreatedDate(*t)
 	}
@@ -382,13 +382,13 @@ func (cuo *CategoryUpdateOne) SetNillableCreatedDate(t *time.Time) *CategoryUpda
 }
 
 // SetUpdatedDate sets the "updated_date" field.
-func (cuo *CategoryUpdateOne) SetUpdatedDate(t time.Time) *CategoryUpdateOne {
+func (cuo *CollectionUpdateOne) SetUpdatedDate(t time.Time) *CollectionUpdateOne {
 	cuo.mutation.SetUpdatedDate(t)
 	return cuo
 }
 
 // SetNillableUpdatedDate sets the "updated_date" field if the given value is not nil.
-func (cuo *CategoryUpdateOne) SetNillableUpdatedDate(t *time.Time) *CategoryUpdateOne {
+func (cuo *CollectionUpdateOne) SetNillableUpdatedDate(t *time.Time) *CollectionUpdateOne {
 	if t != nil {
 		cuo.SetUpdatedDate(*t)
 	}
@@ -396,13 +396,13 @@ func (cuo *CategoryUpdateOne) SetNillableUpdatedDate(t *time.Time) *CategoryUpda
 }
 
 // AddUserIDs adds the "user" edge to the User entity by IDs.
-func (cuo *CategoryUpdateOne) AddUserIDs(ids ...int) *CategoryUpdateOne {
+func (cuo *CollectionUpdateOne) AddUserIDs(ids ...int) *CollectionUpdateOne {
 	cuo.mutation.AddUserIDs(ids...)
 	return cuo
 }
 
 // AddUser adds the "user" edges to the User entity.
-func (cuo *CategoryUpdateOne) AddUser(u ...*User) *CategoryUpdateOne {
+func (cuo *CollectionUpdateOne) AddUser(u ...*User) *CollectionUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
@@ -410,40 +410,40 @@ func (cuo *CategoryUpdateOne) AddUser(u ...*User) *CategoryUpdateOne {
 	return cuo.AddUserIDs(ids...)
 }
 
-// AddCategoryWordIDs adds the "category_words" edge to the Word entity by IDs.
-func (cuo *CategoryUpdateOne) AddCategoryWordIDs(ids ...int) *CategoryUpdateOne {
-	cuo.mutation.AddCategoryWordIDs(ids...)
+// AddCollectionWordIDs adds the "collection_words" edge to the Word entity by IDs.
+func (cuo *CollectionUpdateOne) AddCollectionWordIDs(ids ...int) *CollectionUpdateOne {
+	cuo.mutation.AddCollectionWordIDs(ids...)
 	return cuo
 }
 
-// AddCategoryWords adds the "category_words" edges to the Word entity.
-func (cuo *CategoryUpdateOne) AddCategoryWords(w ...*Word) *CategoryUpdateOne {
+// AddCollectionWords adds the "collection_words" edges to the Word entity.
+func (cuo *CollectionUpdateOne) AddCollectionWords(w ...*Word) *CollectionUpdateOne {
 	ids := make([]int, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
-	return cuo.AddCategoryWordIDs(ids...)
+	return cuo.AddCollectionWordIDs(ids...)
 }
 
-// Mutation returns the CategoryMutation object of the builder.
-func (cuo *CategoryUpdateOne) Mutation() *CategoryMutation {
+// Mutation returns the CollectionMutation object of the builder.
+func (cuo *CollectionUpdateOne) Mutation() *CollectionMutation {
 	return cuo.mutation
 }
 
 // ClearUser clears all "user" edges to the User entity.
-func (cuo *CategoryUpdateOne) ClearUser() *CategoryUpdateOne {
+func (cuo *CollectionUpdateOne) ClearUser() *CollectionUpdateOne {
 	cuo.mutation.ClearUser()
 	return cuo
 }
 
 // RemoveUserIDs removes the "user" edge to User entities by IDs.
-func (cuo *CategoryUpdateOne) RemoveUserIDs(ids ...int) *CategoryUpdateOne {
+func (cuo *CollectionUpdateOne) RemoveUserIDs(ids ...int) *CollectionUpdateOne {
 	cuo.mutation.RemoveUserIDs(ids...)
 	return cuo
 }
 
 // RemoveUser removes "user" edges to User entities.
-func (cuo *CategoryUpdateOne) RemoveUser(u ...*User) *CategoryUpdateOne {
+func (cuo *CollectionUpdateOne) RemoveUser(u ...*User) *CollectionUpdateOne {
 	ids := make([]int, len(u))
 	for i := range u {
 		ids[i] = u[i].ID
@@ -451,45 +451,45 @@ func (cuo *CategoryUpdateOne) RemoveUser(u ...*User) *CategoryUpdateOne {
 	return cuo.RemoveUserIDs(ids...)
 }
 
-// ClearCategoryWords clears all "category_words" edges to the Word entity.
-func (cuo *CategoryUpdateOne) ClearCategoryWords() *CategoryUpdateOne {
-	cuo.mutation.ClearCategoryWords()
+// ClearCollectionWords clears all "collection_words" edges to the Word entity.
+func (cuo *CollectionUpdateOne) ClearCollectionWords() *CollectionUpdateOne {
+	cuo.mutation.ClearCollectionWords()
 	return cuo
 }
 
-// RemoveCategoryWordIDs removes the "category_words" edge to Word entities by IDs.
-func (cuo *CategoryUpdateOne) RemoveCategoryWordIDs(ids ...int) *CategoryUpdateOne {
-	cuo.mutation.RemoveCategoryWordIDs(ids...)
+// RemoveCollectionWordIDs removes the "collection_words" edge to Word entities by IDs.
+func (cuo *CollectionUpdateOne) RemoveCollectionWordIDs(ids ...int) *CollectionUpdateOne {
+	cuo.mutation.RemoveCollectionWordIDs(ids...)
 	return cuo
 }
 
-// RemoveCategoryWords removes "category_words" edges to Word entities.
-func (cuo *CategoryUpdateOne) RemoveCategoryWords(w ...*Word) *CategoryUpdateOne {
+// RemoveCollectionWords removes "collection_words" edges to Word entities.
+func (cuo *CollectionUpdateOne) RemoveCollectionWords(w ...*Word) *CollectionUpdateOne {
 	ids := make([]int, len(w))
 	for i := range w {
 		ids[i] = w[i].ID
 	}
-	return cuo.RemoveCategoryWordIDs(ids...)
+	return cuo.RemoveCollectionWordIDs(ids...)
 }
 
 // Select allows selecting one or more fields (columns) of the returned entity.
 // The default is selecting all fields defined in the entity schema.
-func (cuo *CategoryUpdateOne) Select(field string, fields ...string) *CategoryUpdateOne {
+func (cuo *CollectionUpdateOne) Select(field string, fields ...string) *CollectionUpdateOne {
 	cuo.fields = append([]string{field}, fields...)
 	return cuo
 }
 
-// Save executes the query and returns the updated Category entity.
-func (cuo *CategoryUpdateOne) Save(ctx context.Context) (*Category, error) {
+// Save executes the query and returns the updated Collection entity.
+func (cuo *CollectionUpdateOne) Save(ctx context.Context) (*Collection, error) {
 	var (
 		err  error
-		node *Category
+		node *Collection
 	)
 	if len(cuo.hooks) == 0 {
 		node, err = cuo.sqlSave(ctx)
 	} else {
 		var mut Mutator = MutateFunc(func(ctx context.Context, m Mutation) (Value, error) {
-			mutation, ok := m.(*CategoryMutation)
+			mutation, ok := m.(*CollectionMutation)
 			if !ok {
 				return nil, fmt.Errorf("unexpected mutation type %T", m)
 			}
@@ -512,7 +512,7 @@ func (cuo *CategoryUpdateOne) Save(ctx context.Context) (*Category, error) {
 }
 
 // SaveX is like Save, but panics if an error occurs.
-func (cuo *CategoryUpdateOne) SaveX(ctx context.Context) *Category {
+func (cuo *CollectionUpdateOne) SaveX(ctx context.Context) *Collection {
 	node, err := cuo.Save(ctx)
 	if err != nil {
 		panic(err)
@@ -521,42 +521,42 @@ func (cuo *CategoryUpdateOne) SaveX(ctx context.Context) *Category {
 }
 
 // Exec executes the query on the entity.
-func (cuo *CategoryUpdateOne) Exec(ctx context.Context) error {
+func (cuo *CollectionUpdateOne) Exec(ctx context.Context) error {
 	_, err := cuo.Save(ctx)
 	return err
 }
 
 // ExecX is like Exec, but panics if an error occurs.
-func (cuo *CategoryUpdateOne) ExecX(ctx context.Context) {
+func (cuo *CollectionUpdateOne) ExecX(ctx context.Context) {
 	if err := cuo.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-func (cuo *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err error) {
+func (cuo *CollectionUpdateOne) sqlSave(ctx context.Context) (_node *Collection, err error) {
 	_spec := &sqlgraph.UpdateSpec{
 		Node: &sqlgraph.NodeSpec{
-			Table:   category.Table,
-			Columns: category.Columns,
+			Table:   collection.Table,
+			Columns: collection.Columns,
 			ID: &sqlgraph.FieldSpec{
 				Type:   field.TypeInt,
-				Column: category.FieldID,
+				Column: collection.FieldID,
 			},
 		},
 	}
 	id, ok := cuo.mutation.ID()
 	if !ok {
-		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Category.id" for update`)}
+		return nil, &ValidationError{Name: "id", err: errors.New(`ent: missing "Collection.id" for update`)}
 	}
 	_spec.Node.ID.Value = id
 	if fields := cuo.fields; len(fields) > 0 {
 		_spec.Node.Columns = make([]string, 0, len(fields))
-		_spec.Node.Columns = append(_spec.Node.Columns, category.FieldID)
+		_spec.Node.Columns = append(_spec.Node.Columns, collection.FieldID)
 		for _, f := range fields {
-			if !category.ValidColumn(f) {
+			if !collection.ValidColumn(f) {
 				return nil, &ValidationError{Name: f, err: fmt.Errorf("ent: invalid field %q for query", f)}
 			}
-			if f != category.FieldID {
+			if f != collection.FieldID {
 				_spec.Node.Columns = append(_spec.Node.Columns, f)
 			}
 		}
@@ -572,29 +572,29 @@ func (cuo *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeString,
 			Value:  value,
-			Column: category.FieldTitle,
+			Column: collection.FieldTitle,
 		})
 	}
 	if value, ok := cuo.mutation.CreatedDate(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: category.FieldCreatedDate,
+			Column: collection.FieldCreatedDate,
 		})
 	}
 	if value, ok := cuo.mutation.UpdatedDate(); ok {
 		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
 			Type:   field.TypeTime,
 			Value:  value,
-			Column: category.FieldUpdatedDate,
+			Column: collection.FieldUpdatedDate,
 		})
 	}
 	if cuo.mutation.UserCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   category.UserTable,
-			Columns: category.UserPrimaryKey,
+			Table:   collection.UserTable,
+			Columns: collection.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -609,8 +609,8 @@ func (cuo *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   category.UserTable,
-			Columns: category.UserPrimaryKey,
+			Table:   collection.UserTable,
+			Columns: collection.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -628,8 +628,8 @@ func (cuo *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: true,
-			Table:   category.UserTable,
-			Columns: category.UserPrimaryKey,
+			Table:   collection.UserTable,
+			Columns: collection.UserPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -643,12 +643,12 @@ func (cuo *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	if cuo.mutation.CategoryWordsCleared() {
+	if cuo.mutation.CollectionWordsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   category.CategoryWordsTable,
-			Columns: category.CategoryWordsPrimaryKey,
+			Table:   collection.CollectionWordsTable,
+			Columns: collection.CollectionWordsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -659,12 +659,12 @@ func (cuo *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.RemovedCategoryWordsIDs(); len(nodes) > 0 && !cuo.mutation.CategoryWordsCleared() {
+	if nodes := cuo.mutation.RemovedCollectionWordsIDs(); len(nodes) > 0 && !cuo.mutation.CollectionWordsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   category.CategoryWordsTable,
-			Columns: category.CategoryWordsPrimaryKey,
+			Table:   collection.CollectionWordsTable,
+			Columns: collection.CollectionWordsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -678,12 +678,12 @@ func (cuo *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err
 		}
 		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
 	}
-	if nodes := cuo.mutation.CategoryWordsIDs(); len(nodes) > 0 {
+	if nodes := cuo.mutation.CollectionWordsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   category.CategoryWordsTable,
-			Columns: category.CategoryWordsPrimaryKey,
+			Table:   collection.CollectionWordsTable,
+			Columns: collection.CollectionWordsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
@@ -697,12 +697,12 @@ func (cuo *CategoryUpdateOne) sqlSave(ctx context.Context) (_node *Category, err
 		}
 		_spec.Edges.Add = append(_spec.Edges.Add, edge)
 	}
-	_node = &Category{config: cuo.config}
+	_node = &Collection{config: cuo.config}
 	_spec.Assign = _node.assignValues
 	_spec.ScanValues = _node.scanValues
 	if err = sqlgraph.UpdateNode(ctx, cuo.driver, _spec); err != nil {
 		if _, ok := err.(*sqlgraph.NotFoundError); ok {
-			err = &NotFoundError{category.Label}
+			err = &NotFoundError{collection.Label}
 		} else if sqlgraph.IsConstraintError(err) {
 			err = &ConstraintError{err.Error(), err}
 		}

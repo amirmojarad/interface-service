@@ -9,7 +9,7 @@ import "google/protobuf/wrappers.proto";
 
 option go_package = "interface_project/ent/proto/entpb";
 
-message Category {
+message Collection {
   int32 id = 1;
 
   string title = 2;
@@ -20,7 +20,7 @@ message Category {
 
   repeated User user = 5;
 
-  repeated Word category_words = 6;
+  repeated Word collection_words = 6;
 }
 
 message FileEntity {
@@ -102,7 +102,7 @@ message User {
 
   repeated FileEntity files = 13;
 
-  repeated Category categories = 14;
+  repeated Collection collections = 14;
 }
 
 message Word {
@@ -126,5 +126,5 @@ message Word {
 
   FileEntity file = 10;
 
-  repeated Category category = 11;
+  repeated Collection collection = 11;
 }

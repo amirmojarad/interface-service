@@ -6,7 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"interface_project/ent/category"
+	"interface_project/ent/collection"
 	"interface_project/ent/fileentity"
 	"interface_project/ent/movie"
 	"interface_project/ent/predicate"
@@ -28,7 +28,7 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeCategory      = "Category"
+	TypeCollection    = "Collection"
 	TypeFileEntity    = "FileEntity"
 	TypeMovie         = "Movie"
 	TypeSearchKeyword = "SearchKeyword"
@@ -36,38 +36,38 @@ const (
 	TypeWord          = "Word"
 )
 
-// CategoryMutation represents an operation that mutates the Category nodes in the graph.
-type CategoryMutation struct {
+// CollectionMutation represents an operation that mutates the Collection nodes in the graph.
+type CollectionMutation struct {
 	config
-	op                    Op
-	typ                   string
-	id                    *int
-	title                 *string
-	created_date          *time.Time
-	updated_date          *time.Time
-	clearedFields         map[string]struct{}
-	user                  map[int]struct{}
-	removeduser           map[int]struct{}
-	cleareduser           bool
-	category_words        map[int]struct{}
-	removedcategory_words map[int]struct{}
-	clearedcategory_words bool
-	done                  bool
-	oldValue              func(context.Context) (*Category, error)
-	predicates            []predicate.Category
+	op                      Op
+	typ                     string
+	id                      *int
+	title                   *string
+	created_date            *time.Time
+	updated_date            *time.Time
+	clearedFields           map[string]struct{}
+	user                    map[int]struct{}
+	removeduser             map[int]struct{}
+	cleareduser             bool
+	collection_words        map[int]struct{}
+	removedcollection_words map[int]struct{}
+	clearedcollection_words bool
+	done                    bool
+	oldValue                func(context.Context) (*Collection, error)
+	predicates              []predicate.Collection
 }
 
-var _ ent.Mutation = (*CategoryMutation)(nil)
+var _ ent.Mutation = (*CollectionMutation)(nil)
 
-// categoryOption allows management of the mutation configuration using functional options.
-type categoryOption func(*CategoryMutation)
+// collectionOption allows management of the mutation configuration using functional options.
+type collectionOption func(*CollectionMutation)
 
-// newCategoryMutation creates new mutation for the Category entity.
-func newCategoryMutation(c config, op Op, opts ...categoryOption) *CategoryMutation {
-	m := &CategoryMutation{
+// newCollectionMutation creates new mutation for the Collection entity.
+func newCollectionMutation(c config, op Op, opts ...collectionOption) *CollectionMutation {
+	m := &CollectionMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeCategory,
+		typ:           TypeCollection,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -76,20 +76,20 @@ func newCategoryMutation(c config, op Op, opts ...categoryOption) *CategoryMutat
 	return m
 }
 
-// withCategoryID sets the ID field of the mutation.
-func withCategoryID(id int) categoryOption {
-	return func(m *CategoryMutation) {
+// withCollectionID sets the ID field of the mutation.
+func withCollectionID(id int) collectionOption {
+	return func(m *CollectionMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *Category
+			value *Collection
 		)
-		m.oldValue = func(ctx context.Context) (*Category, error) {
+		m.oldValue = func(ctx context.Context) (*Collection, error) {
 			once.Do(func() {
 				if m.done {
 					err = errors.New("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().Category.Get(ctx, id)
+					value, err = m.Client().Collection.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -98,10 +98,10 @@ func withCategoryID(id int) categoryOption {
 	}
 }
 
-// withCategory sets the old Category of the mutation.
-func withCategory(node *Category) categoryOption {
-	return func(m *CategoryMutation) {
-		m.oldValue = func(context.Context) (*Category, error) {
+// withCollection sets the old Collection of the mutation.
+func withCollection(node *Collection) collectionOption {
+	return func(m *CollectionMutation) {
+		m.oldValue = func(context.Context) (*Collection, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -110,7 +110,7 @@ func withCategory(node *Category) categoryOption {
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m CategoryMutation) Client() *Client {
+func (m CollectionMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -118,7 +118,7 @@ func (m CategoryMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m CategoryMutation) Tx() (*Tx, error) {
+func (m CollectionMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, errors.New("ent: mutation is not running in a transaction")
 	}
@@ -129,7 +129,7 @@ func (m CategoryMutation) Tx() (*Tx, error) {
 
 // ID returns the ID value in the mutation. Note that the ID is only available
 // if it was provided to the builder or after it was returned from the database.
-func (m *CategoryMutation) ID() (id int, exists bool) {
+func (m *CollectionMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -140,7 +140,7 @@ func (m *CategoryMutation) ID() (id int, exists bool) {
 // That means, if the mutation is applied within a transaction with an isolation level such
 // as sql.LevelSerializable, the returned ids match the ids of the rows that will be updated
 // or updated by the mutation.
-func (m *CategoryMutation) IDs(ctx context.Context) ([]int, error) {
+func (m *CollectionMutation) IDs(ctx context.Context) ([]int, error) {
 	switch {
 	case m.op.Is(OpUpdateOne | OpDeleteOne):
 		id, exists := m.ID()
@@ -149,19 +149,19 @@ func (m *CategoryMutation) IDs(ctx context.Context) ([]int, error) {
 		}
 		fallthrough
 	case m.op.Is(OpUpdate | OpDelete):
-		return m.Client().Category.Query().Where(m.predicates...).IDs(ctx)
+		return m.Client().Collection.Query().Where(m.predicates...).IDs(ctx)
 	default:
 		return nil, fmt.Errorf("IDs is not allowed on %s operations", m.op)
 	}
 }
 
 // SetTitle sets the "title" field.
-func (m *CategoryMutation) SetTitle(s string) {
+func (m *CollectionMutation) SetTitle(s string) {
 	m.title = &s
 }
 
 // Title returns the value of the "title" field in the mutation.
-func (m *CategoryMutation) Title() (r string, exists bool) {
+func (m *CollectionMutation) Title() (r string, exists bool) {
 	v := m.title
 	if v == nil {
 		return
@@ -169,10 +169,10 @@ func (m *CategoryMutation) Title() (r string, exists bool) {
 	return *v, true
 }
 
-// OldTitle returns the old "title" field's value of the Category entity.
-// If the Category object wasn't provided to the builder, the object is fetched from the database.
+// OldTitle returns the old "title" field's value of the Collection entity.
+// If the Collection object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CategoryMutation) OldTitle(ctx context.Context) (v string, err error) {
+func (m *CollectionMutation) OldTitle(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldTitle is only allowed on UpdateOne operations")
 	}
@@ -187,17 +187,17 @@ func (m *CategoryMutation) OldTitle(ctx context.Context) (v string, err error) {
 }
 
 // ResetTitle resets all changes to the "title" field.
-func (m *CategoryMutation) ResetTitle() {
+func (m *CollectionMutation) ResetTitle() {
 	m.title = nil
 }
 
 // SetCreatedDate sets the "created_date" field.
-func (m *CategoryMutation) SetCreatedDate(t time.Time) {
+func (m *CollectionMutation) SetCreatedDate(t time.Time) {
 	m.created_date = &t
 }
 
 // CreatedDate returns the value of the "created_date" field in the mutation.
-func (m *CategoryMutation) CreatedDate() (r time.Time, exists bool) {
+func (m *CollectionMutation) CreatedDate() (r time.Time, exists bool) {
 	v := m.created_date
 	if v == nil {
 		return
@@ -205,10 +205,10 @@ func (m *CategoryMutation) CreatedDate() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldCreatedDate returns the old "created_date" field's value of the Category entity.
-// If the Category object wasn't provided to the builder, the object is fetched from the database.
+// OldCreatedDate returns the old "created_date" field's value of the Collection entity.
+// If the Collection object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CategoryMutation) OldCreatedDate(ctx context.Context) (v time.Time, err error) {
+func (m *CollectionMutation) OldCreatedDate(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldCreatedDate is only allowed on UpdateOne operations")
 	}
@@ -223,17 +223,17 @@ func (m *CategoryMutation) OldCreatedDate(ctx context.Context) (v time.Time, err
 }
 
 // ResetCreatedDate resets all changes to the "created_date" field.
-func (m *CategoryMutation) ResetCreatedDate() {
+func (m *CollectionMutation) ResetCreatedDate() {
 	m.created_date = nil
 }
 
 // SetUpdatedDate sets the "updated_date" field.
-func (m *CategoryMutation) SetUpdatedDate(t time.Time) {
+func (m *CollectionMutation) SetUpdatedDate(t time.Time) {
 	m.updated_date = &t
 }
 
 // UpdatedDate returns the value of the "updated_date" field in the mutation.
-func (m *CategoryMutation) UpdatedDate() (r time.Time, exists bool) {
+func (m *CollectionMutation) UpdatedDate() (r time.Time, exists bool) {
 	v := m.updated_date
 	if v == nil {
 		return
@@ -241,10 +241,10 @@ func (m *CategoryMutation) UpdatedDate() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldUpdatedDate returns the old "updated_date" field's value of the Category entity.
-// If the Category object wasn't provided to the builder, the object is fetched from the database.
+// OldUpdatedDate returns the old "updated_date" field's value of the Collection entity.
+// If the Collection object wasn't provided to the builder, the object is fetched from the database.
 // An error is returned if the mutation operation is not UpdateOne, or the database query fails.
-func (m *CategoryMutation) OldUpdatedDate(ctx context.Context) (v time.Time, err error) {
+func (m *CollectionMutation) OldUpdatedDate(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldUpdatedDate is only allowed on UpdateOne operations")
 	}
@@ -259,12 +259,12 @@ func (m *CategoryMutation) OldUpdatedDate(ctx context.Context) (v time.Time, err
 }
 
 // ResetUpdatedDate resets all changes to the "updated_date" field.
-func (m *CategoryMutation) ResetUpdatedDate() {
+func (m *CollectionMutation) ResetUpdatedDate() {
 	m.updated_date = nil
 }
 
 // AddUserIDs adds the "user" edge to the User entity by ids.
-func (m *CategoryMutation) AddUserIDs(ids ...int) {
+func (m *CollectionMutation) AddUserIDs(ids ...int) {
 	if m.user == nil {
 		m.user = make(map[int]struct{})
 	}
@@ -274,17 +274,17 @@ func (m *CategoryMutation) AddUserIDs(ids ...int) {
 }
 
 // ClearUser clears the "user" edge to the User entity.
-func (m *CategoryMutation) ClearUser() {
+func (m *CollectionMutation) ClearUser() {
 	m.cleareduser = true
 }
 
 // UserCleared reports if the "user" edge to the User entity was cleared.
-func (m *CategoryMutation) UserCleared() bool {
+func (m *CollectionMutation) UserCleared() bool {
 	return m.cleareduser
 }
 
 // RemoveUserIDs removes the "user" edge to the User entity by IDs.
-func (m *CategoryMutation) RemoveUserIDs(ids ...int) {
+func (m *CollectionMutation) RemoveUserIDs(ids ...int) {
 	if m.removeduser == nil {
 		m.removeduser = make(map[int]struct{})
 	}
@@ -295,7 +295,7 @@ func (m *CategoryMutation) RemoveUserIDs(ids ...int) {
 }
 
 // RemovedUser returns the removed IDs of the "user" edge to the User entity.
-func (m *CategoryMutation) RemovedUserIDs() (ids []int) {
+func (m *CollectionMutation) RemovedUserIDs() (ids []int) {
 	for id := range m.removeduser {
 		ids = append(ids, id)
 	}
@@ -303,7 +303,7 @@ func (m *CategoryMutation) RemovedUserIDs() (ids []int) {
 }
 
 // UserIDs returns the "user" edge IDs in the mutation.
-func (m *CategoryMutation) UserIDs() (ids []int) {
+func (m *CollectionMutation) UserIDs() (ids []int) {
 	for id := range m.user {
 		ids = append(ids, id)
 	}
@@ -311,94 +311,94 @@ func (m *CategoryMutation) UserIDs() (ids []int) {
 }
 
 // ResetUser resets all changes to the "user" edge.
-func (m *CategoryMutation) ResetUser() {
+func (m *CollectionMutation) ResetUser() {
 	m.user = nil
 	m.cleareduser = false
 	m.removeduser = nil
 }
 
-// AddCategoryWordIDs adds the "category_words" edge to the Word entity by ids.
-func (m *CategoryMutation) AddCategoryWordIDs(ids ...int) {
-	if m.category_words == nil {
-		m.category_words = make(map[int]struct{})
+// AddCollectionWordIDs adds the "collection_words" edge to the Word entity by ids.
+func (m *CollectionMutation) AddCollectionWordIDs(ids ...int) {
+	if m.collection_words == nil {
+		m.collection_words = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.category_words[ids[i]] = struct{}{}
+		m.collection_words[ids[i]] = struct{}{}
 	}
 }
 
-// ClearCategoryWords clears the "category_words" edge to the Word entity.
-func (m *CategoryMutation) ClearCategoryWords() {
-	m.clearedcategory_words = true
+// ClearCollectionWords clears the "collection_words" edge to the Word entity.
+func (m *CollectionMutation) ClearCollectionWords() {
+	m.clearedcollection_words = true
 }
 
-// CategoryWordsCleared reports if the "category_words" edge to the Word entity was cleared.
-func (m *CategoryMutation) CategoryWordsCleared() bool {
-	return m.clearedcategory_words
+// CollectionWordsCleared reports if the "collection_words" edge to the Word entity was cleared.
+func (m *CollectionMutation) CollectionWordsCleared() bool {
+	return m.clearedcollection_words
 }
 
-// RemoveCategoryWordIDs removes the "category_words" edge to the Word entity by IDs.
-func (m *CategoryMutation) RemoveCategoryWordIDs(ids ...int) {
-	if m.removedcategory_words == nil {
-		m.removedcategory_words = make(map[int]struct{})
+// RemoveCollectionWordIDs removes the "collection_words" edge to the Word entity by IDs.
+func (m *CollectionMutation) RemoveCollectionWordIDs(ids ...int) {
+	if m.removedcollection_words == nil {
+		m.removedcollection_words = make(map[int]struct{})
 	}
 	for i := range ids {
-		delete(m.category_words, ids[i])
-		m.removedcategory_words[ids[i]] = struct{}{}
+		delete(m.collection_words, ids[i])
+		m.removedcollection_words[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedCategoryWords returns the removed IDs of the "category_words" edge to the Word entity.
-func (m *CategoryMutation) RemovedCategoryWordsIDs() (ids []int) {
-	for id := range m.removedcategory_words {
+// RemovedCollectionWords returns the removed IDs of the "collection_words" edge to the Word entity.
+func (m *CollectionMutation) RemovedCollectionWordsIDs() (ids []int) {
+	for id := range m.removedcollection_words {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// CategoryWordsIDs returns the "category_words" edge IDs in the mutation.
-func (m *CategoryMutation) CategoryWordsIDs() (ids []int) {
-	for id := range m.category_words {
+// CollectionWordsIDs returns the "collection_words" edge IDs in the mutation.
+func (m *CollectionMutation) CollectionWordsIDs() (ids []int) {
+	for id := range m.collection_words {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetCategoryWords resets all changes to the "category_words" edge.
-func (m *CategoryMutation) ResetCategoryWords() {
-	m.category_words = nil
-	m.clearedcategory_words = false
-	m.removedcategory_words = nil
+// ResetCollectionWords resets all changes to the "collection_words" edge.
+func (m *CollectionMutation) ResetCollectionWords() {
+	m.collection_words = nil
+	m.clearedcollection_words = false
+	m.removedcollection_words = nil
 }
 
-// Where appends a list predicates to the CategoryMutation builder.
-func (m *CategoryMutation) Where(ps ...predicate.Category) {
+// Where appends a list predicates to the CollectionMutation builder.
+func (m *CollectionMutation) Where(ps ...predicate.Collection) {
 	m.predicates = append(m.predicates, ps...)
 }
 
 // Op returns the operation name.
-func (m *CategoryMutation) Op() Op {
+func (m *CollectionMutation) Op() Op {
 	return m.op
 }
 
-// Type returns the node type of this mutation (Category).
-func (m *CategoryMutation) Type() string {
+// Type returns the node type of this mutation (Collection).
+func (m *CollectionMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during this mutation. Note that in
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
-func (m *CategoryMutation) Fields() []string {
+func (m *CollectionMutation) Fields() []string {
 	fields := make([]string, 0, 3)
 	if m.title != nil {
-		fields = append(fields, category.FieldTitle)
+		fields = append(fields, collection.FieldTitle)
 	}
 	if m.created_date != nil {
-		fields = append(fields, category.FieldCreatedDate)
+		fields = append(fields, collection.FieldCreatedDate)
 	}
 	if m.updated_date != nil {
-		fields = append(fields, category.FieldUpdatedDate)
+		fields = append(fields, collection.FieldUpdatedDate)
 	}
 	return fields
 }
@@ -406,13 +406,13 @@ func (m *CategoryMutation) Fields() []string {
 // Field returns the value of a field with the given name. The second boolean
 // return value indicates that this field was not set, or was not defined in the
 // schema.
-func (m *CategoryMutation) Field(name string) (ent.Value, bool) {
+func (m *CollectionMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case category.FieldTitle:
+	case collection.FieldTitle:
 		return m.Title()
-	case category.FieldCreatedDate:
+	case collection.FieldCreatedDate:
 		return m.CreatedDate()
-	case category.FieldUpdatedDate:
+	case collection.FieldUpdatedDate:
 		return m.UpdatedDate()
 	}
 	return nil, false
@@ -421,38 +421,38 @@ func (m *CategoryMutation) Field(name string) (ent.Value, bool) {
 // OldField returns the old value of the field from the database. An error is
 // returned if the mutation operation is not UpdateOne, or the query to the
 // database failed.
-func (m *CategoryMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *CollectionMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case category.FieldTitle:
+	case collection.FieldTitle:
 		return m.OldTitle(ctx)
-	case category.FieldCreatedDate:
+	case collection.FieldCreatedDate:
 		return m.OldCreatedDate(ctx)
-	case category.FieldUpdatedDate:
+	case collection.FieldUpdatedDate:
 		return m.OldUpdatedDate(ctx)
 	}
-	return nil, fmt.Errorf("unknown Category field %s", name)
+	return nil, fmt.Errorf("unknown Collection field %s", name)
 }
 
 // SetField sets the value of a field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *CategoryMutation) SetField(name string, value ent.Value) error {
+func (m *CollectionMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case category.FieldTitle:
+	case collection.FieldTitle:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetTitle(v)
 		return nil
-	case category.FieldCreatedDate:
+	case collection.FieldCreatedDate:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedDate(v)
 		return nil
-	case category.FieldUpdatedDate:
+	case collection.FieldUpdatedDate:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
@@ -460,92 +460,92 @@ func (m *CategoryMutation) SetField(name string, value ent.Value) error {
 		m.SetUpdatedDate(v)
 		return nil
 	}
-	return fmt.Errorf("unknown Category field %s", name)
+	return fmt.Errorf("unknown Collection field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented/decremented during
 // this mutation.
-func (m *CategoryMutation) AddedFields() []string {
+func (m *CollectionMutation) AddedFields() []string {
 	return nil
 }
 
 // AddedField returns the numeric value that was incremented/decremented on a field
 // with the given name. The second boolean return value indicates that this field
 // was not set, or was not defined in the schema.
-func (m *CategoryMutation) AddedField(name string) (ent.Value, bool) {
+func (m *CollectionMutation) AddedField(name string) (ent.Value, bool) {
 	return nil, false
 }
 
 // AddField adds the value to the field with the given name. It returns an error if
 // the field is not defined in the schema, or if the type mismatched the field
 // type.
-func (m *CategoryMutation) AddField(name string, value ent.Value) error {
+func (m *CollectionMutation) AddField(name string, value ent.Value) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown Category numeric field %s", name)
+	return fmt.Errorf("unknown Collection numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared during this
 // mutation.
-func (m *CategoryMutation) ClearedFields() []string {
+func (m *CollectionMutation) ClearedFields() []string {
 	return nil
 }
 
 // FieldCleared returns a boolean indicating if a field with the given name was
 // cleared in this mutation.
-func (m *CategoryMutation) FieldCleared(name string) bool {
+func (m *CollectionMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value of the field with the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *CategoryMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown Category nullable field %s", name)
+func (m *CollectionMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Collection nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation for the field with the given name.
 // It returns an error if the field is not defined in the schema.
-func (m *CategoryMutation) ResetField(name string) error {
+func (m *CollectionMutation) ResetField(name string) error {
 	switch name {
-	case category.FieldTitle:
+	case collection.FieldTitle:
 		m.ResetTitle()
 		return nil
-	case category.FieldCreatedDate:
+	case collection.FieldCreatedDate:
 		m.ResetCreatedDate()
 		return nil
-	case category.FieldUpdatedDate:
+	case collection.FieldUpdatedDate:
 		m.ResetUpdatedDate()
 		return nil
 	}
-	return fmt.Errorf("unknown Category field %s", name)
+	return fmt.Errorf("unknown Collection field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this mutation.
-func (m *CategoryMutation) AddedEdges() []string {
+func (m *CollectionMutation) AddedEdges() []string {
 	edges := make([]string, 0, 2)
 	if m.user != nil {
-		edges = append(edges, category.EdgeUser)
+		edges = append(edges, collection.EdgeUser)
 	}
-	if m.category_words != nil {
-		edges = append(edges, category.EdgeCategoryWords)
+	if m.collection_words != nil {
+		edges = append(edges, collection.EdgeCollectionWords)
 	}
 	return edges
 }
 
 // AddedIDs returns all IDs (to other nodes) that were added for the given edge
 // name in this mutation.
-func (m *CategoryMutation) AddedIDs(name string) []ent.Value {
+func (m *CollectionMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case category.EdgeUser:
+	case collection.EdgeUser:
 		ids := make([]ent.Value, 0, len(m.user))
 		for id := range m.user {
 			ids = append(ids, id)
 		}
 		return ids
-	case category.EdgeCategoryWords:
-		ids := make([]ent.Value, 0, len(m.category_words))
-		for id := range m.category_words {
+	case collection.EdgeCollectionWords:
+		ids := make([]ent.Value, 0, len(m.collection_words))
+		for id := range m.collection_words {
 			ids = append(ids, id)
 		}
 		return ids
@@ -554,30 +554,30 @@ func (m *CategoryMutation) AddedIDs(name string) []ent.Value {
 }
 
 // RemovedEdges returns all edge names that were removed in this mutation.
-func (m *CategoryMutation) RemovedEdges() []string {
+func (m *CollectionMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 2)
 	if m.removeduser != nil {
-		edges = append(edges, category.EdgeUser)
+		edges = append(edges, collection.EdgeUser)
 	}
-	if m.removedcategory_words != nil {
-		edges = append(edges, category.EdgeCategoryWords)
+	if m.removedcollection_words != nil {
+		edges = append(edges, collection.EdgeCollectionWords)
 	}
 	return edges
 }
 
 // RemovedIDs returns all IDs (to other nodes) that were removed for the edge with
 // the given name in this mutation.
-func (m *CategoryMutation) RemovedIDs(name string) []ent.Value {
+func (m *CollectionMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case category.EdgeUser:
+	case collection.EdgeUser:
 		ids := make([]ent.Value, 0, len(m.removeduser))
 		for id := range m.removeduser {
 			ids = append(ids, id)
 		}
 		return ids
-	case category.EdgeCategoryWords:
-		ids := make([]ent.Value, 0, len(m.removedcategory_words))
-		for id := range m.removedcategory_words {
+	case collection.EdgeCollectionWords:
+		ids := make([]ent.Value, 0, len(m.removedcollection_words))
+		for id := range m.removedcollection_words {
 			ids = append(ids, id)
 		}
 		return ids
@@ -586,49 +586,49 @@ func (m *CategoryMutation) RemovedIDs(name string) []ent.Value {
 }
 
 // ClearedEdges returns all edge names that were cleared in this mutation.
-func (m *CategoryMutation) ClearedEdges() []string {
+func (m *CollectionMutation) ClearedEdges() []string {
 	edges := make([]string, 0, 2)
 	if m.cleareduser {
-		edges = append(edges, category.EdgeUser)
+		edges = append(edges, collection.EdgeUser)
 	}
-	if m.clearedcategory_words {
-		edges = append(edges, category.EdgeCategoryWords)
+	if m.clearedcollection_words {
+		edges = append(edges, collection.EdgeCollectionWords)
 	}
 	return edges
 }
 
 // EdgeCleared returns a boolean which indicates if the edge with the given name
 // was cleared in this mutation.
-func (m *CategoryMutation) EdgeCleared(name string) bool {
+func (m *CollectionMutation) EdgeCleared(name string) bool {
 	switch name {
-	case category.EdgeUser:
+	case collection.EdgeUser:
 		return m.cleareduser
-	case category.EdgeCategoryWords:
-		return m.clearedcategory_words
+	case collection.EdgeCollectionWords:
+		return m.clearedcollection_words
 	}
 	return false
 }
 
 // ClearEdge clears the value of the edge with the given name. It returns an error
 // if that edge is not defined in the schema.
-func (m *CategoryMutation) ClearEdge(name string) error {
+func (m *CollectionMutation) ClearEdge(name string) error {
 	switch name {
 	}
-	return fmt.Errorf("unknown Category unique edge %s", name)
+	return fmt.Errorf("unknown Collection unique edge %s", name)
 }
 
 // ResetEdge resets all changes to the edge with the given name in this mutation.
 // It returns an error if the edge is not defined in the schema.
-func (m *CategoryMutation) ResetEdge(name string) error {
+func (m *CollectionMutation) ResetEdge(name string) error {
 	switch name {
-	case category.EdgeUser:
+	case collection.EdgeUser:
 		m.ResetUser()
 		return nil
-	case category.EdgeCategoryWords:
-		m.ResetCategoryWords()
+	case collection.EdgeCollectionWords:
+		m.ResetCollectionWords()
 		return nil
 	}
-	return fmt.Errorf("unknown Category edge %s", name)
+	return fmt.Errorf("unknown Collection edge %s", name)
 }
 
 // FileEntityMutation represents an operation that mutates the FileEntity nodes in the graph.
@@ -2679,9 +2679,9 @@ type UserMutation struct {
 	files                    map[int]struct{}
 	removedfiles             map[int]struct{}
 	clearedfiles             bool
-	categories               map[int]struct{}
-	removedcategories        map[int]struct{}
-	clearedcategories        bool
+	collections              map[int]struct{}
+	removedcollections       map[int]struct{}
+	clearedcollections       bool
 	done                     bool
 	oldValue                 func(context.Context) (*User, error)
 	predicates               []predicate.User
@@ -3315,58 +3315,58 @@ func (m *UserMutation) ResetFiles() {
 	m.removedfiles = nil
 }
 
-// AddCategoryIDs adds the "categories" edge to the Category entity by ids.
-func (m *UserMutation) AddCategoryIDs(ids ...int) {
-	if m.categories == nil {
-		m.categories = make(map[int]struct{})
+// AddCollectionIDs adds the "collections" edge to the Collection entity by ids.
+func (m *UserMutation) AddCollectionIDs(ids ...int) {
+	if m.collections == nil {
+		m.collections = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.categories[ids[i]] = struct{}{}
+		m.collections[ids[i]] = struct{}{}
 	}
 }
 
-// ClearCategories clears the "categories" edge to the Category entity.
-func (m *UserMutation) ClearCategories() {
-	m.clearedcategories = true
+// ClearCollections clears the "collections" edge to the Collection entity.
+func (m *UserMutation) ClearCollections() {
+	m.clearedcollections = true
 }
 
-// CategoriesCleared reports if the "categories" edge to the Category entity was cleared.
-func (m *UserMutation) CategoriesCleared() bool {
-	return m.clearedcategories
+// CollectionsCleared reports if the "collections" edge to the Collection entity was cleared.
+func (m *UserMutation) CollectionsCleared() bool {
+	return m.clearedcollections
 }
 
-// RemoveCategoryIDs removes the "categories" edge to the Category entity by IDs.
-func (m *UserMutation) RemoveCategoryIDs(ids ...int) {
-	if m.removedcategories == nil {
-		m.removedcategories = make(map[int]struct{})
+// RemoveCollectionIDs removes the "collections" edge to the Collection entity by IDs.
+func (m *UserMutation) RemoveCollectionIDs(ids ...int) {
+	if m.removedcollections == nil {
+		m.removedcollections = make(map[int]struct{})
 	}
 	for i := range ids {
-		delete(m.categories, ids[i])
-		m.removedcategories[ids[i]] = struct{}{}
+		delete(m.collections, ids[i])
+		m.removedcollections[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedCategories returns the removed IDs of the "categories" edge to the Category entity.
-func (m *UserMutation) RemovedCategoriesIDs() (ids []int) {
-	for id := range m.removedcategories {
+// RemovedCollections returns the removed IDs of the "collections" edge to the Collection entity.
+func (m *UserMutation) RemovedCollectionsIDs() (ids []int) {
+	for id := range m.removedcollections {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// CategoriesIDs returns the "categories" edge IDs in the mutation.
-func (m *UserMutation) CategoriesIDs() (ids []int) {
-	for id := range m.categories {
+// CollectionsIDs returns the "collections" edge IDs in the mutation.
+func (m *UserMutation) CollectionsIDs() (ids []int) {
+	for id := range m.collections {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetCategories resets all changes to the "categories" edge.
-func (m *UserMutation) ResetCategories() {
-	m.categories = nil
-	m.clearedcategories = false
-	m.removedcategories = nil
+// ResetCollections resets all changes to the "collections" edge.
+func (m *UserMutation) ResetCollections() {
+	m.collections = nil
+	m.clearedcollections = false
+	m.removedcollections = nil
 }
 
 // Where appends a list predicates to the UserMutation builder.
@@ -3634,8 +3634,8 @@ func (m *UserMutation) AddedEdges() []string {
 	if m.files != nil {
 		edges = append(edges, user.EdgeFiles)
 	}
-	if m.categories != nil {
-		edges = append(edges, user.EdgeCategories)
+	if m.collections != nil {
+		edges = append(edges, user.EdgeCollections)
 	}
 	return edges
 }
@@ -3668,9 +3668,9 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case user.EdgeCategories:
-		ids := make([]ent.Value, 0, len(m.categories))
-		for id := range m.categories {
+	case user.EdgeCollections:
+		ids := make([]ent.Value, 0, len(m.collections))
+		for id := range m.collections {
 			ids = append(ids, id)
 		}
 		return ids
@@ -3693,8 +3693,8 @@ func (m *UserMutation) RemovedEdges() []string {
 	if m.removedfiles != nil {
 		edges = append(edges, user.EdgeFiles)
 	}
-	if m.removedcategories != nil {
-		edges = append(edges, user.EdgeCategories)
+	if m.removedcollections != nil {
+		edges = append(edges, user.EdgeCollections)
 	}
 	return edges
 }
@@ -3727,9 +3727,9 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 			ids = append(ids, id)
 		}
 		return ids
-	case user.EdgeCategories:
-		ids := make([]ent.Value, 0, len(m.removedcategories))
-		for id := range m.removedcategories {
+	case user.EdgeCollections:
+		ids := make([]ent.Value, 0, len(m.removedcollections))
+		for id := range m.removedcollections {
 			ids = append(ids, id)
 		}
 		return ids
@@ -3752,8 +3752,8 @@ func (m *UserMutation) ClearedEdges() []string {
 	if m.clearedfiles {
 		edges = append(edges, user.EdgeFiles)
 	}
-	if m.clearedcategories {
-		edges = append(edges, user.EdgeCategories)
+	if m.clearedcollections {
+		edges = append(edges, user.EdgeCollections)
 	}
 	return edges
 }
@@ -3770,8 +3770,8 @@ func (m *UserMutation) EdgeCleared(name string) bool {
 		return m.clearedfavorite_words
 	case user.EdgeFiles:
 		return m.clearedfiles
-	case user.EdgeCategories:
-		return m.clearedcategories
+	case user.EdgeCollections:
+		return m.clearedcollections
 	}
 	return false
 }
@@ -3800,8 +3800,8 @@ func (m *UserMutation) ResetEdge(name string) error {
 	case user.EdgeFiles:
 		m.ResetFiles()
 		return nil
-	case user.EdgeCategories:
-		m.ResetCategories()
+	case user.EdgeCollections:
+		m.ResetCollections()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)
@@ -3810,27 +3810,27 @@ func (m *UserMutation) ResetEdge(name string) error {
 // WordMutation represents an operation that mutates the Word nodes in the graph.
 type WordMutation struct {
 	config
-	op              Op
-	typ             string
-	id              *int
-	title           *string
-	meaning         *string
-	isPreposition   *bool
-	sentence        *string
-	duration        *string
-	start           *string
-	end             *string
-	clearedFields   map[string]struct{}
-	user            *int
-	cleareduser     bool
-	file            *int
-	clearedfile     bool
-	category        map[int]struct{}
-	removedcategory map[int]struct{}
-	clearedcategory bool
-	done            bool
-	oldValue        func(context.Context) (*Word, error)
-	predicates      []predicate.Word
+	op                Op
+	typ               string
+	id                *int
+	title             *string
+	meaning           *string
+	isPreposition     *bool
+	sentence          *string
+	duration          *string
+	start             *string
+	end               *string
+	clearedFields     map[string]struct{}
+	user              *int
+	cleareduser       bool
+	file              *int
+	clearedfile       bool
+	collection        map[int]struct{}
+	removedcollection map[int]struct{}
+	clearedcollection bool
+	done              bool
+	oldValue          func(context.Context) (*Word, error)
+	predicates        []predicate.Word
 }
 
 var _ ent.Mutation = (*WordMutation)(nil)
@@ -4261,58 +4261,58 @@ func (m *WordMutation) ResetFile() {
 	m.clearedfile = false
 }
 
-// AddCategoryIDs adds the "category" edge to the Category entity by ids.
-func (m *WordMutation) AddCategoryIDs(ids ...int) {
-	if m.category == nil {
-		m.category = make(map[int]struct{})
+// AddCollectionIDs adds the "collection" edge to the Collection entity by ids.
+func (m *WordMutation) AddCollectionIDs(ids ...int) {
+	if m.collection == nil {
+		m.collection = make(map[int]struct{})
 	}
 	for i := range ids {
-		m.category[ids[i]] = struct{}{}
+		m.collection[ids[i]] = struct{}{}
 	}
 }
 
-// ClearCategory clears the "category" edge to the Category entity.
-func (m *WordMutation) ClearCategory() {
-	m.clearedcategory = true
+// ClearCollection clears the "collection" edge to the Collection entity.
+func (m *WordMutation) ClearCollection() {
+	m.clearedcollection = true
 }
 
-// CategoryCleared reports if the "category" edge to the Category entity was cleared.
-func (m *WordMutation) CategoryCleared() bool {
-	return m.clearedcategory
+// CollectionCleared reports if the "collection" edge to the Collection entity was cleared.
+func (m *WordMutation) CollectionCleared() bool {
+	return m.clearedcollection
 }
 
-// RemoveCategoryIDs removes the "category" edge to the Category entity by IDs.
-func (m *WordMutation) RemoveCategoryIDs(ids ...int) {
-	if m.removedcategory == nil {
-		m.removedcategory = make(map[int]struct{})
+// RemoveCollectionIDs removes the "collection" edge to the Collection entity by IDs.
+func (m *WordMutation) RemoveCollectionIDs(ids ...int) {
+	if m.removedcollection == nil {
+		m.removedcollection = make(map[int]struct{})
 	}
 	for i := range ids {
-		delete(m.category, ids[i])
-		m.removedcategory[ids[i]] = struct{}{}
+		delete(m.collection, ids[i])
+		m.removedcollection[ids[i]] = struct{}{}
 	}
 }
 
-// RemovedCategory returns the removed IDs of the "category" edge to the Category entity.
-func (m *WordMutation) RemovedCategoryIDs() (ids []int) {
-	for id := range m.removedcategory {
+// RemovedCollection returns the removed IDs of the "collection" edge to the Collection entity.
+func (m *WordMutation) RemovedCollectionIDs() (ids []int) {
+	for id := range m.removedcollection {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// CategoryIDs returns the "category" edge IDs in the mutation.
-func (m *WordMutation) CategoryIDs() (ids []int) {
-	for id := range m.category {
+// CollectionIDs returns the "collection" edge IDs in the mutation.
+func (m *WordMutation) CollectionIDs() (ids []int) {
+	for id := range m.collection {
 		ids = append(ids, id)
 	}
 	return
 }
 
-// ResetCategory resets all changes to the "category" edge.
-func (m *WordMutation) ResetCategory() {
-	m.category = nil
-	m.clearedcategory = false
-	m.removedcategory = nil
+// ResetCollection resets all changes to the "collection" edge.
+func (m *WordMutation) ResetCollection() {
+	m.collection = nil
+	m.clearedcollection = false
+	m.removedcollection = nil
 }
 
 // Where appends a list predicates to the WordMutation builder.
@@ -4542,8 +4542,8 @@ func (m *WordMutation) AddedEdges() []string {
 	if m.file != nil {
 		edges = append(edges, word.EdgeFile)
 	}
-	if m.category != nil {
-		edges = append(edges, word.EdgeCategory)
+	if m.collection != nil {
+		edges = append(edges, word.EdgeCollection)
 	}
 	return edges
 }
@@ -4560,9 +4560,9 @@ func (m *WordMutation) AddedIDs(name string) []ent.Value {
 		if id := m.file; id != nil {
 			return []ent.Value{*id}
 		}
-	case word.EdgeCategory:
-		ids := make([]ent.Value, 0, len(m.category))
-		for id := range m.category {
+	case word.EdgeCollection:
+		ids := make([]ent.Value, 0, len(m.collection))
+		for id := range m.collection {
 			ids = append(ids, id)
 		}
 		return ids
@@ -4573,8 +4573,8 @@ func (m *WordMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this mutation.
 func (m *WordMutation) RemovedEdges() []string {
 	edges := make([]string, 0, 3)
-	if m.removedcategory != nil {
-		edges = append(edges, word.EdgeCategory)
+	if m.removedcollection != nil {
+		edges = append(edges, word.EdgeCollection)
 	}
 	return edges
 }
@@ -4583,9 +4583,9 @@ func (m *WordMutation) RemovedEdges() []string {
 // the given name in this mutation.
 func (m *WordMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case word.EdgeCategory:
-		ids := make([]ent.Value, 0, len(m.removedcategory))
-		for id := range m.removedcategory {
+	case word.EdgeCollection:
+		ids := make([]ent.Value, 0, len(m.removedcollection))
+		for id := range m.removedcollection {
 			ids = append(ids, id)
 		}
 		return ids
@@ -4602,8 +4602,8 @@ func (m *WordMutation) ClearedEdges() []string {
 	if m.clearedfile {
 		edges = append(edges, word.EdgeFile)
 	}
-	if m.clearedcategory {
-		edges = append(edges, word.EdgeCategory)
+	if m.clearedcollection {
+		edges = append(edges, word.EdgeCollection)
 	}
 	return edges
 }
@@ -4616,8 +4616,8 @@ func (m *WordMutation) EdgeCleared(name string) bool {
 		return m.cleareduser
 	case word.EdgeFile:
 		return m.clearedfile
-	case word.EdgeCategory:
-		return m.clearedcategory
+	case word.EdgeCollection:
+		return m.clearedcollection
 	}
 	return false
 }
@@ -4646,8 +4646,8 @@ func (m *WordMutation) ResetEdge(name string) error {
 	case word.EdgeFile:
 		m.ResetFile()
 		return nil
-	case word.EdgeCategory:
-		m.ResetCategory()
+	case word.EdgeCollection:
+		m.ResetCollection()
 		return nil
 	}
 	return fmt.Errorf("unknown Word edge %s", name)

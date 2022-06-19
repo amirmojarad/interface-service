@@ -44,8 +44,8 @@ type WordEdges struct {
 	User *User `json:"user,omitempty"`
 	// File holds the value of the file edge.
 	File *FileEntity `json:"file,omitempty"`
-	// Category holds the value of the category edge.
-	Category []*Category `json:"category,omitempty"`
+	// Collection holds the value of the collection edge.
+	Collection []*Collection `json:"collection,omitempty"`
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
 	loadedTypes [3]bool
@@ -79,13 +79,13 @@ func (e WordEdges) FileOrErr() (*FileEntity, error) {
 	return nil, &NotLoadedError{edge: "file"}
 }
 
-// CategoryOrErr returns the Category value or an error if the edge
+// CollectionOrErr returns the Collection value or an error if the edge
 // was not loaded in eager-loading.
-func (e WordEdges) CategoryOrErr() ([]*Category, error) {
+func (e WordEdges) CollectionOrErr() ([]*Collection, error) {
 	if e.loadedTypes[2] {
-		return e.Category, nil
+		return e.Collection, nil
 	}
-	return nil, &NotLoadedError{edge: "category"}
+	return nil, &NotLoadedError{edge: "collection"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -195,9 +195,9 @@ func (w *Word) QueryFile() *FileEntityQuery {
 	return (&WordClient{config: w.config}).QueryFile(w)
 }
 
-// QueryCategory queries the "category" edge of the Word entity.
-func (w *Word) QueryCategory() *CategoryQuery {
-	return (&WordClient{config: w.config}).QueryCategory(w)
+// QueryCollection queries the "collection" edge of the Word entity.
+func (w *Word) QueryCollection() *CollectionQuery {
+	return (&WordClient{config: w.config}).QueryCollection(w)
 }
 
 // Update returns a builder for updating this Word.

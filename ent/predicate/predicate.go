@@ -6,8 +6,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// Category is the predicate function for category builders.
-type Category func(*sql.Selector)
+// Collection is the predicate function for collection builders.
+type Collection func(*sql.Selector)
 
 // FileEntity is the predicate function for fileentity builders.
 type FileEntity func(*sql.Selector)

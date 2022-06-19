@@ -6,7 +6,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"interface_project/ent/category"
+	"interface_project/ent/collection"
 	"interface_project/ent/fileentity"
 	"interface_project/ent/movie"
 	"interface_project/ent/searchkeyword"
@@ -173,19 +173,19 @@ func (uc *UserCreate) AddFiles(f ...*FileEntity) *UserCreate {
 	return uc.AddFileIDs(ids...)
 }
 
-// AddCategoryIDs adds the "categories" edge to the Category entity by IDs.
-func (uc *UserCreate) AddCategoryIDs(ids ...int) *UserCreate {
-	uc.mutation.AddCategoryIDs(ids...)
+// AddCollectionIDs adds the "collections" edge to the Collection entity by IDs.
+func (uc *UserCreate) AddCollectionIDs(ids ...int) *UserCreate {
+	uc.mutation.AddCollectionIDs(ids...)
 	return uc
 }
 
-// AddCategories adds the "categories" edges to the Category entity.
-func (uc *UserCreate) AddCategories(c ...*Category) *UserCreate {
+// AddCollections adds the "collections" edges to the Collection entity.
+func (uc *UserCreate) AddCollections(c ...*Collection) *UserCreate {
 	ids := make([]int, len(c))
 	for i := range c {
 		ids[i] = c[i].ID
 	}
-	return uc.AddCategoryIDs(ids...)
+	return uc.AddCollectionIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -479,17 +479,17 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		}
 		_spec.Edges = append(_spec.Edges, edge)
 	}
-	if nodes := uc.mutation.CategoriesIDs(); len(nodes) > 0 {
+	if nodes := uc.mutation.CollectionsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.M2M,
 			Inverse: false,
-			Table:   user.CategoriesTable,
-			Columns: user.CategoriesPrimaryKey,
+			Table:   user.CollectionsTable,
+			Columns: user.CollectionsPrimaryKey,
 			Bidi:    false,
 			Target: &sqlgraph.EdgeTarget{
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
-					Column: category.FieldID,
+					Column: collection.FieldID,
 				},
 			},
 		}

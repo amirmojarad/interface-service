@@ -51,3 +51,11 @@ func (crud Crud) GetFiles(userEntity *ent.User, idList []int) ([]*ent.FileEntity
 func (crud Crud) DeleteFiles(user *ent.User, idList []int) error {
 	return crud.Client.User.UpdateOne(user).RemoveFileIDs(idList...).Exec(*crud.Ctx)
 }
+
+func (crud Crud) GetUserFileByID(fileID int, email string) (*ent.FileEntity, error) {
+	user, err := crud.GetUserByEmail(email)
+	if err != nil {
+		return nil, err
+	}
+	return user.QueryFiles().Where(fileentity.IDEQ(fileID)).First(*crud.Ctx)
+}

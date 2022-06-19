@@ -25,8 +25,8 @@ const (
 	EdgeUser = "user"
 	// EdgeFile holds the string denoting the file edge name in mutations.
 	EdgeFile = "file"
-	// EdgeCategory holds the string denoting the category edge name in mutations.
-	EdgeCategory = "category"
+	// EdgeCollection holds the string denoting the collection edge name in mutations.
+	EdgeCollection = "collection"
 	// Table holds the table name of the word in the database.
 	Table = "words"
 	// UserTable is the table that holds the user relation/edge.
@@ -43,11 +43,11 @@ const (
 	FileInverseTable = "file_entities"
 	// FileColumn is the table column denoting the file relation/edge.
 	FileColumn = "file_entity_words"
-	// CategoryTable is the table that holds the category relation/edge. The primary key declared below.
-	CategoryTable = "category_category_words"
-	// CategoryInverseTable is the table name for the Category entity.
-	// It exists in this package in order to avoid circular dependency with the "category" package.
-	CategoryInverseTable = "categories"
+	// CollectionTable is the table that holds the collection relation/edge. The primary key declared below.
+	CollectionTable = "collection_collection_words"
+	// CollectionInverseTable is the table name for the Collection entity.
+	// It exists in this package in order to avoid circular dependency with the "collection" package.
+	CollectionInverseTable = "collections"
 )
 
 // Columns holds all SQL columns for word fields.
@@ -70,9 +70,9 @@ var ForeignKeys = []string{
 }
 
 var (
-	// CategoryPrimaryKey and CategoryColumn2 are the table columns denoting the
-	// primary key for the category relation (M2M).
-	CategoryPrimaryKey = []string{"category_id", "word_id"}
+	// CollectionPrimaryKey and CollectionColumn2 are the table columns denoting the
+	// primary key for the collection relation (M2M).
+	CollectionPrimaryKey = []string{"collection_id", "word_id"}
 )
 
 // ValidColumn reports if the column name is valid (part of the table columns).
